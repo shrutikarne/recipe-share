@@ -1,12 +1,30 @@
 import React, { useState } from "react";
 import API from "../api/api";
+import "./Login.css";
+
+/**
+ * Login component
+ * Renders a login form and handles user authentication with the backend API.
+ */
 
 function Login() {
+  /**
+   * State for the login form fields
+   */
   const [form, setForm] = useState({ email: "", password: "" });
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  /**
+   * Handles changes to the input fields
+   * @param {object} e - The input change event
+   */
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  /**
+   * Handles form submission, sends login data to backend
+   * @param {object} e - The form submit event
+   */
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await API.post("/auth/login", form);
@@ -18,15 +36,31 @@ function Login() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="login-form" onSubmit={handleSubmit}>
       <h2>Login</h2>
-      <input name="email" placeholder="Email" onChange={handleChange} />
-      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+      <label htmlFor="email">Email</label>
+      <input
+        id="email"
+        name="email"
+        placeholder="Email"
+        onChange={handleChange}
+      />
+      <label htmlFor="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        placeholder="Password"
+        onChange={handleChange}
+      />
       <button type="submit">Login</button>
     </form>
   );
 }
 
+/**
+ * Exports the Login component for use in the app
+ */
 export default Login;
 // client/src/pages/Login.js
-// Ensure the login page is set up correctly to handle user login
+// This page allows users to log in and receive a token from the backend
