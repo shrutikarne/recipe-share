@@ -1,53 +1,76 @@
+/**
+ * Authentication routes for user registration and login
+ * Handles creating new users and issuing JWT tokens
+ */
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Register route
+/**
+ * @route   POST /api/auth/register
+ * @desc    Register a new user and return a JWT token
+ * @access  Public
+ */
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Check if user exists
+    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ msg: "User already exists" });
 
-    // Hash password
+    // Hash the password before saving
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Save user
+    // Create and save the new user
     user = new User({ name, email, password: hashedPassword });
     await user.save();
 
-    // Create JWT
+    // Create JWT payload and sign token
     const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
+    // Return the token
     res.json({ token });
   } catch (err) {
+    // Log and return server error
     console.error(err.message);
     res.status(500).send("Server error");
   }
 });
 
-// Login route
+/**
+ * @route   POST /api/auth/login
+ * @desc    Authenticate user and return a JWT token
+ * @access  Public
+ */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
+    // Compare provided password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
+    // Create JWT payload and sign token
     const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
+    // Return the token
     res.json({ token });
   } catch (err) {
+    // Log and return server error
     console.error(err.message);
     res.status(500).send("Server error");
   }
@@ -55,4 +78,4 @@ router.post("/login", async (req, res) => {
 
 module.exports = router;
 // server/routes/auth.js
-// Ensure the authentication routes are set up correctly
+// This file contains authentication routes for registration and login
