@@ -1,9 +1,51 @@
+
+/**
+ * @route   PUT /api/recipes/:id
+ * @desc    Update a recipe by ID
+ * @access  Public (should be protected in production)
+ */
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedRecipe) return res.status(404).json({ msg: "Recipe not found" });
+    res.json(updatedRecipe);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
+/**
+ * @route   DELETE /api/recipes/:id
+ * @desc    Delete a recipe by ID
+ * @access  Public (should be protected in production)
+ */
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
+    if (!deletedRecipe) return res.status(404).json({ msg: "Recipe not found" });
+    res.json({ msg: "Recipe deleted" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
 const express = require("express");
 const router = express.Router();
 const Recipe = require("../models/Recipe");
 
 
-// GET all recipes
+
+/**
+ * @route   GET /api/recipes
+ * @desc    Get all recipes
+ * @access  Public
+ */
 router.get("/", async (req, res) => {
   try {
     const recipes = await Recipe.find().populate("author", "name"); // optional: show author's name
@@ -14,7 +56,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET a single recipe by ID
+
+/**
+ * @route   GET /api/recipes/:id
+ * @desc    Get a single recipe by ID
+ * @access  Public
+ */
 router.get("/:id", async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id).populate("author", "name");
@@ -26,7 +73,12 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST a new recipe
+
+/**
+ * @route   POST /api/recipes
+ * @desc    Create a new recipe
+ * @access  Public (should be protected in production)
+ */
 router.post("/", async (req, res) => {
   const {
     title,
