@@ -1,26 +1,26 @@
-/* Register.css - Custom styles for the Register form */
+/* AuthPage.css - Shared styles for login and register forms */
 
-.register-form {
+.auth-form {
   max-width: 350px;
   margin: 40px auto;
   padding: 24px;
   background: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.register-form h2 {
+.auth-form h2 {
   text-align: center;
   margin-bottom: 18px;
 }
 
-.register-form label {
+.auth-form label {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
 }
 
-.register-form input {
+.auth-form input {
   width: 100%;
   padding: 8px 10px;
   margin-bottom: 16px;
@@ -29,10 +29,10 @@
   font-size: 1rem;
 }
 
-.register-form button {
+.auth-form button {
   width: 100%;
   padding: 10px;
-  background: #ff9800;
+  background: #1976d2;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -41,6 +41,14 @@
   transition: background 0.2s;
 }
 
-.register-form button:hover {
+.auth-form button:hover {
+  background: #0d47a1;
+}
+
+/* Register tab button color */
+.auth-form.register button {
+  background: #ff9800;
+}
+.auth-form.register button:hover {
   background: #e65100;
 }
