@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+const Recipe = require("../models/Recipe");
 
 /**
  * @route   PUT /api/recipes/:id
@@ -19,7 +22,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-
 /**
  * @route   DELETE /api/recipes/:id
  * @desc    Delete a recipe by ID
@@ -35,11 +37,6 @@ router.delete("/:id", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-const express = require("express");
-const router = express.Router();
-const Recipe = require("../models/Recipe");
-
-
 
 /**
  * @route   GET /api/recipes
@@ -56,7 +53,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-
 /**
  * @route   GET /api/recipes/:id
  * @desc    Get a single recipe by ID
@@ -64,7 +60,7 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.params.id).populate("author", "name");
+    const recipe = await Recipe.findById(req.params.id).populate("author", "name _id");
     if (!recipe) return res.status(404).json({ msg: "Recipe not found" });
     res.json(recipe);
   } catch (err) {
@@ -72,7 +68,6 @@ router.get("/:id", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 
 /**
  * @route   POST /api/recipes
