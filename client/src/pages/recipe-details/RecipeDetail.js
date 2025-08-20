@@ -1,15 +1,29 @@
 
 
+
 import React, { useEffect, useState } from "react";
 import API from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
 import "./RecipeDetails.css";
+
+// Helper to get user from JWT (copied from Home.js)
+function getUserFromToken() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 
 /**
  * RecipeDetail component
  * Fetches and displays details for a single recipe by ID
  */
+
 
 function RecipeDetail() {
   const { id } = useParams();
@@ -19,6 +33,33 @@ function RecipeDetail() {
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState(null);
+  // Comments state
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const user = getUserFromToken();
+
+  // Fetch comments on mount or id change
+  useEffect(() => {
+    API.get(`/recipes/${id}/comments`)
+      .then((res) => setComments(res.data))
+      .catch(() => setComments([]));
+  }, [id]);
+
+  // Handle comment submit
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+    setCommentLoading(true);
+    try {
+      const res = await API.post(`/recipes/${id}/comments`, { text: commentText });
+      setComments((prev) => [...prev, res.data]);
+      setCommentText("");
+    } catch (err) {
+      alert(err.response?.data?.msg || "Error posting comment");
+    }
+    setCommentLoading(false);
+  };
 
   useEffect(() => {
     API.get(`/recipes/${id}`)
@@ -134,6 +175,37 @@ function RecipeDetail() {
             <ol className="recipe-details-list">
               {recipe.steps && recipe.steps.map((step, i) => <li key={i}>{step}</li>)}
             </ol>
+          </div>
+          {/* Comments Section */}
+          <div className="recipe-details-section">
+            <div className="recipe-details-section-title">Comments</div>
+            <div className="comments-list">
+              {comments.length === 0 && <div style={{color:'#888'}}>No comments yet.</div>}
+              {comments.map((c, i) => (
+                <div key={i} className="comment-item">
+                  <div className="comment-user"><strong>{c.username || c.user || 'User'}</strong>:</div>
+                  <div className="comment-text">{c.text}</div>
+                  <div className="comment-date">{c.createdAt ? new Date(c.createdAt).toLocaleString() : ''}</div>
+                </div>
+              ))}
+            </div>
+            {user ? (
+              <form className="comment-form" onSubmit={handleCommentSubmit} style={{marginTop:16}}>
+                <textarea
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  placeholder="Add a comment..."
+                  rows={2}
+                  style={{width:'100%',resize:'vertical'}}
+                  disabled={commentLoading}
+                />
+                <button className="recipe-details-btn" type="submit" disabled={commentLoading || !commentText.trim()} style={{marginTop:8}}>
+                  {commentLoading ? 'Posting...' : 'Post Comment'}
+                </button>
+              </form>
+            ) : (
+              <div style={{color:'#888',marginTop:8}}>Log in to post a comment.</div>
+            )}
           </div>
           {/* Always show edit/delete buttons (original behavior) */}
           <div className="recipe-details-actions">

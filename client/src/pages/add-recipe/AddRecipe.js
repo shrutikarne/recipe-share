@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
 import "./AddRecipe.css";
 
@@ -21,6 +22,8 @@ function AddRecipe() {
     imageUrl: "",
   });
 
+  const navigate = useNavigate(); // Hook for navigation
+
   /**
    * Handles changes to text/number input fields (except ingredients and steps)
    * @param {object} e - The input change event
@@ -37,6 +40,7 @@ function AddRecipe() {
     try {
       await API.post("/recipes", form); // Send POST request to backend
       alert("Recipe added!");
+      navigate("/"); // Redirect to home page
     } catch (err) {
       alert(err.response?.data?.msg || "Error adding recipe");
     }
