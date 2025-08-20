@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
     // Create JWT payload and sign token
     const payload = { user: { id: user.id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "30m", // 30 minutes
     });
 
     // Return the token
@@ -64,7 +64,7 @@ router.post("/login", async (req, res) => {
     // Create JWT payload and sign token
     const payload = { user: { id: user.id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "30m", // 30 minutes
     });
 
     // Return the token

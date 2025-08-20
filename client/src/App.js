@@ -17,20 +17,48 @@ import RecipeDetail from "./pages/recipe-details/RecipeDetail";
 
 
 function App() {
+
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
+  // Timer reference
+  let inactivityTimer = null;
 
-  useEffect(() => {
-    // Listen for login/logout changes in other tabs
-    const handler = () => setLoggedIn(!!localStorage.getItem("token"));
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
-
+  // Sign out function
   const handleSignOut = () => {
     localStorage.removeItem("token");
     setLoggedIn(false);
     window.location.href = "/";
   };
+
+  // Reset inactivity timer
+  const resetInactivityTimer = () => {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    if (loggedIn) {
+      inactivityTimer = setTimeout(() => {
+        alert("You have been signed out due to inactivity.");
+        handleSignOut();
+      }, 30 * 60 * 1000); // 30 minutes
+    }
+  };
+
+  useEffect(() => {
+    // Listen for login/logout changes in other tabs
+    const handler = () => setLoggedIn(!!localStorage.getItem("token"));
+    window.addEventListener("storage", handler);
+
+    // Listen for user activity
+    const activityEvents = ["mousemove", "keydown", "mousedown", "touchstart"];
+    activityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+
+    // Start timer if logged in
+    if (loggedIn) resetInactivityTimer();
+
+    return () => {
+      window.removeEventListener("storage", handler);
+      activityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+    };
+    // eslint-disable-next-line
+  }, [loggedIn]);
 
   return (
     <BrowserRouter>
