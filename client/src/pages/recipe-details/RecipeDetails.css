@@ -4,10 +4,11 @@
 	margin: 40px auto;
 	background: #fff;
 	border-radius: 18px;
-	box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+	box-shadow: 0 4px 24px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
 	padding: 32px 36px 36px 36px;
 	font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-	color: #222;
+	color: #374151;
+	border: 1.5px solid #84cc16;
 	position: relative;
 }
 
@@ -15,7 +16,7 @@
 	font-size: 2.2rem;
 	font-weight: 700;
 	margin-bottom: 12px;
-	color: #2d8659;
+	color: #84cc16;
 	letter-spacing: 1px;
 }
 
@@ -23,7 +24,7 @@
 	display: flex;
 	gap: 24px;
 	font-size: 1rem;
-	color: #888;
+	color: #fb7185;
 	margin-bottom: 18px;
 }
 
@@ -43,7 +44,7 @@
 .recipe-details-section-title {
 	font-size: 1.2rem;
 	font-weight: 600;
-	color: #2d8659;
+	color: #fb7185;
 	margin-bottom: 8px;
 	letter-spacing: 0.5px;
 }
@@ -51,12 +52,12 @@
 .recipe-details-list {
 	padding-left: 20px;
 	margin: 0;
-	color: #333;
+	color: #374151;
 }
 
 .recipe-details-description {
 	font-size: 1.08rem;
-	color: #444;
+	color: #374151;
 	margin-bottom: 18px;
 	line-height: 1.6;
 }
@@ -71,21 +72,25 @@
 	padding: 8px 22px;
 	border: none;
 	border-radius: 6px;
-	background: #2d8659;
+	background: #fb7185;
 	color: #fff;
 	font-size: 1rem;
 	font-weight: 500;
 	cursor: pointer;
-	transition: background 0.2s;
+	transition: background 0.2s, color 0.2s;
+	box-shadow: 0 2px 8px rgba(251,113,133,0.10);
 }
 .recipe-details-btn.delete {
-	background: #e74c3c;
+	background: #84cc16;
+	color: #374151;
 }
 .recipe-details-btn:hover {
-	background: #226644;
+	background: #84cc16;
+	color: #374151;
 }
 .recipe-details-btn.delete:hover {
-	background: #c0392b;
+	background: #fb7185;
+	color: #fff;
 }
 
 @media (max-width: 600px) {

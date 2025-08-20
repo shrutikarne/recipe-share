@@ -4,43 +4,58 @@
   max-width: 400px;
   margin: 30px auto;
   padding: 24px;
-  background: #f9f9f9;
+  background: #f9f9f9; /* Updated background color */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+  color: #374151;
+  border: 1.5px solid #84cc16;
+  border-radius: 16px; /* Updated border radius */
 }
 
 .add-recipe-form h2 {
   text-align: center;
   margin-bottom: 18px;
+  color: #84cc16;
+  letter-spacing: 1px;
+  font-weight: 700; /* Added font weight */
 }
 
 .add-recipe-form label {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
+  color: #374151;
 }
 
 .add-recipe-form input {
   width: 100%;
   padding: 8px 10px;
   margin-bottom: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid #84cc16;
+  border-radius: 6px; /* Updated border radius */
   font-size: 1rem;
+  color: #374151;
+  background: #fff;
 }
 
 .add-recipe-form button {
   width: 100%;
   padding: 10px;
-  background: #4caf50;
+  background: #fb7185;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px; /* Updated border radius */
   font-size: 1.1rem;
   cursor: pointer;
   transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(251,113,133,0.10);
+.add-recipe-form button:hover {
+  background: #84cc16;
+  color: #374151;
+}
 }
 
 .add-recipe-form button:hover {
-  background: #388e3c;
+  background: #84cc16;
+  color: #374151;
 }
