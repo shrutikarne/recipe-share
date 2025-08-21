@@ -130,7 +130,19 @@ router.put("/:id", recipeWriteLimiter, async (req, res) => {
   const update = {};
   for (const key of allowedFields) {
     if (req.body[key] !== undefined) {
-      update[key] = req.body[key];
+      // Only allow primitive values for update fields
+      const value = req.body[key];
+      // For now, treat strings and numbers (adjust as needed for schema)
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean" ||
+        (Array.isArray(value) && key === "ingredients") // ingredients could be an array
+      ) {
+        update[key] = value;
+      } else {
+        return res.status(400).json({ msg: `Invalid value for field "${key}"` });
+      }
     }
   }
   try {
