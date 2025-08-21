@@ -90,7 +90,7 @@ function AddRecipe() {
       <input
         id="imageUrl"
         name="imageUrl"
-        placeholder="Image URL"
+        placeholder="JPG/PNG, 800x450px"
         onChange={handleChange}
       />
 
