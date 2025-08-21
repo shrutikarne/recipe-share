@@ -3,12 +3,26 @@
 
 Recipe Share is a full-stack web application that allows users to search for, create, and share their favorite recipes. Users can browse recipes, view details, and contribute their own creations to the community.
 
-## Features
+
+## Current Status
+Recipe Share is actively in development. The following features are implemented and working:
+
+### Core Features
 - User authentication (sign up, login)
 - Search for recipes
 - Add new recipes
+- Edit and delete your own recipes
 - View recipe details
+- Add and view comments on recipes
 - Responsive design
+
+### Recent Improvements
+- Codebase refactored for clarity: functions are documented with JSDoc, and file structure matches UI flow.
+
+### In Progress / Planned
+- User profile pages
+- Recipe image uploads
+- Improved search and filtering
 
 ## Tech Stack
 - **Frontend:** React (client/)
@@ -55,11 +69,19 @@ Recipe Share is a full-stack web application that allows users to search for, cr
 		 npm start
 		 ```
 
+
 ## Folder Structure
 ```
 recipe-share/
-├── client/         # React frontend
-├── server/         # Node.js/Express backend
+├── client/         # React frontend (all UI, pages, and API calls)
+│   ├── src/
+│   │   ├── pages/  # Page components (add, home, authentication, recipe details)
+│   │   ├── api/    # API helper
+│   │   └── ...     # Other React files
+├── server/         # Node.js/Express backend (API, models, routes, middleware)
+│   ├── models/     # Mongoose models (User, Recipe)
+│   ├── routes/     # API routes (auth, recipes)
+│   └── ...         # Other backend files
 ```
 
 ## Contributing
