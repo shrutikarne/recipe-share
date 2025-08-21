@@ -1,4 +1,22 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
+// Rate limiter for posting comments (e.g., max 5 requests per minute per IP)
+const commentLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5,
+  message: { msg: "Too many comments created from this IP, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// General rate limiter for recipe modifications (e.g., max 10 requests per minute per IP)
+const recipeWriteLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  message: { msg: "Too many requests from this IP, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 const router = express.Router();
 const Recipe = require("../models/Recipe");
 const auth = require("../middleware/auth");
@@ -19,9 +37,11 @@ router.get("/", async (req, res) => {
     if (category) {
       filter.category = category;
     }
-    if (ingredient) {
+    if (ingredient && typeof ingredient === "string") {
+      // Escape regex special characters
+      const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.ingredients = {
-        $elemMatch: { $regex: ingredient, $options: "i" },
+        $elemMatch: { $regex: escapeRegex(ingredient), $options: "i" },
       };
     }
     const recipes = await Recipe.find(filter).populate("author", "name");
@@ -37,7 +57,7 @@ router.get("/", async (req, res) => {
  * @desc    Create a new recipe
  * @access  Public (should be protected in production)
  */
-router.post("/", async (req, res) => {
+router.post("/", recipeWriteLimiter, async (req, res) => {
   const {
     title,
     description,
@@ -91,11 +111,32 @@ router.get("/:id", async (req, res) => {
  * @desc    Update a recipe by ID
  * @access  Public (should be protected in production)
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", recipeWriteLimiter, async (req, res) => {
+  const mongoose = require("mongoose");
+  // Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ msg: "Invalid recipe ID" });
+  }
+  // Whitelist fields to update
+  const allowedFields = [
+    "title",
+    "description",
+    "ingredients",
+    "steps",
+    "category",
+    "cookTime",
+    "imageUrl"
+  ];
+  const update = {};
+  for (const key of allowedFields) {
+    if (req.body[key] !== undefined) {
+      update[key] = req.body[key];
+    }
+  }
   try {
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      update,
       { new: true }
     );
     if (!updatedRecipe)
@@ -112,7 +153,7 @@ router.put("/:id", async (req, res) => {
  * @desc    Delete a recipe by ID
  * @access  Public (should be protected in production)
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", recipeWriteLimiter, async (req, res) => {
   try {
     const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
     if (!deletedRecipe)
@@ -129,7 +170,7 @@ router.delete("/:id", async (req, res) => {
  * @desc    Like or unlike a recipe (toggle)
  * @access  Private
  */
-router.post("/:id/like", auth, async (req, res) => {
+router.post("/:id/like", recipeWriteLimiter, auth, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ msg: "Recipe not found" });
@@ -168,8 +209,8 @@ router.get("/:id/comments", async (req, res) => {
  * @route   POST /api/recipes/:id/comments
  * @desc    Add a comment to a recipe
  * @access  Private
- */
-router.post("/:id/comments", auth, async (req, res) => {
+*/
+router.post("/:id/comments", commentLimiter, auth, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ msg: "Recipe not found" });
