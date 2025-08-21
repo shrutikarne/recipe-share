@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom";
 /**
  * Home component
  * Fetches and displays a list of all recipes from the backend API.
+ * @component
  */
-
 function Home() {
-  // State for the list of recipes
+  // --- State for the list of recipes ---
   const [recipes, setRecipes] = useState([]);
   const [likeLoading, setLikeLoading] = useState({});
   const [userId, setUserId] = useState(null);
@@ -19,7 +19,10 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch recipes with filters
+  // --- Data Fetching ---
+  /**
+   * Fetches recipes from the backend with optional filters.
+   */
   const fetchRecipes = () => {
     setLoading(true);
     const params = {};
@@ -45,12 +48,21 @@ function Home() {
     // eslint-disable-next-line
   }, []);
 
-  // Handle search/filter submit
+  // --- Handlers (in order of user flow) ---
+  /**
+   * Handles search/filter form submission.
+   * @param {React.FormEvent} e
+   */
   const handleFilter = (e) => {
     e.preventDefault();
     fetchRecipes();
   };
-  // Like/unlike a recipe
+
+  /**
+   * Handles liking/unliking a recipe.
+   * @param {React.MouseEvent} e
+   * @param {string} recipeId
+   */
   const handleLike = async (e, recipeId) => {
     e.stopPropagation();
     setLikeLoading((prev) => ({ ...prev, [recipeId]: true }));
@@ -58,10 +70,12 @@ function Home() {
       const res = await API.post(`/recipes/${recipeId}/like`);
       setRecipes((prev) =>
         prev.map((r) =>
-          r._id === recipeId
-            ? { ...r, likes: res.data.liked
-                ? [...(r.likes || []), userId]
-                : (r.likes || []).filter((id) => id !== userId)
+          r._id === recipeId // Check if this is the recipe being liked/unliked
+            ? {
+                ...r,
+                likes: res.data.liked
+                  ? [...(r.likes || []), userId]
+                  : (r.likes || []).filter((id) => id !== userId),
               }
             : r
         )
@@ -72,33 +86,47 @@ function Home() {
     setLikeLoading((prev) => ({ ...prev, [recipeId]: false }));
   };
 
-  // Handle clicking a recipe card
+  /**
+   * Handles clicking a recipe card to view details.
+   * @param {string} id - The recipe ID
+   */
   const handleCardClick = (id) => {
     navigate(`/recipe/${id}`);
   };
 
+  // --- Render logic (in order of user flow) ---
   return (
     <div className="home-container">
       <h1>All Recipes</h1>
       {/* Search and filter controls */}
-      <form className="recipe-filter-form" onSubmit={handleFilter} style={{marginBottom:24,display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}}>
+      <form
+        className="recipe-filter-form"
+        onSubmit={handleFilter}
+        style={{
+          marginBottom: 24,
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
         <input
           type="text"
           placeholder="Search by title..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="recipe-filter-input"
         />
         <input
           type="text"
           placeholder="Filter by ingredient..."
           value={ingredient}
-          onChange={e => setIngredient(e.target.value)}
+          onChange={(e) => setIngredient(e.target.value)}
           className="recipe-filter-input"
         />
         <select
           value={category}
-          onChange={e => setCategory(e.target.value)}
+          onChange={(e) => setCategory(e.target.value)}
           className="recipe-filter-input"
         >
           <option value="">All Categories</option>
@@ -109,13 +137,19 @@ function Home() {
           <option value="Snack">Snack</option>
           <option value="Beverage">Beverage</option>
         </select>
-        <button className="recipe-filter-btn" type="submit">Search</button>
+        <button className="recipe-filter-btn" type="submit">
+          Search
+        </button>
       </form>
       {loading ? (
-        <div style={{textAlign:'center',marginTop:40}}>Loading...</div>
+        <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>
       ) : (
         <div className="recipe-list">
-          {recipes.length === 0 && <div style={{color:'#888',textAlign:'center',width:'100%'}}>No recipes found.</div>}
+          {recipes.length === 0 && (
+            <div style={{ color: "#888", textAlign: "center", width: "100%" }}>
+              No recipes found.
+            </div>
+          )}
           {recipes.map((r) => (
             <div
               key={r._id}
@@ -136,21 +170,28 @@ function Home() {
                 <div className="recipe-card-actions">
                   <button
                     className="recipe-card-btn like"
-                    onClick={e => handleLike(e, r._id)}
+                    onClick={(e) => handleLike(e, r._id)}
                     disabled={likeLoading[r._id]}
                     aria-label="Like"
                   >
-                    {r.likes && userId && r.likes.includes(userId) ? "♥" : "♡"} {r.likes ? r.likes.length : 0}
+                    {r.likes && userId && r.likes.includes(userId) ? "♥" : "♡"}{" "}
+                    {r.likes ? r.likes.length : 0}
                   </button>
                   <button
                     className="recipe-card-btn save"
-                    onClick={e => { e.stopPropagation(); alert('Recipe saved!'); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert("Recipe saved!");
+                    }}
                   >
                     Save Recipe
                   </button>
                   <button
                     className="recipe-card-btn share"
-                    onClick={e => { e.stopPropagation(); alert('Share link copied!'); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert("Share link copied!");
+                    }}
                   >
                     Share
                   </button>

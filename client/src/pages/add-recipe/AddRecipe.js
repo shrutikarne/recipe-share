@@ -6,12 +6,10 @@ import "./AddRecipe.css";
 /**
  * AddRecipe component
  * Renders a form for users to add a new recipe and submits it to the backend API.
+ * @component
  */
-
 function AddRecipe() {
-  /**
-   * State for the recipe form fields
-   */
+  // --- State ---
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -21,31 +19,46 @@ function AddRecipe() {
     cookTime: 0,
     imageUrl: "",
   });
+  const navigate = useNavigate(); // Redirect after adding recipe
 
-  const navigate = useNavigate(); // Hook for navigation
-
+  // --- Handlers (in order of user flow) ---
   /**
    * Handles changes to text/number input fields (except ingredients and steps)
-   * @param {object} e - The input change event
+   * @param {React.ChangeEvent<HTMLInputElement>} e
    */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   /**
+   * Handles changes to the ingredients field (comma separated).
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
+  const handleIngredientsChange = (e) =>
+    setForm({ ...form, ingredients: e.target.value.split(",") });
+
+  /**
+   * Handles changes to the steps field (comma separated).
+   * @param {React.ChangeEvent<HTMLInputElement>} e
+   */
+  const handleStepsChange = (e) =>
+    setForm({ ...form, steps: e.target.value.split(",") });
+
+  /**
    * Handles form submission, sends recipe data to backend
-   * @param {object} e - The form submit event
+   * @param {React.FormEvent} e
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/recipes", form); // Send POST request to backend
+      await API.post("/recipes", form);
       alert("Recipe added!");
-      navigate("/"); // Redirect to home page
+      navigate("/");
     } catch (err) {
       alert(err.response?.data?.msg || "Error adding recipe");
     }
   };
 
+  // --- Render logic (in order of user flow) ---
   return (
     <form className="add-recipe-form" onSubmit={handleSubmit}>
       <h2>Add Recipe</h2>
@@ -86,9 +99,7 @@ function AddRecipe() {
         id="ingredients"
         name="ingredients"
         placeholder="e.g. flour, sugar, eggs"
-        onChange={(e) =>
-          setForm({ ...form, ingredients: e.target.value.split(",") })
-        }
+        onChange={handleIngredientsChange}
       />
 
       <label htmlFor="steps">Steps (comma separated)</label>
@@ -96,7 +107,7 @@ function AddRecipe() {
         id="steps"
         name="steps"
         placeholder="e.g. mix, bake, serve"
-        onChange={(e) => setForm({ ...form, steps: e.target.value.split(",") })}
+        onChange={handleStepsChange}
       />
 
       <label htmlFor="cookTime">Cook Time (min)</label>
