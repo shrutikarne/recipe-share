@@ -71,6 +71,9 @@
   display: flex;
   flex-direction: column;
   width: 340px;
+  height: 440px;
+  max-width: 340px;
+  max-height: 440px;
   border: 1.5px solid #84cc16;
   background: #fff;
   margin-bottom: 18px;
@@ -97,7 +100,7 @@
 /* 3. Card image */
 .recipe-card-img {
   width: 100%;
-  height: auto;
+  height: 180px;
   border-top-left-radius: 1.25rem;
   border-top-right-radius: 1.25rem;
 }
