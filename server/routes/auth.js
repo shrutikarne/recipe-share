@@ -34,10 +34,10 @@ const User = require("../models/User");
 router.post("/register", registerLimiter, async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Validate email is a string and matches a basic email pattern
+  // Validate email is a string and matches a safe email pattern
   if (
     typeof email !== "string" ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
   ) {
     return res.status(400).json({ msg: "Invalid email format" });
   }
@@ -78,10 +78,10 @@ router.post("/register", registerLimiter, async (req, res) => {
 router.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate email is a string and matches a basic email pattern
+  // Validate email is a string and matches a safe email pattern
   if (
     typeof email !== "string" ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
   ) {
     return res.status(400).json({ msg: "Invalid email format" });
   }
