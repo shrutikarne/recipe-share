@@ -1,11 +1,45 @@
 /* Search/filter form styles */
-.recipe-filter-form {
+.home-header-bar {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.search-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+}
+.search-icon-btn:hover {
+  background: #f7fee7;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #84cc16;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+  padding: 18px 20px 14px 20px;
+  z-index: 10;
+  min-width: 320px;
+}
+
+.recipe-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
 }
 .recipe-filter-input {
   padding: 8px 12px;
