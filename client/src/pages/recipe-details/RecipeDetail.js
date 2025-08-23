@@ -95,8 +95,13 @@ function RecipeDetail() {
   };
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    // Combine hours and minutes into total seconds for cookTime
+    const cookTime = (parseInt(editForm.cookHours) || 0) * 3600 + (parseInt(editForm.cookMinutes) || 0) * 60;
+    const updatedForm = { ...editForm, cookTime };
+    delete updatedForm.cookHours;
+    delete updatedForm.cookMinutes;
     try {
-      const res = await API.put(`/recipes/${id}`, editForm);
+      const res = await API.put(`/recipes/${id}`, updatedForm);
       setRecipe(res.data);
       setEditMode(false);
       alert("Recipe updated");
@@ -144,79 +149,119 @@ function RecipeDetail() {
   if (!recipe) return null;
 
   return (
-    <div className="recipe-details-container">
+    <div>
       {editMode ? (
-        <form onSubmit={handleEditSubmit}>
-          <h2 className="recipe-details-title">Edit Recipe</h2>
-          <div className="recipe-details-section">
-            <label>Title</label>
+        <form className="add-recipe-form" onSubmit={handleEditSubmit}>
+          <h2>Edit Recipe</h2>
+          <label htmlFor="title">Title</label>
+          <input
+            id="title"
+            name="title"
+            placeholder="Title"
+            value={editForm.title}
+            onChange={handleEditChange}
+          />
+
+          <label htmlFor="description">Description</label>
+          <input
+            id="description"
+            name="description"
+            placeholder="Description"
+            value={editForm.description}
+            onChange={handleEditChange}
+          />
+
+          <label htmlFor="category">Category</label>
+          <select
+            id="category"
+            name="category"
+            value={editForm.category}
+            onChange={handleEditChange}
+          >
+            <option value="">Select category</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Dessert">Dessert</option>
+            <option value="Snack">Snack</option>
+            <option value="Beverage">Beverage</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label htmlFor="diet">Diet Type</label>
+          <select
+            id="diet"
+            name="diet"
+            value={editForm.diet || ""}
+            onChange={handleEditChange}
+          >
+            <option value="">Select diet type</option>
+            <option value="vegan">Vegan</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="pescatarian">Pescatarian</option>
+            <option value="gluten-free">Gluten-Free</option>
+            <option value="keto">Keto</option>
+            <option value="paleo">Paleo</option>
+            <option value="omnivore">Omnivore</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label htmlFor="imageUrl">Add Image</label>
+          <input
+            id="imageUrl"
+            name="imageUrl"
+            placeholder="JPG/PNG, 800x450px"
+            value={editForm.imageUrl}
+            onChange={handleEditChange}
+          />
+
+          <label htmlFor="ingredients">Ingredients (comma separated)</label>
+          <input
+            id="ingredients"
+            name="ingredients"
+            placeholder="e.g. flour, sugar, eggs"
+            value={Array.isArray(editForm.ingredients) ? editForm.ingredients.join(",") : editForm.ingredients}
+            onChange={handleEditArrayChange}
+          />
+
+          <label htmlFor="steps">Steps (comma separated)</label>
+          <input
+            id="steps"
+            name="steps"
+            placeholder="e.g. mix, bake, serve"
+            value={Array.isArray(editForm.steps) ? editForm.steps.join(",") : editForm.steps}
+            onChange={handleEditArrayChange}
+          />
+
+          <label>Cook Time</label>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             <input
-              name="title"
-              value={editForm.title}
-              onChange={handleEditChange}
-            />
-          </div>
-          <div className="recipe-details-section">
-            <label>Description</label>
-            <input
-              name="description"
-              value={editForm.description}
-              onChange={handleEditChange}
-            />
-          </div>
-          <div className="recipe-details-section">
-            <label>Category</label>
-            <input
-              name="category"
-              value={editForm.category}
-              onChange={handleEditChange}
-            />
-          </div>
-          <div className="recipe-details-section">
-            <label>Cook Time (min)</label>
-            <input
-              name="cookTime"
               type="number"
-              value={editForm.cookTime}
-              onChange={handleEditChange}
+              min="0"
+              value={editForm.cookHours !== undefined ? editForm.cookHours : (editForm.cookTime ? Math.floor(editForm.cookTime / 3600) : "")}
+              onChange={e => setEditForm(prev => ({ ...prev, cookHours: e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, "") }))}
+              placeholder="Hrs"
+              style={{ flex: 1 }}
             />
-          </div>
-          <div className="recipe-details-section">
-            <label>Image URL</label>
             <input
-              name="imageUrl"
-              value={editForm.imageUrl}
-              onChange={handleEditChange}
+              type="number"
+              min="0"
+              max="59"
+              value={editForm.cookMinutes !== undefined ? editForm.cookMinutes : (editForm.cookTime ? Math.floor((editForm.cookTime % 3600) / 60) : "")}
+              onChange={e => setEditForm(prev => ({ ...prev, cookMinutes: e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, "") }))}
+              placeholder="Min"
+              style={{ flex: 1 }}
             />
           </div>
-          <div className="recipe-details-section">
-            <label>Ingredients (comma separated)</label>
-            <input
-              name="ingredients"
-              value={editForm.ingredients}
-              onChange={handleEditArrayChange}
-            />
-          </div>
-          <div className="recipe-details-section">
-            <label>Steps (comma separated)</label>
-            <input
-              name="steps"
-              value={editForm.steps}
-              onChange={handleEditArrayChange}
-            />
-          </div>
-          <div className="recipe-details-actions">
-            <button className="recipe-details-btn" type="submit">
-              Save
-            </button>
-            <button
-              className="recipe-details-btn delete"
-              type="button"
-              onClick={() => setEditMode(false)}
-            >
-              Cancel
-            </button>
-          </div>
+
+          <button type="submit">Save</button>
+          <button
+            type="button"
+            style={{ marginTop: 8, background: '#84cc16', color: '#374151' }}
+            onClick={() => setEditMode(false)}
+          >
+            Cancel
+          </button>
         </form>
       ) : (
         <>

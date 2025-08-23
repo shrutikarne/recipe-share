@@ -17,18 +17,18 @@ function Home() {
   const [category, setCategory] = useState("");
   const [ingredient, setIngredient] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [diet, setDiet] = useState("");
   const navigate = useNavigate();
 
-  // --- Data Fetching ---
-  /**
-   * Fetches recipes from the backend with optional filters.
-   */
+  // Fetch recipes from backend
   const fetchRecipes = () => {
     setLoading(true);
     const params = {};
     if (search) params.search = search;
     if (category) params.category = category;
     if (ingredient) params.ingredient = ingredient;
+    if (diet) params.diet = diet;
     API.get("/recipes", { params })
       .then((res) => setRecipes(res.data))
       .catch((err) => console.error(err))
@@ -48,21 +48,16 @@ function Home() {
     // eslint-disable-next-line
   }, []);
 
-  // --- Handlers (in order of user flow) ---
-  /**
-   * Handles search/filter form submission.
-   * @param {React.FormEvent} e
-   */
+  // Handlers
   const handleFilter = (e) => {
     e.preventDefault();
     fetchRecipes();
   };
 
-  /**
-   * Handles liking/unliking a recipe.
-   * @param {React.MouseEvent} e
-   * @param {string} recipeId
-   */
+  const handleCardClick = (id) => {
+    navigate(`/recipe/${id}`);
+  };
+
   const handleLike = async (e, recipeId) => {
     e.stopPropagation();
     setLikeLoading((prev) => ({ ...prev, [recipeId]: true }));
@@ -70,7 +65,7 @@ function Home() {
       const res = await API.post(`/recipes/${recipeId}/like`);
       setRecipes((prev) =>
         prev.map((r) =>
-          r._id === recipeId // Check if this is the recipe being liked/unliked
+          r._id === recipeId
             ? {
                 ...r,
                 likes: res.data.liked
@@ -85,62 +80,71 @@ function Home() {
     }
     setLikeLoading((prev) => ({ ...prev, [recipeId]: false }));
   };
-
-  /**
-   * Handles clicking a recipe card to view details.
-   * @param {string} id - The recipe ID
-   */
-  const handleCardClick = (id) => {
-    navigate(`/recipe/${id}`);
-  };
-
-  // --- Render logic (in order of user flow) ---
   return (
     <div className="home-container">
-      <h1>All Recipes</h1>
-      {/* Search and filter controls */}
-      <form
-        className="recipe-filter-form"
-        onSubmit={handleFilter}
-        style={{
-          marginBottom: 24,
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="recipe-filter-input"
-        />
-        <input
-          type="text"
-          placeholder="Filter by ingredient..."
-          value={ingredient}
-          onChange={(e) => setIngredient(e.target.value)}
-          className="recipe-filter-input"
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="recipe-filter-input"
+      <div className="home-header-bar">
+        <h1>All Recipes</h1>
+        <button
+          className="search-icon-btn"
+          aria-label="Open search"
+          onClick={() => setShowSearch((s) => !s)}
         >
-          <option value="">All Categories</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Dessert">Dessert</option>
-          <option value="Snack">Snack</option>
-          <option value="Beverage">Beverage</option>
-        </select>
-        <button className="recipe-filter-btn" type="submit">
-          Search
+          {/* SVG search icon */}
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
-      </form>
+        {showSearch && (
+          <div className="search-dropdown">
+            <form className="recipe-filter-form" onSubmit={(e) => { handleFilter(e); setShowSearch(false); }}>
+              <input
+                type="text"
+                placeholder="Search by title..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="recipe-filter-input"
+                autoFocus
+              />
+              <input
+                type="text"
+                placeholder="Filter by ingredient..."
+                value={ingredient}
+                onChange={(e) => setIngredient(e.target.value)}
+                className="recipe-filter-input"
+              />
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="recipe-filter-input"
+              >
+                <option value="">All Categories</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Snack">Snack</option>
+                <option value="Beverage">Beverage</option>
+              </select>
+              <select
+                value={diet}
+                onChange={(e) => setDiet(e.target.value)}
+                className="recipe-filter-input"
+              >
+                <option value="">All Diet Types</option>
+                <option value="vegan">Vegan</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="pescatarian">Pescatarian</option>
+                <option value="gluten-free">Gluten-Free</option>
+                <option value="keto">Keto</option>
+                <option value="paleo">Paleo</option>
+                <option value="omnivore">Omnivore</option>
+                <option value="other">Other</option>
+              </select>
+              <button className="recipe-filter-btn" type="submit">
+                Search
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>
       ) : (
@@ -174,8 +178,7 @@ function Home() {
                     disabled={likeLoading[r._id]}
                     aria-label="Like"
                   >
-                    {r.likes && userId && r.likes.includes(userId) ? "♥" : "♡"}{" "}
-                    {r.likes ? r.likes.length : 0}
+                    {r.likes && userId && r.likes.includes(userId) ? "♥" : "♡"} {r.likes ? r.likes.length : 0}
                   </button>
                   <button
                     className="recipe-card-btn save"
@@ -183,8 +186,9 @@ function Home() {
                       e.stopPropagation();
                       alert("Recipe saved!");
                     }}
+                    aria-label="Save Recipe"
                   >
-                    Save Recipe
+                    <span role="img" aria-label="Save">💾</span>
                   </button>
                   <button
                     className="recipe-card-btn share"
@@ -192,8 +196,9 @@ function Home() {
                       e.stopPropagation();
                       alert("Share link copied!");
                     }}
+                    aria-label="Share Recipe"
                   >
-                    Share
+                    <span role="img" aria-label="Share">🔗</span>
                   </button>
                 </div>
               </div>
@@ -201,13 +206,9 @@ function Home() {
           ))}
         </div>
       )}
+
     </div>
   );
 }
 
-/**
- * Exports the Home component for use in the app
- */
 export default Home;
-// client/src/pages/Home.js
-// This page displays all recipes from the backend in a styled list

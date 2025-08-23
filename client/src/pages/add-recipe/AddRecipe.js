@@ -16,9 +16,11 @@ function AddRecipe() {
     ingredients: [],
     steps: [],
     category: "",
-    cookTime: 0,
     imageUrl: "",
+    diet: "",
   });
+  const [cookHours, setCookHours] = useState("");
+  const [cookMinutes, setCookMinutes] = useState("");
   const navigate = useNavigate(); // Redirect after adding recipe
 
   // --- Handlers (in order of user flow) ---
@@ -49,8 +51,10 @@ function AddRecipe() {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Combine hours, minutes, seconds into total seconds
+    const cookTime = (parseInt(cookHours) || 0) * 3600 + (parseInt(cookMinutes) || 0);
     try {
-      await API.post("/recipes", form);
+      await API.post("/recipes", { ...form, cookTime });
       alert("Recipe added!");
       navigate("/");
     } catch (err) {
@@ -79,14 +83,42 @@ function AddRecipe() {
       />
 
       <label htmlFor="category">Category</label>
-      <input
+      <select
         id="category"
         name="category"
-        placeholder="Category"
+        value={form.category}
         onChange={handleChange}
-      />
+      >
+        <option value="">Select category</option>
+        <option value="Breakfast">Breakfast</option>
+        <option value="Lunch">Lunch</option>
+        <option value="Dinner">Dinner</option>
+        <option value="Dessert">Dessert</option>
+        <option value="Snack">Snack</option>
+        <option value="Beverage">Beverage</option>
+        <option value="Other">Other</option>
+      </select>
 
-      <label htmlFor="imageUrl">Image URL</label>
+
+      <label htmlFor="diet">Diet Type</label>
+      <select
+        id="diet"
+        name="diet"
+        value={form.diet}
+        onChange={handleChange}
+      >
+        <option value="">Select diet type</option>
+        <option value="vegan">Vegan</option>
+        <option value="vegetarian">Vegetarian</option>
+        <option value="pescatarian">Pescatarian</option>
+        <option value="gluten-free">Gluten-Free</option>
+        <option value="keto">Keto</option>
+        <option value="paleo">Paleo</option>
+        <option value="omnivore">Omnivore</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label htmlFor="imageUrl">Add Image</label>
       <input
         id="imageUrl"
         name="imageUrl"
@@ -110,14 +142,26 @@ function AddRecipe() {
         onChange={handleStepsChange}
       />
 
-      <label htmlFor="cookTime">Cook Time (min)</label>
-      <input
-        id="cookTime"
-        name="cookTime"
-        type="number"
-        placeholder="Cook Time (min)"
-        onChange={handleChange}
-      />
+      <label>Cook Time</label>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <input
+          type="number"
+          min="0"
+          value={cookHours}
+          onChange={e => setCookHours(e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, ""))}
+          placeholder="Hrs"
+          style={{ flex: 1 }}
+        />
+        <input
+          type="number"
+          min="0"
+          max="59"
+          value={cookMinutes}
+          onChange={e => setCookMinutes(e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, ""))}
+          placeholder="Min"
+          style={{ flex: 1 }}
+        />
+      </div>
 
       <button type="submit">Add Recipe</button>
     </form>

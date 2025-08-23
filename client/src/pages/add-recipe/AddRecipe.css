@@ -25,6 +25,42 @@
   margin-bottom: 6px;
   font-weight: 500;
   color: #374151;
+  margin-top: 12px;
+}
+
+.add-recipe-form input,
+.add-recipe-form select {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 16px;
+  border: 1px solid #84cc16;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #374151;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.add-recipe-form select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%2384cc16" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px 20px;
+}
+
+.add-recipe-form button {
+  width: 100%;
+  padding: 12px;
+  background: #fb7185;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(251,113,133,0.10);
+  margin-top: 18px;
 }
 
 .add-recipe-form input {
