@@ -6,15 +6,39 @@ const mongoose = require("mongoose");
 
 const RecipeSchema = new mongoose.Schema(
   {
-    title: String, // Recipe title
-    description: String, // Short description
-    ingredients: [String], // List of ingredients
+    title: {
+      type: String,
+      required: [true, "Title is required"],
+      trim: true,
+    },
     steps: [String], // List of preparation steps
     category: String, // Recipe category
     cookTime: Number, // Cooking time in minutes
-    imageUrl: String, // Optional image URL
+    imageUrls: [String], // Multiple image URLs
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User
+    tags: [String], // e.g., ["Vegan", "Gluten-Free"]
     likes: [String], // Array of user IDs who liked
+    ratings: [
+      {
+        userId: String, // ID of user who rated
+        value: { type: Number, min: 1, max: 5 }, // Star value
+      },
+    ],
+    nutrition: {
+      calories: Number,
+      protein: Number,
+      carbs: Number,
+      fat: Number,
+      // Add more as needed
+    },
+    funFacts: [String], // Array of fun facts/trivia
+    storySteps: [
+      {
+        text: String, // Step description
+        mediaUrl: String, // Image or video URL
+      },
+    ],
+    stepImages: [String], // Step-by-step images
     comments: [
       {
         userId: String, // ID of user who commented

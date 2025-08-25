@@ -6,7 +6,8 @@
   padding: 24px;
   background: #f9f9f9;
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+  box-shadow: 0 4px 16px rgba(132, 204, 22, 0.1),
+    0 1.5px 4px rgba(251, 113, 133, 0.1);
   color: #374151;
   border: 1.5px solid #84cc16;
 
@@ -57,7 +58,7 @@
     font-size: 1.1rem;
     cursor: pointer;
     transition: background 0.2s;
-    box-shadow: 0 2px 8px rgba(251,113,133,0.10);
+    box-shadow: 0 2px 8px rgba(251, 113, 133, 0.1);
     margin-top: 18px;
 
     &:hover {

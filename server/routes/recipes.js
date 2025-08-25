@@ -4,7 +4,9 @@ const rateLimit = require("express-rate-limit");
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 5,
-  message: { msg: "Too many comments created from this IP, please try again later." },
+  message: {
+    msg: "Too many comments created from this IP, please try again later.",
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -17,19 +19,26 @@ const recipeWriteLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-const router = express.Router();
 const Recipe = require("../models/Recipe");
-const auth = require("../middleware/auth");
-
+const router = express.Router();
+const { verifyToken } = require("../middleware/auth");
 
 /**
  * @route   GET /api/recipes
  * @desc    Get all recipes
  * @access  Public
  */
+// Enhanced: filter by tags, infinite scroll, etc.
 router.get("/", async (req, res) => {
   try {
-    const { search, category, ingredient } = req.query;
+    const {
+      search,
+      category,
+      ingredient,
+      tag,
+      skip = 0,
+      limit = 20,
+    } = req.query;
     let filter = {};
     if (search) {
       filter.title = { $regex: search, $options: "i" };
@@ -38,13 +47,18 @@ router.get("/", async (req, res) => {
       filter.category = category;
     }
     if (ingredient && typeof ingredient === "string") {
-      // Escape regex special characters
-      const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filter.ingredients = {
         $elemMatch: { $regex: escapeRegex(ingredient), $options: "i" },
       };
     }
-    const recipes = await Recipe.find(filter).populate("author", "name");
+    if (tag) {
+      filter.tags = tag;
+    }
+    const recipes = await Recipe.find(filter)
+      .skip(Number(skip))
+      .limit(Number(limit))
+      .populate("author", "name");
     res.json(recipes);
   } catch (err) {
     console.error(err.message);
@@ -57,27 +71,11 @@ router.get("/", async (req, res) => {
  * @desc    Create a new recipe
  * @access  Public (should be protected in production)
  */
-router.post("/", recipeWriteLimiter, async (req, res) => {
-  const {
-    title,
-    description,
-    ingredients,
-    steps,
-    category,
-    cookTime,
-    imageUrl,
-    author,
-  } = req.body;
+// Enhanced: support new fields (imageUrls, tags, ratings, nutrition, funFacts, storySteps, stepImages)
+router.post("/", recipeWriteLimiter, verifyToken, async (req, res) => {
   try {
     const newRecipe = new Recipe({
-      title,
-      description,
-      ingredients,
-      steps,
-      category,
-      cookTime,
-      imageUrl,
-      author,
+      ...req.body,
     });
     const savedRecipe = await newRecipe.save();
     res.json(savedRecipe);
@@ -111,37 +109,49 @@ router.get("/:id", async (req, res) => {
  * @desc    Update a recipe by ID
  * @access  Public (should be protected in production)
  */
-router.put("/:id", recipeWriteLimiter, async (req, res) => {
+router.put("/:id", recipeWriteLimiter, verifyToken, async (req, res) => {
   const mongoose = require("mongoose");
   // Validate ObjectId
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ msg: "Invalid recipe ID" });
   }
   // Whitelist fields to update
-  const allowedFields = [
-    "title",
-    "description",
-    "ingredients",
-    "steps",
-    "category",
-    "cookTime",
-    "imageUrl"
-  ];
-  const update = {};
-  for (const key of allowedFields) {
-    if (req.body[key] !== undefined) {
-      update[key] = req.body[key];
-    }
-  }
+  // Allow updating all fields in schema
   try {
     const updatedRecipe = await Recipe.findByIdAndUpdate(
       req.params.id,
-      update,
+      req.body,
       { new: true }
     );
     if (!updatedRecipe)
       return res.status(404).json({ msg: "Recipe not found" });
     res.json(updatedRecipe);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+/**
+ * @route   POST /api/recipes/:id/rate
+ * @desc    Rate a recipe (1-5 stars)
+ * @access  Private
+ */
+router.post("/:id/rate", recipeWriteLimiter, verifyToken, async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) return res.status(404).json({ msg: "Recipe not found" });
+    const userId = req.user.id;
+    const { value } = req.body;
+    if (!value || value < 1 || value > 5)
+      return res.status(400).json({ msg: "Invalid rating value" });
+    // Remove previous rating if exists
+    recipe.ratings = recipe.ratings.filter((r) => r.userId !== userId);
+    recipe.ratings.push({ userId, value });
+    await recipe.save();
+    // Calculate average
+    const avg =
+      recipe.ratings.reduce((a, b) => a + b.value, 0) / recipe.ratings.length;
+    res.json({ avg, count: recipe.ratings.length });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -153,7 +163,7 @@ router.put("/:id", recipeWriteLimiter, async (req, res) => {
  * @desc    Delete a recipe by ID
  * @access  Public (should be protected in production)
  */
-router.delete("/:id", recipeWriteLimiter, async (req, res) => {
+router.delete("/:id", recipeWriteLimiter, verifyToken, async (req, res) => {
   try {
     const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
     if (!deletedRecipe)
@@ -170,7 +180,7 @@ router.delete("/:id", recipeWriteLimiter, async (req, res) => {
  * @desc    Like or unlike a recipe (toggle)
  * @access  Private
  */
-router.post("/:id/like", recipeWriteLimiter, auth, async (req, res) => {
+router.post("/:id/like", recipeWriteLimiter, verifyToken, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ msg: "Recipe not found" });
@@ -209,8 +219,8 @@ router.get("/:id/comments", async (req, res) => {
  * @route   POST /api/recipes/:id/comments
  * @desc    Add a comment to a recipe
  * @access  Private
-*/
-router.post("/:id/comments", commentLimiter, auth, async (req, res) => {
+ */
+router.post("/:id/comments", commentLimiter, verifyToken, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ msg: "Recipe not found" });

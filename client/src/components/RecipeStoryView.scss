@@ -1,0 +1,87 @@
+.story-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #111827;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 12px;
+}
+.story-exit {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  font-size: 2.5rem;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+}
+.story-progress {
+  display: flex;
+  gap: 6px;
+  width: 80vw;
+  max-width: 420px;
+  margin: 0 auto 18px auto;
+}
+.story-bar {
+  flex: 1 1 0;
+  height: 4px;
+  background: #374151;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.story-bar.active {
+  background: #facc15;
+}
+.story-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 420px;
+  width: 100%;
+}
+.story-media {
+  width: 100%;
+  max-width: 340px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.1);
+  background: #222;
+}
+.story-text {
+  font-size: 1.25rem;
+  color: #f3f4f6;
+  text-align: center;
+  margin: 12px 0 0 0;
+  font-weight: 500;
+}
+.story-nav {
+  display: flex;
+  gap: 18px;
+  margin-top: 24px;
+}
+.story-nav button {
+  background: #facc15;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.story-nav button:disabled {
+  background: #d1d5db;
+  color: #888;
+  cursor: not-allowed;
+}
+.story-nav button:not(:disabled):hover {
+  background: #fde68a;
+}

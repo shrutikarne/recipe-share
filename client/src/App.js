@@ -1,5 +1,3 @@
-import './App.scss';
-
 /**
  * App component
  * Sets up the main routes and navigation for the Recipe Share frontend
@@ -10,15 +8,96 @@ import './App.scss';
  */
 
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import "./App.scss";
 import Home from "./pages/home/Home";
 import AuthPage from "./pages/authentication/AuthPage";
 import AddRecipe from "./pages/add-recipe/AddRecipe";
 import RecipeDetail from "./pages/recipe-details/RecipeDetail";
 
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.35 }}
+            >
+              <Home />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.35 }}
+            >
+              <AuthPage />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.35 }}
+            >
+              <AuthPage />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/add"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.35 }}
+            >
+              <AddRecipe />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/recipe/:id"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.35 }}
+            >
+              <RecipeDetail />
+            </motion.div>
+          }
+        />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 function App() {
-
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
   // Timer reference
   let inactivityTimer = null;
@@ -48,14 +127,18 @@ function App() {
 
     // Listen for user activity
     const activityEvents = ["mousemove", "keydown", "mousedown", "touchstart"];
-    activityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+    activityEvents.forEach((event) =>
+      window.addEventListener(event, resetInactivityTimer)
+    );
 
     // Start timer if logged in
     if (loggedIn) resetInactivityTimer();
 
     return () => {
       window.removeEventListener("storage", handler);
-      activityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+      activityEvents.forEach((event) =>
+        window.removeEventListener(event, resetInactivityTimer)
+      );
       if (inactivityTimer) clearTimeout(inactivityTimer);
     };
     // eslint-disable-next-line
@@ -63,24 +146,46 @@ function App() {
 
   return (
     <BrowserRouter>
-      <nav className="main-nav">
-        <Link className="main-nav__link" to="/">Home</Link>
+      <nav className="main-nav" aria-label="Main navigation">
+        <Link
+          className="main-nav__link"
+          to="/"
+          tabIndex={0}
+          aria-label="Home page"
+        >
+          Home
+        </Link>
         {loggedIn ? (
           <>
-            <Link className="main-nav__link" to="/add">Add Recipe</Link>
-            <button className="main-nav__button" onClick={handleSignOut}>Sign Out</button>
+            <Link
+              className="main-nav__link"
+              to="/add"
+              tabIndex={0}
+              aria-label="Add a new recipe"
+            >
+              Add Recipe
+            </Link>
+            <button
+              className="main-nav__button"
+              onClick={handleSignOut}
+              tabIndex={0}
+              aria-label="Sign out"
+            >
+              Sign Out
+            </button>
           </>
         ) : (
-          <Link className="main-nav__link" to="/login">Login/Register</Link>
+          <Link
+            className="main-nav__link"
+            to="/login"
+            tabIndex={0}
+            aria-label="Login or Register"
+          >
+            Login/Register
+          </Link>
         )}
       </nav>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/register" element={<AuthPage />} />
-        <Route path="/add" element={<AddRecipe />} />
-        <Route path="/recipe/:id" element={<RecipeDetail />} />
-      </Routes>
+      <AnimatedRoutes />
     </BrowserRouter>
   );
 }
@@ -89,5 +194,3 @@ function App() {
  * Exports the App component for use in the app
  */
 export default App;
-// client/src/App.js
-// Main entry point for the React app, handles routing and navigation

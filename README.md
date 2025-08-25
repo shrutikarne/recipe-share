@@ -1,91 +1,113 @@
-
 # Recipe Share
 
-Recipe Share is a full-stack web application that allows users to search for, create, and share their favorite recipes. Users can browse recipes, view details, and contribute their own creations to the community.
+Recipe Share is a modern, full-stack web application for discovering, creating, and sharing recipes. It features robust authentication, accessibility, and a fully automated test suite for both frontend and backend.
 
+---
 
-## Current Status
-Recipe Share is actively in development. The following features are implemented and working:
+## 🚀 Features
 
-### Core Features
-- User authentication (sign up, login)
-- Search for recipes
-- Add new recipes
-- Edit and delete your own recipes
-- View recipe details
-- Add and view comments on recipes
-- Responsive design
+- **User authentication** (register, login, JWT-protected routes)
+- **Recipe CRUD** (add, edit, delete, view, search)
+- **Responsive, accessible UI** (WCAG-compliant, keyboard navigation, ARIA roles)
+- **Recipe details, comments, and quick preview modals**
+- **Automated testing:**
+	- Playwright for end-to-end (E2E) frontend tests
+	- Jest for backend API and model tests
+- **Modern developer workflow:**
+	- Modular React and Express codebase
+	- API error handling and in-page feedback
+	- Environment-based configuration
 
-### Recent Improvements
-- Codebase refactored for clarity: functions are documented with JSDoc, and file structure matches UI flow.
+---
 
-### In Progress / Planned
-- User profile pages
-- Recipe image uploads
-- Improved search and filtering
+## 🛠️ Tech Stack
 
-## Tech Stack
-- **Frontend:** React (client/)
-- **Backend:** Node.js, Express (server/)
-- **Database:** MongoDB
+- **Frontend:** React (client/), Playwright (E2E)
+- **Backend:** Node.js, Express (server/), Jest (unit/integration)
+- **Database:** MongoDB (Mongoose ODM)
 
-## Getting Started
+---
+
+## 🧪 Testing
+
+- **Frontend:**
+	- All major user flows are covered by Playwright tests in `client/tests/`.
+	- Run with:
+		```bash
+		cd client
+		npx playwright test
+		```
+- **Backend:**
+	- Comprehensive Jest tests for routes, models, and middleware in `server/tests/`.
+	- Run with:
+		```bash
+		cd server
+		npm test
+		```
+
+---
+
+## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js (v14 or above)
+- Node.js (v16+ recommended)
 - npm or yarn
-- MongoDB instance (local or cloud)
+- MongoDB (local or Atlas)
 
 ### Installation
 1. **Clone the repository:**
-	 ```bash
-	 git clone https://github.com/shrutikarne/recipe-share.git
-	 cd recipe-share
-	 ```
+		```bash
+		git clone https://github.com/shrutikarne/recipe-share.git
+		cd recipe-share
+		```
 2. **Install dependencies:**
-	 - For the client:
-		 ```bash
-		 cd client
-		 npm install
-		 ```
-	 - For the server:
-		 ```bash
-		 cd ../server
-		 npm install
-		 ```
-
+		- For the client:
+			```bash
+			cd client
+			npm install
+			```
+		- For the server:
+			```bash
+			cd ../server
+			npm install
+			```
 3. **Configure environment variables:**
-	 - Create a `.env` file in the `server/` directory with your MongoDB URI and any other secrets.
+		- Create a `.env` file in `server/` with your MongoDB URI and JWT secret.
+4. **Run the app:**
+		- Start backend:
+			```bash
+			cd server
+			npm start
+			```
+		- Start frontend:
+			```bash
+			cd ../client
+			npm start
+			```
 
-4. **Run the application:**
-	 - Start the backend server:
-		 ```bash
-		 cd server
-		 npm start
-		 ```
-	 - Start the frontend React app:
-		 ```bash
-		 cd ../client
-		 npm start
-		 ```
+---
 
+## 📁 Folder Structure
 
-## Folder Structure
 ```
 recipe-share/
-├── client/         # React frontend (all UI, pages, and API calls)
+├── client/         # React frontend (UI, pages, API calls, Playwright tests)
 │   ├── src/
-│   │   ├── pages/  # Page components (add, home, authentication, recipe details)
+│   │   ├── pages/  # Page components (add-recipe, home, authentication, recipe-details)
 │   │   ├── api/    # API helper
 │   │   └── ...     # Other React files
-├── server/         # Node.js/Express backend (API, models, routes, middleware)
+│   └── tests/      # Playwright E2E tests
+├── server/         # Node.js/Express backend (API, models, routes, middleware, Jest tests)
 │   ├── models/     # Mongoose models (User, Recipe)
-│   ├── routes/     # API routes (auth, recipes)
+│   ├── routes/     # API routes (auth, recipes, user)
+│   ├── tests/      # Jest tests
 │   └── ...         # Other backend files
 ```
 
-## Contributing
+---
+
+## 🤝 Contributing
 Contributions are welcome! Please open an issue or submit a pull request.
 
-## License
-This project is licensed under the MIT License.
+## 📝 License
+MIT License

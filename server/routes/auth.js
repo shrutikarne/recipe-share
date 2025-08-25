@@ -8,7 +8,9 @@ const rateLimit = require("express-rate-limit");
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 5,
-  message: { msg: "Too many login attempts from this IP, please try again later." },
+  message: {
+    msg: "Too many login attempts from this IP, please try again later.",
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -17,13 +19,16 @@ const loginLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 5,
-  message: { msg: "Too many registration attempts from this IP, please try again later." },
+  message: {
+    msg: "Too many registration attempts from this IP, please try again later.",
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { verifyToken } = require("../middleware/auth");
 const User = require("../models/User");
 
 /**
@@ -33,6 +38,13 @@ const User = require("../models/User");
  */
 router.post("/register", registerLimiter, async (req, res) => {
   const { name, email, password } = req.body;
+
+  // Validate required fields
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ msg: "Name, email, and password are required" });
+  }
 
   // Validate email is a string and matches a safe email pattern
   if (
@@ -65,7 +77,7 @@ router.post("/register", registerLimiter, async (req, res) => {
     res.json({ token });
   } catch (err) {
     // Log and return server error
-    console.error(err.message);
+    console.error(err && err.message ? err.message : err);
     res.status(500).send("Server error");
   }
 });
@@ -89,11 +101,11 @@ router.post("/login", loginLimiter, async (req, res) => {
   try {
     // Find user by email
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "Invalid credentials" });
+    if (!user) return res.status(401).json({ msg: "Invalid credentials" });
 
     // Compare provided password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
 
     // Create JWT payload and sign token
     const payload = { user: { id: user.id } };
@@ -105,7 +117,7 @@ router.post("/login", loginLimiter, async (req, res) => {
     res.json({ token });
   } catch (err) {
     // Log and return server error
-    console.error(err.message);
+    console.error(err && err.message ? err.message : err);
     res.status(500).send("Server error");
   }
 });

@@ -1,14 +1,85 @@
 /* AuthPage.scss - SCSS version with nesting and BEM style */
 
 .auth-page {
-  // Add your container styles here
-  &__form {
-    // Form styles
+  max-width: 400px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+
+  &__tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
   }
+  &__tab {
+    flex: 1;
+    padding: 10px;
+    background: #eee;
+    color: #333;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    &--active {
+      background: #1976d2;
+      color: #fff;
+    }
+    &:last-child {
+      border-radius: 0 8px 8px 0;
+    }
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+
+  &__title {
+    text-align: center;
+    margin-bottom: 18px;
+    color: #1976d2;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  &__label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    margin-top: 12px;
+  }
+
   &__input {
-    // Input styles
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 16px;
+    border: 1px solid #1976d2;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #374151;
+    background: #fff;
+    box-sizing: border-box;
   }
+
   &__button {
-    // Button styles
+    width: 100%;
+    padding: 12px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+    margin-top: 18px;
+
+    &:hover {
+      background: #fb7185;
+      color: #fff;
+    }
   }
 }
