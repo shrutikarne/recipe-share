@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
-import "./AddRecipe.css";
+import "./AddRecipe.scss";
 
 /**
  * AddRecipe component
@@ -65,25 +65,28 @@ function AddRecipe() {
   // --- Render logic (in order of user flow) ---
   return (
     <form className="add-recipe-form" onSubmit={handleSubmit}>
-      <h2>Add Recipe</h2>
-      <label htmlFor="title">Title</label>
+      <h2 className="add-recipe-form__h2">Add Recipe</h2>
+      <label className="add-recipe-form__label" htmlFor="title">Title</label>
       <input
+        className="add-recipe-form__input"
         id="title"
         name="title"
         placeholder="Title"
         onChange={handleChange}
       />
 
-      <label htmlFor="description">Description</label>
+      <label className="add-recipe-form__label" htmlFor="description">Description</label>
       <input
+        className="add-recipe-form__input"
         id="description"
         name="description"
         placeholder="Description"
         onChange={handleChange}
       />
 
-      <label htmlFor="category">Category</label>
+      <label className="add-recipe-form__label" htmlFor="category">Category</label>
       <select
+        className="add-recipe-form__select"
         id="category"
         name="category"
         value={form.category}
@@ -99,9 +102,9 @@ function AddRecipe() {
         <option value="Other">Other</option>
       </select>
 
-
-      <label htmlFor="diet">Diet Type</label>
+      <label className="add-recipe-form__label" htmlFor="diet">Diet Type</label>
       <select
+        className="add-recipe-form__select"
         id="diet"
         name="diet"
         value={form.diet}
@@ -118,33 +121,37 @@ function AddRecipe() {
         <option value="other">Other</option>
       </select>
 
-      <label htmlFor="imageUrl">Add Image</label>
+      <label className="add-recipe-form__label" htmlFor="imageUrl">Add Image</label>
       <input
+        className="add-recipe-form__input"
         id="imageUrl"
         name="imageUrl"
         placeholder="JPG/PNG, 800x450px"
         onChange={handleChange}
       />
 
-      <label htmlFor="ingredients">Ingredients (comma separated)</label>
+      <label className="add-recipe-form__label" htmlFor="ingredients">Ingredients (comma separated)</label>
       <input
+        className="add-recipe-form__input"
         id="ingredients"
         name="ingredients"
         placeholder="e.g. flour, sugar, eggs"
         onChange={handleIngredientsChange}
       />
 
-      <label htmlFor="steps">Steps (comma separated)</label>
+      <label className="add-recipe-form__label" htmlFor="steps">Steps (comma separated)</label>
       <input
+        className="add-recipe-form__input"
         id="steps"
         name="steps"
         placeholder="e.g. mix, bake, serve"
         onChange={handleStepsChange}
       />
 
-      <label>Cook Time</label>
+      <label className="add-recipe-form__label">Cook Time</label>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <input
+          className="add-recipe-form__input"
           type="number"
           min="0"
           value={cookHours}
@@ -153,6 +160,7 @@ function AddRecipe() {
           style={{ flex: 1 }}
         />
         <input
+          className="add-recipe-form__input"
           type="number"
           min="0"
           max="59"
@@ -163,7 +171,7 @@ function AddRecipe() {
         />
       </div>
 
-      <button type="submit">Add Recipe</button>
+      <button className="add-recipe-form__button" type="submit">Add Recipe</button>
     </form>
   );
 }

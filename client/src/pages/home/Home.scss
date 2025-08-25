@@ -1,0 +1,24 @@
+/* Home.scss - SCSS version with nesting and BEM style */
+
+.home-container {
+  // Add your container styles here
+}
+
+.recipe-card {
+  // Card styles
+  &__title {
+    // Title styles
+  }
+  &__desc {
+    // Description styles
+  }
+  &__actions {
+    // Actions row styles
+  }
+  &__btn {
+    // Button styles
+    &.like {}
+    &.save {}
+    &.share {}
+  }
+}

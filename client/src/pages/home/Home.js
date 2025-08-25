@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../../api/api";
-import "./Home.css";
+import "./Home.scss";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -81,8 +81,8 @@ function Home() {
     setLikeLoading((prev) => ({ ...prev, [recipeId]: false }));
   };
   return (
-    <div className="home-container">
-      <div className="home-header-bar">
+  <div className="home-container">
+  <div className="home-header-bar">
         <h1>All Recipes</h1>
         <button
           className="search-icon-btn"
@@ -100,7 +100,7 @@ function Home() {
                 placeholder="Search by title..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="recipe-filter-input"
+                className="recipe-filter-form__input"
                 autoFocus
               />
               <input
@@ -108,12 +108,12 @@ function Home() {
                 placeholder="Filter by ingredient..."
                 value={ingredient}
                 onChange={(e) => setIngredient(e.target.value)}
-                className="recipe-filter-input"
+                className="recipe-filter-form__input"
               />
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="recipe-filter-input"
+                className="recipe-filter-form__input"
               >
                 <option value="">All Categories</option>
                 <option value="Breakfast">Breakfast</option>
@@ -126,7 +126,7 @@ function Home() {
               <select
                 value={diet}
                 onChange={(e) => setDiet(e.target.value)}
-                className="recipe-filter-input"
+                className="recipe-filter-form__input"
               >
                 <option value="">All Diet Types</option>
                 <option value="vegan">Vegan</option>
@@ -138,7 +138,7 @@ function Home() {
                 <option value="omnivore">Omnivore</option>
                 <option value="other">Other</option>
               </select>
-              <button className="recipe-filter-btn" type="submit">
+              <button className="recipe-filter-form__button" type="submit">
                 Search
               </button>
             </form>
@@ -148,7 +148,7 @@ function Home() {
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>
       ) : (
-        <div className="recipe-list">
+  <div className="recipe-list">
           {recipes.length === 0 && (
             <div style={{ color: "#888", textAlign: "center", width: "100%" }}>
               No recipes found.
@@ -165,15 +165,15 @@ function Home() {
                 <img
                   src={r.imageUrl}
                   alt={r.title}
-                  className="recipe-card-img"
+                  className="recipe-card__img"
                 />
               )}
-              <div className="recipe-card-content">
-                <h3 className="recipe-card-title">{r.title}</h3>
-                <p className="recipe-card-desc">{r.description}</p>
-                <div className="recipe-card-actions">
+              <div className="recipe-card__content">
+                <h3 className="recipe-card__title">{r.title}</h3>
+                <p className="recipe-card__desc">{r.description}</p>
+                <div className="recipe-card__actions">
                   <button
-                    className="recipe-card-btn like"
+                    className="recipe-card__btn like"
                     onClick={(e) => handleLike(e, r._id)}
                     disabled={likeLoading[r._id]}
                     aria-label="Like"
@@ -181,7 +181,7 @@ function Home() {
                     {r.likes && userId && r.likes.includes(userId) ? "♥" : "♡"} {r.likes ? r.likes.length : 0}
                   </button>
                   <button
-                    className="recipe-card-btn save"
+                    className="recipe-card__btn save"
                     onClick={(e) => {
                       e.stopPropagation();
                       alert("Recipe saved!");
@@ -191,7 +191,7 @@ function Home() {
                     <span role="img" aria-label="Save">💾</span>
                   </button>
                   <button
-                    className="recipe-card-btn share"
+                    className="recipe-card__btn share"
                     onClick={(e) => {
                       e.stopPropagation();
                       alert("Share link copied!");
