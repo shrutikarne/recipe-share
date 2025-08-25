@@ -1,9 +1,61 @@
+.flip-card {
+  perspective: 1200px;
+  position: relative;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  min-height: 340px;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.flip-card-front {
+  z-index: 2;
+  background: #fff;
+  padding: 22px 20px 18px 20px;
+  box-sizing: border-box;
+}
+.flip-card-back {
+  background: #f9fafb;
+  transform: rotateY(180deg);
+  z-index: 3;
+  box-shadow: 0 2px 12px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+}
+.recipe-card__quickinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 500;
+}
 .recipe-card__content {
   display: flex;
   flex-direction: column;
-  padding: 18px 18px 14px 18px;
+  padding: 0;
   flex: 1 1 auto;
   min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // Masonry grid
@@ -20,7 +72,7 @@
   max-width: 1100px;
   margin: 36px auto 0 auto;
   padding: 0 16px 32px 16px;
-  font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+  font-family: "Roboto";
 }
 
 .recipe-card {
@@ -60,7 +112,7 @@
   color: #2563eb;
   border-radius: 8px;
   padding: 2px 10px;
-  font-size: 0.85rem;
+  font-size: 8px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
@@ -70,41 +122,45 @@
   color: #fff;
 }
 .recipe-card__title {
-  font-size: 1.3rem;
+  font-size: 18px;
   font-weight: 700;
   color: #84cc16;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   letter-spacing: 0.5px;
 }
 .recipe-card__desc {
-  font-size: 1.02rem;
+  font-size: 14px;
   color: #374151;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   line-height: 1.5;
-  min-height: 44px;
+  min-height: 32px;
+  max-height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 .recipe-card__rating {
   display: flex;
   align-items: center;
-  gap: 2px;
-  margin-bottom: 4px;
-  font-size: 1.1rem;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 15px;
 }
 .recipe-card__rating-count {
   color: #888;
-  font-size: 0.95rem;
+  font-size: 4px;
   margin-left: 4px;
 }
 .recipe-card__actions {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 16px;
+  margin-top: 12px;
 }
 .recipe-card__btn {
   background: #fff;
   color: #2563eb;
   border: none;
-  font-size: 1.2rem;
+  font-size: 15px;
   cursor: pointer;
   transition: color 0.2s;
   border-radius: 6px;
