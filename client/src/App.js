@@ -1,3 +1,4 @@
+import './App.scss';
 
 /**
  * App component
@@ -62,15 +63,15 @@ function App() {
 
   return (
     <BrowserRouter>
-      <nav>
-        <Link to="/">Home</Link> |
+      <nav className="main-nav">
+        <Link className="main-nav__link" to="/">Home</Link>
         {loggedIn ? (
           <>
-            <Link to="/add">Add Recipe</Link> |
-            <button onClick={handleSignOut} style={{ background: "none", border: "none", color: "#1976d2", cursor: "pointer", padding: 0, font: "inherit" }}>Sign Out</button>
+            <Link className="main-nav__link" to="/add">Add Recipe</Link>
+            <button className="main-nav__button" onClick={handleSignOut}>Sign Out</button>
           </>
         ) : (
-          <Link to="/login">Login/Register</Link>
+          <Link className="main-nav__link" to="/login">Login/Register</Link>
         )}
       </nav>
       <Routes>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import API from "../../api/api";
-import "./AuthPage.css";
+import "./AuthPage.scss";
 
 /**
  * AuthPage component
@@ -66,94 +66,72 @@ function AuthPage() {
 
   // --- Render logic (in order of user flow) ---
   return (
-    <div
-      style={{
-        maxWidth: 400,
-        margin: "40px auto",
-        background: "#fff",
-        borderRadius: 8,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        padding: 24,
-      }}
-    >
-      <div
-        style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}
-      >
+    <div className="auth-page">
+      <div className="auth-page__tabs">
         <button
+          className={`auth-page__tab${tab === "login" ? " auth-page__tab--active" : ""}`}
           onClick={() => setTab("login")}
-          style={{
-            flex: 1,
-            padding: 10,
-            background: tab === "login" ? "#1976d2" : "#eee",
-            color: tab === "login" ? "#fff" : "#333",
-            border: "none",
-            borderRadius: "8px 0 0 8px",
-            cursor: "pointer",
-          }}
         >
           Login
         </button>
         <button
+          className={`auth-page__tab${tab === "register" ? " auth-page__tab--active" : ""}`}
           onClick={() => setTab("register")}
-          style={{
-            flex: 1,
-            padding: 10,
-            background: tab === "register" ? "#ff9800" : "#eee",
-            color: tab === "register" ? "#fff" : "#333",
-            border: "none",
-            borderRadius: "0 8px 8px 0",
-            cursor: "pointer",
-          }}
         >
           Register
         </button>
       </div>
       {tab === "login" ? (
         <form className="auth-form" onSubmit={handleLoginSubmit}>
-          <h2>Login</h2>
-          <label htmlFor="login-email">Email</label>
+          <h2 className="auth-form__title">Login</h2>
+          <label className="auth-form__label" htmlFor="login-email">Email</label>
           <input
+            className="auth-form__input"
             id="login-email"
             name="email"
             placeholder="Email"
             onChange={handleLoginChange}
           />
-          <label htmlFor="login-password">Password</label>
+          <label className="auth-form__label" htmlFor="login-password">Password</label>
           <input
+            className="auth-form__input"
             id="login-password"
             name="password"
             type="password"
             placeholder="Password"
             onChange={handleLoginChange}
           />
-          <button type="submit">Login</button>
+          <button className="auth-form__button" type="submit">Login</button>
         </form>
       ) : (
-        <form className="auth-form register" onSubmit={handleRegisterSubmit}>
-          <h2>Register</h2>
-          <label htmlFor="register-name">Name</label>
+        <form className="auth-form auth-form--register" onSubmit={handleRegisterSubmit}>
+          <h2 className="auth-form__title">Register</h2>
+          <label className="auth-form__label" htmlFor="register-name">Name</label>
           <input
+            className="auth-form__input"
             id="register-name"
             name="name"
             placeholder="Name"
             onChange={handleRegisterChange}
           />
-          <label htmlFor="register-email">Email</label>
+          <label className="auth-form__label" htmlFor="register-email">Email</label>
           <input
+            className="auth-form__input"
             id="register-email"
             name="email"
             placeholder="Email"
             onChange={handleRegisterChange}
           />
-          <label htmlFor="register-password">Password</label>
+          <label className="auth-form__label" htmlFor="register-password">Password</label>
           <input
+            className="auth-form__input"
             id="register-password"
             name="password"
             type="password"
             placeholder="Password"
             onChange={handleRegisterChange}
           />
-          <button type="submit">Register</button>
+          <button className="auth-form__button" type="submit">Register</button>
         </form>
       )}
     </div>

@@ -1,0 +1,68 @@
+/* AddRecipe.scss - SCSS version with nesting and BEM style */
+
+.add-recipe-form {
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #f9f9f9;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+  color: #374151;
+  border: 1.5px solid #84cc16;
+
+  &__h2 {
+    text-align: center;
+    margin-bottom: 18px;
+    color: #84cc16;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  &__label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #374151;
+    margin-top: 12px;
+  }
+
+  &__input,
+  &__select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 16px;
+    border: 1px solid #84cc16;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #374151;
+    background: #fff;
+    box-sizing: border-box;
+  }
+
+  &__select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2384cc16" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px 20px;
+  }
+
+  &__button {
+    width: 100%;
+    padding: 12px;
+    background: #fb7185;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(251,113,133,0.10);
+    margin-top: 18px;
+
+    &:hover {
+      background: #84cc16;
+      color: #374151;
+    }
+  }
+}
