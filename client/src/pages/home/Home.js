@@ -296,10 +296,11 @@ function Home() {
               r.ratings && r.ratings.length > 0
                 ? r.ratings.reduce((a, b) => a + b.value, 0) / r.ratings.length
                 : 0;
+            const isFlipped = hoveredRecipeId === r._id;
             return (
               <motion.div
                 key={r._id}
-                className="recipe-card"
+                className={"recipe-card flip-card" + (isFlipped ? " flipped" : "")}
                 style={{ cursor: "pointer", position: "relative" }}
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -317,170 +318,157 @@ function Home() {
                 onMouseLeave={handleCardMouseLeave}
                 onClick={() => handleCardClick(r)}
               >
-                {r.imageUrls && r.imageUrls.length > 0 ? (
-                  <img
-                    src={r.imageUrls[0]}
-                    alt={r.title}
-                    className="recipe-card__img"
-                  />
-                ) : r.imageUrl ? (
-                  <img
-                    src={r.imageUrl}
-                    alt={r.title}
-                    className="recipe-card__img"
-                  />
-                ) : null}
-                <div className="recipe-card__content">
-                  {/* Quick preview text overlay on hover */}
-                  {hoveredRecipeId === r._id && (
-                    <motion.div
-                      className="quick-preview-hover-text"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.25 }}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        background: "rgba(255,255,255,0.92)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 10,
-                        borderRadius: "12px",
-                        fontSize: "1.1rem",
-                        fontWeight: 500,
-                        color: "#2563eb",
-                        pointerEvents: "none",
-                        boxShadow:
-                          "0 2px 12px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10)",
-                      }}
-                    >
-                      Quick Preview
-                    </motion.div>
-                  )}
-                  <div className="recipe-card__tags">
-                    {r.tags &&
-                      r.tags.map((tag, i) => (
-                        <span
-                          className="recipe-card__tag"
-                          key={i}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCategory("");
-                            setIngredient("");
-                            setDiet("");
-                            setSearch("");
-                            fetchRecipes(true);
-                            setTimeout(() => {
-                              setSearch("");
-                              setCategory("");
-                              setIngredient("");
-                              setDiet("");
-                              // Set tag filter and reload
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                              setTimeout(() => {
-                                API.get("/recipes", { params: { tag } }).then(
-                                  (res) => {
-                                    setRecipes(res.data);
-                                    setPage(1);
-                                    setHasMore(res.data.length === 20);
-                                  }
-                                );
-                              }, 100);
-                            }, 0);
-                          }}
-                          style={{ cursor: "pointer" }}
+                <div className="flip-card-inner">
+                  {/* Front Face */}
+                  <div className="flip-card-front">
+                    {r.imageUrls && r.imageUrls.length > 0 ? (
+                      <img
+                        src={r.imageUrls[0]}
+                        alt={r.title}
+                        className="recipe-card__img"
+                      />
+                    ) : r.imageUrl ? (
+                      <img
+                        src={r.imageUrl}
+                        alt={r.title}
+                        className="recipe-card__img"
+                      />
+                    ) : null}
+                    <div className="recipe-card__content">
+                      <h3 className="recipe-card__title">{r.title}</h3>
+                      {r.description && r.description.trim() && (
+                        <p className="recipe-card__desc">{r.description}</p>
+                      )}
+                      <div className="recipe-card__rating">
+                        {[1, 2, 3, 4, 5].map((n) =>
+                          n <= Math.round(avgRating) ? (
+                            <FaStar key={n} color="#facc15" />
+                          ) : (
+                            <FaRegStar key={n} color="#d1d5db" />
+                          )
+                        )}
+                        <span className="recipe-card__rating-count">
+                          {r.ratings ? `(${r.ratings.length})` : ""}
+                        </span>
+                      </div>
+                      <div className="recipe-card__actions">
+                        <button
+                          className="recipe-card__btn like"
+                          onClick={(e) => handleLike(e, r._id)}
+                          disabled={likeLoading[r._id]}
+                          aria-label={
+                            r.likes && userId && r.likes.includes(userId)
+                              ? "Unlike recipe"
+                              : "Like recipe"
+                          }
                           tabIndex={0}
-                          role="button"
-                          aria-label={`Filter by tag: ${tag}`}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setCategory("");
-                              setIngredient("");
-                              setDiet("");
-                              setSearch("");
-                              fetchRecipes(true);
-                              setTimeout(() => {
-                                setSearch("");
+                        >
+                          {r.likes && userId && r.likes.includes(userId) ? (
+                            <FaHeart color="#ef4444" />
+                          ) : (
+                            <FaRegHeart color="#9ca3af" />
+                          )}{" "}
+                          {r.likes ? r.likes.length : 0}
+                        </button>
+                        <button
+                          className="recipe-card__btn save"
+                          onClick={(e) => handleSave(e, r._id)}
+                          disabled={saveLoading[r._id]}
+                          aria-label={
+                            savedRecipes.includes(r._id)
+                              ? "Unsave recipe"
+                              : "Save recipe"
+                          }
+                          tabIndex={0}
+                        >
+                          {savedRecipes.includes(r._id) ? (
+                            <FaBookmark color="#2563eb" />
+                          ) : (
+                            <FaRegBookmark color="#9ca3af" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Back Face */}
+                  <div className="flip-card-back">
+                    <div className="recipe-card__content">
+                      <div className="recipe-card__quickinfo">
+                        <div><strong>Cook Time:</strong> {r.cookTime ? r.cookTime + ' min' : 'N/A'}</div>
+                        <div><strong>Servings:</strong> {r.servings || 'N/A'}</div>
+                        {r.ingredients && r.ingredients.length > 0 && (
+                          <div><strong>Ingredients:</strong> {r.ingredients.join(', ')}</div>
+                        )}
+                        {/* No description on back */}
+                      </div>
+                      {r.tags && r.tags.length > 0 && (
+                        <div className="recipe-card__tags">
+                          {r.tags.map((tag, i) => (
+                            <span
+                              className="recipe-card__tag"
+                              key={i}
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setCategory("");
                                 setIngredient("");
                                 setDiet("");
-                                window.scrollTo({ top: 0, behavior: "smooth" });
+                                setSearch("");
+                                fetchRecipes(true);
                                 setTimeout(() => {
-                                  API.get("/recipes", { params: { tag } }).then(
-                                    (res) => {
-                                      setRecipes(res.data);
-                                      setPage(1);
-                                      setHasMore(res.data.length === 20);
-                                    }
-                                  );
-                                }, 100);
-                              }, 0);
-                            }
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                  </div>
-                  <h3 className="recipe-card__title">{r.title}</h3>
-                  {r.description && r.description.trim() && (
-                    <p className="recipe-card__desc">{r.description}</p>
-                  )}
-                  <div className="recipe-card__rating">
-                    {[1, 2, 3, 4, 5].map((n) =>
-                      n <= Math.round(avgRating) ? (
-                        <FaStar key={n} color="#facc15" />
-                      ) : (
-                        <FaRegStar key={n} color="#d1d5db" />
-                      )
-                    )}
-                    <span className="recipe-card__rating-count">
-                      {r.ratings ? `(${r.ratings.length})` : ""}
-                    </span>
-                  </div>
-                  <div className="recipe-card__actions">
-                    <button
-                      className="recipe-card__btn like"
-                      onClick={(e) => handleLike(e, r._id)}
-                      disabled={likeLoading[r._id]}
-                      aria-label={
-                        r.likes && userId && r.likes.includes(userId)
-                          ? "Unlike recipe"
-                          : "Like recipe"
-                      }
-                      tabIndex={0}
-                    >
-                      {r.likes && userId && r.likes.includes(userId) ? (
-                        <FaHeart color="#ef4444" />
-                      ) : (
-                        <FaRegHeart color="#9ca3af" />
-                      )}{" "}
-                      {r.likes ? r.likes.length : 0}
-                    </button>
-                    <button
-                      className="recipe-card__btn save"
-                      onClick={(e) => handleSave(e, r._id)}
-                      disabled={saveLoading[r._id]}
-                      aria-label={
-                        savedRecipes.includes(r._id)
-                          ? "Unsave recipe"
-                          : "Save recipe"
-                      }
-                      tabIndex={0}
-                    >
-                      {savedRecipes.includes(r._id) ? (
-                        <FaBookmark color="#2563eb" />
-                      ) : (
-                        <FaRegBookmark color="#9ca3af" />
+                                  setSearch("");
+                                  setCategory("");
+                                  setIngredient("");
+                                  setDiet("");
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                  setTimeout(() => {
+                                    API.get("/recipes", { params: { tag } }).then(
+                                      (res) => {
+                                        setRecipes(res.data);
+                                        setPage(1);
+                                        setHasMore(res.data.length === 20);
+                                      }
+                                    );
+                                  }, 100);
+                                }, 0);
+                              }}
+                              style={{ cursor: "pointer" }}
+                              tabIndex={0}
+                              role="button"
+                              aria-label={`Filter by tag: ${tag}`}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setCategory("");
+                                  setIngredient("");
+                                  setDiet("");
+                                  setSearch("");
+                                  fetchRecipes(true);
+                                  setTimeout(() => {
+                                    setSearch("");
+                                    setCategory("");
+                                    setIngredient("");
+                                    setDiet("");
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                    setTimeout(() => {
+                                      API.get("/recipes", { params: { tag } }).then(
+                                        (res) => {
+                                          setRecipes(res.data);
+                                          setPage(1);
+                                          setHasMore(res.data.length === 20);
+                                        }
+                                      );
+                                    }, 100);
+                                  }, 0);
+                                }
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       )}
-                    </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
