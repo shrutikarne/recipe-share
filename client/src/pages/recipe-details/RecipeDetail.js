@@ -1,4 +1,6 @@
+import RecipeStoryView from "../../components/RecipeStoryView";
 import React, { useEffect, useState } from "react";
+import CookingMode from "../../components/CookingMode";
 import API from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
 import "./RecipeDetails.scss";
@@ -47,9 +49,11 @@ function timeAgo(dateString) {
  * Fetches and displays details for a single recipe by ID, allows editing, deleting, and commenting.
  * @component
  */
-function RecipeDetail() {
+function RecipeDetail(props) {
   // --- State ---
-  const { id } = useParams();
+  // Accept id as a prop (for modal usage), fallback to useParams if not provided
+  const params = useParams();
+  const id = props.id || params.id;
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -96,7 +100,9 @@ function RecipeDetail() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     // Combine hours and minutes into total seconds for cookTime
-    const cookTime = (parseInt(editForm.cookHours) || 0) * 3600 + (parseInt(editForm.cookMinutes) || 0) * 60;
+    const cookTime =
+      (parseInt(editForm.cookHours) || 0) * 3600 +
+      (parseInt(editForm.cookMinutes) || 0) * 60;
     const updatedForm = { ...editForm, cookTime };
     delete updatedForm.cookHours;
     delete updatedForm.cookMinutes;
@@ -138,6 +144,8 @@ function RecipeDetail() {
   };
 
   // --- Render logic (in order of appearance) ---
+  const [cookingMode, setCookingMode] = useState(false);
+  const [storyMode, setStoryMode] = useState(false);
   if (loading)
     return <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>;
   if (error)
@@ -147,13 +155,31 @@ function RecipeDetail() {
       </div>
     );
   if (!recipe) return null;
-
+  if (storyMode) {
+    return (
+      <RecipeStoryView
+        storySteps={recipe.storySteps || []}
+        onExit={() => setStoryMode(false)}
+      />
+    );
+  }
+  if (cookingMode) {
+    return (
+      <CookingMode
+        steps={recipe.steps || []}
+        stepImages={recipe.stepImages || []}
+        onExit={() => setCookingMode(false)}
+      />
+    );
+  }
   return (
-  <div className="recipe-details">
+    <div className="recipe-details">
       {editMode ? (
-  <form className="add-recipe-form" onSubmit={handleEditSubmit}>
+        <form className="add-recipe-form" onSubmit={handleEditSubmit}>
           <h2 className="add-recipe-form__h2">Edit Recipe</h2>
-          <label className="add-recipe-form__label" htmlFor="title">Title</label>
+          <label className="add-recipe-form__label" htmlFor="title">
+            Title
+          </label>
           <input
             className="add-recipe-form__input"
             id="title"
@@ -163,7 +189,9 @@ function RecipeDetail() {
             onChange={handleEditChange}
           />
 
-          <label className="add-recipe-form__label" htmlFor="description">Description</label>
+          <label className="add-recipe-form__label" htmlFor="description">
+            Description
+          </label>
           <input
             className="add-recipe-form__input"
             id="description"
@@ -173,7 +201,9 @@ function RecipeDetail() {
             onChange={handleEditChange}
           />
 
-          <label className="add-recipe-form__label" htmlFor="category">Category</label>
+          <label className="add-recipe-form__label" htmlFor="category">
+            Category
+          </label>
           <select
             className="add-recipe-form__select"
             id="category"
@@ -191,7 +221,9 @@ function RecipeDetail() {
             <option value="Other">Other</option>
           </select>
 
-          <label className="add-recipe-form__label" htmlFor="diet">Diet Type</label>
+          <label className="add-recipe-form__label" htmlFor="diet">
+            Diet Type
+          </label>
           <select
             className="add-recipe-form__select"
             id="diet"
@@ -210,7 +242,9 @@ function RecipeDetail() {
             <option value="other">Other</option>
           </select>
 
-          <label className="add-recipe-form__label" htmlFor="imageUrl">Add Image</label>
+          <label className="add-recipe-form__label" htmlFor="imageUrl">
+            Add Image
+          </label>
           <input
             className="add-recipe-form__input"
             id="imageUrl"
@@ -220,23 +254,35 @@ function RecipeDetail() {
             onChange={handleEditChange}
           />
 
-          <label className="add-recipe-form__label" htmlFor="ingredients">Ingredients (comma separated)</label>
+          <label className="add-recipe-form__label" htmlFor="ingredients">
+            Ingredients (comma separated)
+          </label>
           <input
             className="add-recipe-form__input"
             id="ingredients"
             name="ingredients"
             placeholder="e.g. flour, sugar, eggs"
-            value={Array.isArray(editForm.ingredients) ? editForm.ingredients.join(",") : editForm.ingredients}
+            value={
+              Array.isArray(editForm.ingredients)
+                ? editForm.ingredients.join(",")
+                : editForm.ingredients
+            }
             onChange={handleEditArrayChange}
           />
 
-          <label className="add-recipe-form__label" htmlFor="steps">Steps (comma separated)</label>
+          <label className="add-recipe-form__label" htmlFor="steps">
+            Steps (comma separated)
+          </label>
           <input
             className="add-recipe-form__input"
             id="steps"
             name="steps"
             placeholder="e.g. mix, bake, serve"
-            value={Array.isArray(editForm.steps) ? editForm.steps.join(",") : editForm.steps}
+            value={
+              Array.isArray(editForm.steps)
+                ? editForm.steps.join(",")
+                : editForm.steps
+            }
             onChange={handleEditArrayChange}
           />
 
@@ -246,8 +292,22 @@ function RecipeDetail() {
               className="add-recipe-form__input add-recipe-form__input--cooktime"
               type="number"
               min="0"
-              value={editForm.cookHours !== undefined ? editForm.cookHours : (editForm.cookTime ? Math.floor(editForm.cookTime / 3600) : "")}
-              onChange={e => setEditForm(prev => ({ ...prev, cookHours: e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, "") }))}
+              value={
+                editForm.cookHours !== undefined
+                  ? editForm.cookHours
+                  : editForm.cookTime
+                  ? Math.floor(editForm.cookTime / 3600)
+                  : ""
+              }
+              onChange={(e) =>
+                setEditForm((prev) => ({
+                  ...prev,
+                  cookHours:
+                    e.target.value === ""
+                      ? ""
+                      : e.target.value.replace(/^0+(?!$)/, ""),
+                }))
+              }
               placeholder="Hrs"
             />
             <input
@@ -255,13 +315,29 @@ function RecipeDetail() {
               type="number"
               min="0"
               max="59"
-              value={editForm.cookMinutes !== undefined ? editForm.cookMinutes : (editForm.cookTime ? Math.floor((editForm.cookTime % 3600) / 60) : "")}
-              onChange={e => setEditForm(prev => ({ ...prev, cookMinutes: e.target.value === "" ? "" : e.target.value.replace(/^0+(?!$)/, "") }))}
+              value={
+                editForm.cookMinutes !== undefined
+                  ? editForm.cookMinutes
+                  : editForm.cookTime
+                  ? Math.floor((editForm.cookTime % 3600) / 60)
+                  : ""
+              }
+              onChange={(e) =>
+                setEditForm((prev) => ({
+                  ...prev,
+                  cookMinutes:
+                    e.target.value === ""
+                      ? ""
+                      : e.target.value.replace(/^0+(?!$)/, ""),
+                }))
+              }
               placeholder="Min"
             />
           </div>
 
-          <button className="add-recipe-form__button" type="submit">Save</button>
+          <button className="add-recipe-form__button" type="submit">
+            Save
+          </button>
           <button
             className="add-recipe-form__button add-recipe-form__button--cancel"
             type="button"
@@ -307,13 +383,31 @@ function RecipeDetail() {
               {recipe.steps &&
                 recipe.steps.map((step, i) => <li key={i}>{step}</li>)}
             </ol>
+            <button
+              className="recipe-details__btn"
+              style={{ marginTop: 12, background: "#22c55e" }}
+              onClick={() => setCookingMode(true)}
+            >
+              Start Cooking Mode
+            </button>
+            {recipe.storySteps && recipe.storySteps.length > 0 && (
+              <button
+                className="recipe-details__btn"
+                style={{ marginTop: 12, background: "#facc15", color: "#222" }}
+                onClick={() => setStoryMode(true)}
+              >
+                View as Story
+              </button>
+            )}
           </div>
           {/* Comments Section */}
           <div className="recipe-details__section">
             <div className="recipe-details__section-title">Comments</div>
             <div className="recipe-details__comments-list">
               {comments.length === 0 && (
-                <div className="recipe-details__no-comments">No comments yet.</div>
+                <div className="recipe-details__no-comments">
+                  No comments yet.
+                </div>
               )}
               {comments.map((c, i) => (
                 <div key={i} className="recipe-details__comment-item">

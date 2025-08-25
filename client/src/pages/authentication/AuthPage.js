@@ -67,32 +67,69 @@ function AuthPage() {
   // --- Render logic (in order of user flow) ---
   return (
     <div className="auth-page">
-      <div className="auth-page__tabs">
+      <div
+        className="auth-page__tabs"
+        role="tablist"
+        aria-label="Authentication tabs"
+      >
         <button
-          className={`auth-page__tab${tab === "login" ? " auth-page__tab--active" : ""}`}
+          className={`auth-page__tab${
+            tab === "login" ? " auth-page__tab--active" : ""
+          }`}
           onClick={() => setTab("login")}
+          role="tab"
+          aria-selected={tab === "login"}
+          aria-controls="login-panel"
+          id="login-tab"
+          tabIndex={tab === "login" ? 0 : -1}
         >
           Login
         </button>
         <button
-          className={`auth-page__tab${tab === "register" ? " auth-page__tab--active" : ""}`}
+          className={`auth-page__tab${
+            tab === "register" ? " auth-page__tab--active" : ""
+          }`}
           onClick={() => setTab("register")}
+          role="tab"
+          aria-selected={tab === "register"}
+          aria-controls="register-panel"
+          id="register-tab"
+          tabIndex={tab === "register" ? 0 : -1}
         >
           Register
         </button>
       </div>
       {tab === "login" ? (
-        <form className="auth-form" onSubmit={handleLoginSubmit}>
+        <form
+          className="auth-form"
+          onSubmit={handleLoginSubmit}
+          aria-labelledby="login-tab"
+          id="login-panel"
+          role="tabpanel"
+          tabIndex={0}
+        >
           <h2 className="auth-form__title">Login</h2>
-          <label className="auth-form__label" htmlFor="login-email">Email</label>
+          <label
+            className="auth-form__label visually-hidden"
+            htmlFor="login-email"
+          >
+            Email
+          </label>
           <input
             className="auth-form__input"
             id="login-email"
             name="email"
             placeholder="Email"
             onChange={handleLoginChange}
+            aria-required="true"
+            autoComplete="username"
           />
-          <label className="auth-form__label" htmlFor="login-password">Password</label>
+          <label
+            className="auth-form__label visually-hidden"
+            htmlFor="login-password"
+          >
+            Password
+          </label>
           <input
             className="auth-form__input"
             id="login-password"
@@ -100,29 +137,63 @@ function AuthPage() {
             type="password"
             placeholder="Password"
             onChange={handleLoginChange}
+            aria-required="true"
+            autoComplete="current-password"
           />
-          <button className="auth-form__button" type="submit">Login</button>
+          <button
+            className="auth-form__button"
+            type="submit"
+            aria-label="Login"
+          >
+            Login
+          </button>
         </form>
       ) : (
-        <form className="auth-form auth-form--register" onSubmit={handleRegisterSubmit}>
+        <form
+          className="auth-form auth-form--register"
+          onSubmit={handleRegisterSubmit}
+          aria-labelledby="register-tab"
+          id="register-panel"
+          role="tabpanel"
+          tabIndex={0}
+        >
           <h2 className="auth-form__title">Register</h2>
-          <label className="auth-form__label" htmlFor="register-name">Name</label>
+          <label
+            className="auth-form__label visually-hidden"
+            htmlFor="register-name"
+          >
+            Name
+          </label>
           <input
             className="auth-form__input"
             id="register-name"
             name="name"
             placeholder="Name"
             onChange={handleRegisterChange}
+            aria-required="true"
+            autoComplete="name"
           />
-          <label className="auth-form__label" htmlFor="register-email">Email</label>
+          <label
+            className="auth-form__label visually-hidden"
+            htmlFor="register-email"
+          >
+            Email
+          </label>
           <input
             className="auth-form__input"
             id="register-email"
             name="email"
             placeholder="Email"
             onChange={handleRegisterChange}
+            aria-required="true"
+            autoComplete="email"
           />
-          <label className="auth-form__label" htmlFor="register-password">Password</label>
+          <label
+            className="auth-form__label visually-hidden"
+            htmlFor="register-password"
+          >
+            Password
+          </label>
           <input
             className="auth-form__input"
             id="register-password"
@@ -130,8 +201,16 @@ function AuthPage() {
             type="password"
             placeholder="Password"
             onChange={handleRegisterChange}
+            aria-required="true"
+            autoComplete="new-password"
           />
-          <button className="auth-form__button" type="submit">Register</button>
+          <button
+            className="auth-form__button"
+            type="submit"
+            aria-label="Register"
+          >
+            Register
+          </button>
         </form>
       )}
     </div>

@@ -18,19 +18,20 @@ app.use(cors());
 // Parse incoming JSON requests
 app.use(express.json());
 
-// Register authentication and recipe routes
+// Register authentication, recipe, and user routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/recipes", require("./routes/recipes"));
+app.use("/api/user", require("./routes/user"));
 
 // Connect to MongoDB database
 connectDB();
 
 const PORT = process.env.PORT || 5000;
 
-// Start the server
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+if (require.main === module) {
+  app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`)
+  );
+}
 
-// server/server.js
-// This file starts the Express server and connects to the database
+module.exports = app;

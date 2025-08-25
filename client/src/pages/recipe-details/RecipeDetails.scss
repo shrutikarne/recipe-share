@@ -1,13 +1,14 @@
 /* RecipeDetails.scss - SCSS version with nesting and BEM style */
 
-.recipe-details-container {
+.recipe-details {
   max-width: 700px;
   margin: 40px auto;
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(132,204,22,0.10), 0 1.5px 4px rgba(251,113,133,0.10);
+  box-shadow: 0 4px 24px rgba(132, 204, 22, 0.1),
+    0 1.5px 4px rgba(251, 113, 133, 0.1);
   padding: 32px 36px 36px 36px;
-  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  font-family: "Segoe UI", "Roboto", Arial, sans-serif;
   color: #374151;
   border: 1.5px solid #84cc16;
   position: relative;
@@ -31,10 +32,9 @@
   &__image {
     width: 100%;
     max-height: 320px;
-    object-fit: cover;
     border-radius: 12px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
   &__section {
@@ -78,8 +78,8 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
-    box-shadow: 0 2px 8px rgba(251,113,133,0.10);
-    &.delete {
+    box-shadow: 0 2px 8px rgba(251, 113, 133, 0.1);
+    &--delete {
       background: #84cc16;
       color: #374151;
     }
@@ -87,7 +87,7 @@
       background: #84cc16;
       color: #374151;
     }
-    &.delete:hover {
+    &--delete:hover {
       background: #fb7185;
       color: #fff;
     }
@@ -95,7 +95,7 @@
 }
 
 @media (max-width: 600px) {
-  .recipe-details-container {
+  .recipe-details {
     padding: 18px 6vw 24px 6vw;
     &__title {
       font-size: 1.4rem;
