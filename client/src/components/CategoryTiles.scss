@@ -1,0 +1,68 @@
+.category-tiles-section {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 32px 0;
+  padding: 0;
+  background: none;
+}
+.category-tiles-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0ea5e9;
+  margin: 0 0 18px 32px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px #0ea5e9cc;
+}
+.category-tiles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+  padding: 0 0 0 32px;
+}
+.category-tile {
+  min-width: 160px;
+  max-width: 200px;
+  height: 120px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px #0ea5e9cc, 0 1.5px 4px #facc15cc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: box-shadow 0.2s, transform 0.2s;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #23262f;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.category-tile-icon {
+  font-size: 2.5rem;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 2px 8px #facc15cc);
+}
+.category-tile-label {
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.category-tile:hover {
+  background: #0ea5e9;
+  color: #fff;
+  box-shadow: 0 8px 32px #0ea5e9cc;
+}
+// Dark mode
+.dark .category-tile {
+  background: #23262f;
+  color: #facc15;
+  box-shadow: 0 2px 16px #facc15cc, 0 1.5px 4px #0ea5e9cc;
+}
+.dark .category-tiles-title {
+  color: #facc15;
+}

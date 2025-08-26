@@ -1,5 +1,25 @@
 const express = require("express");
 const rateLimit = require("express-rate-limit");
+const Recipe = require("../models/Recipe");
+const router = express.Router();
+
+/**
+ * @route   GET /api/recipes/random
+ * @desc    Get a random recipe
+ * @access  Public
+ */
+router.get("/random", async (req, res) => {
+  try {
+    const count = await Recipe.countDocuments();
+    if (count === 0) return res.status(404).json({ msg: "No recipes found" });
+    const random = Math.floor(Math.random() * count);
+    const recipe = await Recipe.findOne().skip(random).populate("author", "name _id");
+    res.json(recipe);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
 // Rate limiter for posting comments (e.g., max 5 requests per minute per IP)
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -19,8 +39,6 @@ const recipeWriteLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-const Recipe = require("../models/Recipe");
-const router = express.Router();
 const { verifyToken } = require("../middleware/auth");
 
 /**

@@ -172,12 +172,45 @@ function RecipeDetail(props) {
       />
     );
   }
+  // --- HERO SECTION ---
+  const heroImage = recipe?.imageUrl || (recipe?.imageUrls && recipe.imageUrls[0]);
+
   return (
-    <div className="recipe-details">
-      {editMode ? (
-        <form className="add-recipe-form" onSubmit={handleEditSubmit}>
-          <h2 className="add-recipe-form__h2">Edit Recipe</h2>
-          <label className="add-recipe-form__label" htmlFor="title">
+    <>
+      {/* HERO SECTION */}
+      {heroImage && (
+        <div className="recipe-hero">
+          <div
+            className="recipe-hero__bg"
+            style={{ backgroundImage: `url('${heroImage}')` }}
+          >
+            <div className="recipe-hero__overlay" />
+            <div className="recipe-hero__content">
+              <h1 className="recipe-hero__title">{recipe.title}</h1>
+              <div className="recipe-hero__actions">
+                <button
+                  className="recipe-hero__btn recipe-hero__btn--save"
+                  onClick={() => alert('Save functionality coming soon!')}
+                >
+                  Save Recipe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="recipe-details">
+        <button
+          className="recipe-details__btn recipe-details__btn--cookingmode"
+          style={{ width: '100%', fontSize: 22, padding: '18px 0', margin: '24px 0', background: '#22c55e', color: '#fff', borderRadius: 12, fontWeight: 700, letterSpacing: 1 }}
+          onClick={() => setCookingMode(true)}
+        >
+          🍳 Cooking Mode
+        </button>
+        {editMode ? (
+          <form className="add-recipe-form" onSubmit={handleEditSubmit}>
+            <h2 className="add-recipe-form__h2">Edit Recipe</h2>
+            <label className="add-recipe-form__label" htmlFor="title">
             Title
           </label>
           <input
@@ -383,13 +416,6 @@ function RecipeDetail(props) {
               {recipe.steps &&
                 recipe.steps.map((step, i) => <li key={i}>{step}</li>)}
             </ol>
-            <button
-              className="recipe-details__btn"
-              style={{ marginTop: 12, background: "#22c55e" }}
-              onClick={() => setCookingMode(true)}
-            >
-              Start Cooking Mode
-            </button>
             {recipe.storySteps && recipe.storySteps.length > 0 && (
               <button
                 className="recipe-details__btn"
@@ -465,7 +491,9 @@ function RecipeDetail(props) {
           </div>
         </>
       )}
+
     </div>
+    </>
   );
 }
 

@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import DarkModeToggle from "./components/DarkModeToggle";
 import {
   BrowserRouter,
   Routes,
@@ -99,6 +100,14 @@ function AnimatedRoutes() {
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved ? saved === "true" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("darkMode", dark);
+  }, [dark]);
   // Timer reference
   let inactivityTimer = null;
 
@@ -184,6 +193,7 @@ function App() {
             Login/Register
           </Link>
         )}
+        <DarkModeToggle dark={dark} setDark={setDark} />
       </nav>
       <AnimatedRoutes />
     </BrowserRouter>
