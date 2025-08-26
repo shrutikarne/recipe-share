@@ -1,0 +1,69 @@
+.editors-picks-section {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0 0 32px 0;
+  padding: 0;
+  background: none;
+}
+.editors-picks-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0ea5e9;
+  margin: 0 0 18px 32px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px #0ea5e9cc;
+}
+.editors-picks-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+  padding: 0 0 0 32px;
+}
+.editors-picks-card {
+  min-width: 200px;
+  max-width: 260px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px #0ea5e9cc, 0 1.5px 4px #facc15cc;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.editors-picks-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 18px 18px 0 0;
+}
+.editors-picks-info {
+  padding: 12px 14px 10px 14px;
+  color: #23262f;
+  background: none;
+}
+.editors-picks-title-row {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #0ea5e9;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px #0ea5e9cc;
+}
+.editors-picks-desc {
+  font-size: 0.97rem;
+  color: #23262f;
+  min-height: 28px;
+}
+// Dark mode
+.dark .editors-picks-card {
+  background: #23262f;
+  color: #facc15;
+  box-shadow: 0 2px 16px #facc15cc, 0 1.5px 4px #0ea5e9cc;
+}
+.dark .editors-picks-title {
+  color: #facc15;
+}
+.dark .editors-picks-info {
+  color: #facc15;
+}

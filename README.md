@@ -1,22 +1,24 @@
 # Recipe Share
 
-Recipe Share is a modern, full-stack web application for discovering, creating, and sharing recipes. It features robust authentication, accessibility, and a fully automated test suite for both frontend and backend.
+Recipe Share is a modern, full-stack web application for discovering, creating, and sharing recipes. The project is in active development. Core features like authentication, recipe CRUD, and a responsive UI are implemented. Automated tests for both frontend and backend are in place, with coverage expanding as new features are added.
 
 ---
 
-## 🚀 Features
+## 🚀 Features (as of August 2025)
 
 - **User authentication** (register, login, JWT-protected routes)
 - **Recipe CRUD** (add, edit, delete, view, search)
 - **Responsive, accessible UI** (WCAG-compliant, keyboard navigation, ARIA roles)
-- **Recipe details, comments, and quick preview modals**
+- **Recipe details, quick preview modals, and story view**
+- **Category tiles, featured carousel, editor's picks, and dark mode toggle**
 - **Automated testing:**
-	- Playwright for end-to-end (E2E) frontend tests
-	- Jest for backend API and model tests
+	- Playwright for end-to-end (E2E) frontend tests (see `client/tests/`)
+	- Jest for backend API, models, and middleware (see `server/tests/`)
 - **Modern developer workflow:**
 	- Modular React and Express codebase
 	- API error handling and in-page feedback
 	- Environment-based configuration
+	- SCSS modules for component styling
 
 ---
 
@@ -31,14 +33,14 @@ Recipe Share is a modern, full-stack web application for discovering, creating, 
 ## 🧪 Testing
 
 - **Frontend:**
-	- All major user flows are covered by Playwright tests in `client/tests/`.
+	- Playwright E2E tests for all major user flows in `client/tests/`.
 	- Run with:
 		```bash
 		cd client
 		npx playwright test
 		```
 - **Backend:**
-	- Comprehensive Jest tests for routes, models, and middleware in `server/tests/`.
+	- Jest tests for API routes, models, and middleware in `server/tests/`.
 	- Run with:
 		```bash
 		cd server
@@ -87,24 +89,37 @@ Recipe Share is a modern, full-stack web application for discovering, creating, 
 
 ---
 
-## 📁 Folder Structure
+## 📁 Folder Structure (as of August 2025)
 
 ```
 recipe-share/
 ├── client/         # React frontend (UI, pages, API calls, Playwright tests)
+│   ├── public/     # Static assets (HTML, icons, manifest)
 │   ├── src/
+│   │   ├── api/    # API helpers (api.js, autocomplete.js)
+│   │   ├── components/ # Reusable UI components (tiles, carousels, modals, etc.)
 │   │   ├── pages/  # Page components (add-recipe, home, authentication, recipe-details)
-│   │   ├── api/    # API helper
-│   │   └── ...     # Other React files
+│   │   └── ...     # Other React files (App.js, index.js, styles)
 │   └── tests/      # Playwright E2E tests
 ├── server/         # Node.js/Express backend (API, models, routes, middleware, Jest tests)
+│   ├── config/     # Database config
+│   ├── middleware/ # Auth middleware
 │   ├── models/     # Mongoose models (User, Recipe)
 │   ├── routes/     # API routes (auth, recipes, user)
-│   ├── tests/      # Jest tests
-│   └── ...         # Other backend files
+│   ├── tests/      # Jest tests (auth, recipes, models, middleware)
+│   └── ...         # Other backend files (server.js, package.json)
 ```
 
 ---
+
+---
+
+## 🚧 Project Status & Next Steps
+
+- Core features are implemented and tested.
+- UI/UX improvements and new features are in progress.
+- Test coverage is expanding as new components and routes are added.
+- Feedback and contributions are welcome!
 
 ## 🤝 Contributing
 Contributions are welcome! Please open an issue or submit a pull request.
