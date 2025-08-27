@@ -1,5 +1,6 @@
 import RecipeStoryView from "../../components/RecipeStoryView";
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import CookingMode from "../../components/CookingMode";
 import API from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
@@ -199,7 +200,13 @@ function RecipeDetail(props) {
           </div>
         </div>
       )}
-      <div className="recipe-details">
+      <motion.div
+        className="recipe-details"
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 32 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+      >
         <button
           className="recipe-details__btn recipe-details__btn--cookingmode"
           style={{ width: '100%', fontSize: 22, padding: '18px 0', margin: '24px 0', background: '#22c55e', color: '#fff', borderRadius: 12, fontWeight: 700, letterSpacing: 1 }}
@@ -211,288 +218,288 @@ function RecipeDetail(props) {
           <form className="add-recipe-form" onSubmit={handleEditSubmit}>
             <h2 className="add-recipe-form__h2">Edit Recipe</h2>
             <label className="add-recipe-form__label" htmlFor="title">
-            Title
-          </label>
-          <input
-            className="add-recipe-form__input"
-            id="title"
-            name="title"
-            placeholder="Title"
-            value={editForm.title}
-            onChange={handleEditChange}
-          />
-
-          <label className="add-recipe-form__label" htmlFor="description">
-            Description
-          </label>
-          <input
-            className="add-recipe-form__input"
-            id="description"
-            name="description"
-            placeholder="Description"
-            value={editForm.description}
-            onChange={handleEditChange}
-          />
-
-          <label className="add-recipe-form__label" htmlFor="category">
-            Category
-          </label>
-          <select
-            className="add-recipe-form__select"
-            id="category"
-            name="category"
-            value={editForm.category}
-            onChange={handleEditChange}
-          >
-            <option value="">Select category</option>
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner">Dinner</option>
-            <option value="Dessert">Dessert</option>
-            <option value="Snack">Snack</option>
-            <option value="Beverage">Beverage</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label className="add-recipe-form__label" htmlFor="diet">
-            Diet Type
-          </label>
-          <select
-            className="add-recipe-form__select"
-            id="diet"
-            name="diet"
-            value={editForm.diet || ""}
-            onChange={handleEditChange}
-          >
-            <option value="">Select diet type</option>
-            <option value="vegan">Vegan</option>
-            <option value="vegetarian">Vegetarian</option>
-            <option value="pescatarian">Pescatarian</option>
-            <option value="gluten-free">Gluten-Free</option>
-            <option value="keto">Keto</option>
-            <option value="paleo">Paleo</option>
-            <option value="omnivore">Omnivore</option>
-            <option value="other">Other</option>
-          </select>
-
-          <label className="add-recipe-form__label" htmlFor="imageUrl">
-            Add Image
-          </label>
-          <input
-            className="add-recipe-form__input"
-            id="imageUrl"
-            name="imageUrl"
-            placeholder="JPG/PNG, 800x450px"
-            value={editForm.imageUrl}
-            onChange={handleEditChange}
-          />
-
-          <label className="add-recipe-form__label" htmlFor="ingredients">
-            Ingredients (comma separated)
-          </label>
-          <input
-            className="add-recipe-form__input"
-            id="ingredients"
-            name="ingredients"
-            placeholder="e.g. flour, sugar, eggs"
-            value={
-              Array.isArray(editForm.ingredients)
-                ? editForm.ingredients.join(",")
-                : editForm.ingredients
-            }
-            onChange={handleEditArrayChange}
-          />
-
-          <label className="add-recipe-form__label" htmlFor="steps">
-            Steps (comma separated)
-          </label>
-          <input
-            className="add-recipe-form__input"
-            id="steps"
-            name="steps"
-            placeholder="e.g. mix, bake, serve"
-            value={
-              Array.isArray(editForm.steps)
-                ? editForm.steps.join(",")
-                : editForm.steps
-            }
-            onChange={handleEditArrayChange}
-          />
-
-          <label className="add-recipe-form__label">Cook Time</label>
-          <div className="add-recipe-form__cooktime-row">
+              Title
+            </label>
             <input
-              className="add-recipe-form__input add-recipe-form__input--cooktime"
-              type="number"
-              min="0"
-              value={
-                editForm.cookHours !== undefined
-                  ? editForm.cookHours
-                  : editForm.cookTime
-                  ? Math.floor(editForm.cookTime / 3600)
-                  : ""
-              }
-              onChange={(e) =>
-                setEditForm((prev) => ({
-                  ...prev,
-                  cookHours:
-                    e.target.value === ""
-                      ? ""
-                      : e.target.value.replace(/^0+(?!$)/, ""),
-                }))
-              }
-              placeholder="Hrs"
+              className="add-recipe-form__input"
+              id="title"
+              name="title"
+              placeholder="Title"
+              value={editForm.title}
+              onChange={handleEditChange}
             />
-            <input
-              className="add-recipe-form__input add-recipe-form__input--cooktime"
-              type="number"
-              min="0"
-              max="59"
-              value={
-                editForm.cookMinutes !== undefined
-                  ? editForm.cookMinutes
-                  : editForm.cookTime
-                  ? Math.floor((editForm.cookTime % 3600) / 60)
-                  : ""
-              }
-              onChange={(e) =>
-                setEditForm((prev) => ({
-                  ...prev,
-                  cookMinutes:
-                    e.target.value === ""
-                      ? ""
-                      : e.target.value.replace(/^0+(?!$)/, ""),
-                }))
-              }
-              placeholder="Min"
-            />
-          </div>
 
-          <button className="add-recipe-form__button" type="submit">
-            Save
-          </button>
-          <button
-            className="add-recipe-form__button add-recipe-form__button--cancel"
-            type="button"
-            onClick={() => setEditMode(false)}
-          >
-            Cancel
-          </button>
-        </form>
-      ) : (
-        <>
-          <h2 className="recipe-details__title">{recipe.title}</h2>
-          <div className="recipe-details__meta">
-            <span>
-              <strong>Category:</strong> {recipe.category}
-            </span>
-            <span>
-              <strong>Cook Time:</strong> {recipe.cookTime} min
-            </span>
-          </div>
-          {recipe.imageUrl && (
-            <img
-              className="recipe-details__image"
-              src={recipe.imageUrl}
-              alt={recipe.title}
+            <label className="add-recipe-form__label" htmlFor="description">
+              Description
+            </label>
+            <input
+              className="add-recipe-form__input"
+              id="description"
+              name="description"
+              placeholder="Description"
+              value={editForm.description}
+              onChange={handleEditChange}
             />
-          )}
-          <div className="recipe-details__section">
-            <div className="recipe-details__section-title">Description</div>
-            <div className="recipe-details__description">
-              {recipe.description}
+
+            <label className="add-recipe-form__label" htmlFor="category">
+              Category
+            </label>
+            <select
+              className="add-recipe-form__select"
+              id="category"
+              name="category"
+              value={editForm.category}
+              onChange={handleEditChange}
+            >
+              <option value="">Select category</option>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Dessert">Dessert</option>
+              <option value="Snack">Snack</option>
+              <option value="Beverage">Beverage</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label className="add-recipe-form__label" htmlFor="diet">
+              Diet Type
+            </label>
+            <select
+              className="add-recipe-form__select"
+              id="diet"
+              name="diet"
+              value={editForm.diet || ""}
+              onChange={handleEditChange}
+            >
+              <option value="">Select diet type</option>
+              <option value="vegan">Vegan</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="pescatarian">Pescatarian</option>
+              <option value="gluten-free">Gluten-Free</option>
+              <option value="keto">Keto</option>
+              <option value="paleo">Paleo</option>
+              <option value="omnivore">Omnivore</option>
+              <option value="other">Other</option>
+            </select>
+
+            <label className="add-recipe-form__label" htmlFor="imageUrl">
+              Add Image
+            </label>
+            <input
+              className="add-recipe-form__input"
+              id="imageUrl"
+              name="imageUrl"
+              placeholder="JPG/PNG, 800x450px"
+              value={editForm.imageUrl}
+              onChange={handleEditChange}
+            />
+
+            <label className="add-recipe-form__label" htmlFor="ingredients">
+              Ingredients (comma separated)
+            </label>
+            <input
+              className="add-recipe-form__input"
+              id="ingredients"
+              name="ingredients"
+              placeholder="e.g. flour, sugar, eggs"
+              value={
+                Array.isArray(editForm.ingredients)
+                  ? editForm.ingredients.join(",")
+                  : editForm.ingredients
+              }
+              onChange={handleEditArrayChange}
+            />
+
+            <label className="add-recipe-form__label" htmlFor="steps">
+              Steps (comma separated)
+            </label>
+            <input
+              className="add-recipe-form__input"
+              id="steps"
+              name="steps"
+              placeholder="e.g. mix, bake, serve"
+              value={
+                Array.isArray(editForm.steps)
+                  ? editForm.steps.join(",")
+                  : editForm.steps
+              }
+              onChange={handleEditArrayChange}
+            />
+
+            <label className="add-recipe-form__label">Cook Time</label>
+            <div className="add-recipe-form__cooktime-row">
+              <input
+                className="add-recipe-form__input add-recipe-form__input--cooktime"
+                type="number"
+                min="0"
+                value={
+                  editForm.cookHours !== undefined
+                    ? editForm.cookHours
+                    : editForm.cookTime
+                      ? Math.floor(editForm.cookTime / 3600)
+                      : ""
+                }
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    cookHours:
+                      e.target.value === ""
+                        ? ""
+                        : e.target.value.replace(/^0+(?!$)/, ""),
+                  }))
+                }
+                placeholder="Hrs"
+              />
+              <input
+                className="add-recipe-form__input add-recipe-form__input--cooktime"
+                type="number"
+                min="0"
+                max="59"
+                value={
+                  editForm.cookMinutes !== undefined
+                    ? editForm.cookMinutes
+                    : editForm.cookTime
+                      ? Math.floor((editForm.cookTime % 3600) / 60)
+                      : ""
+                }
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    cookMinutes:
+                      e.target.value === ""
+                        ? ""
+                        : e.target.value.replace(/^0+(?!$)/, ""),
+                  }))
+                }
+                placeholder="Min"
+              />
             </div>
-          </div>
-          <div className="recipe-details__section">
-            <div className="recipe-details__section-title">Ingredients</div>
-            <ul className="recipe-details__list">
-              {recipe.ingredients &&
-                recipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
-            </ul>
-          </div>
-          <div className="recipe-details__section">
-            <div className="recipe-details__section-title">Steps</div>
-            <ol className="recipe-details__list">
-              {recipe.steps &&
-                recipe.steps.map((step, i) => <li key={i}>{step}</li>)}
-            </ol>
-            {recipe.storySteps && recipe.storySteps.length > 0 && (
-              <button
-                className="recipe-details__btn"
-                style={{ marginTop: 12, background: "#facc15", color: "#222" }}
-                onClick={() => setStoryMode(true)}
-              >
-                View as Story
-              </button>
+
+            <button className="add-recipe-form__button" type="submit">
+              Save
+            </button>
+            <button
+              className="add-recipe-form__button add-recipe-form__button--cancel"
+              type="button"
+              onClick={() => setEditMode(false)}
+            >
+              Cancel
+            </button>
+          </form>
+        ) : (
+          <>
+            <h2 className="recipe-details__title">{recipe.title}</h2>
+            <div className="recipe-details__meta">
+              <span>
+                <strong>Category:</strong> {recipe.category}
+              </span>
+              <span>
+                <strong>Cook Time:</strong> {recipe.cookTime} min
+              </span>
+            </div>
+            {recipe.imageUrl && (
+              <img
+                className="recipe-details__image"
+                src={recipe.imageUrl}
+                alt={recipe.title}
+              />
             )}
-          </div>
-          {/* Comments Section */}
-          <div className="recipe-details__section">
-            <div className="recipe-details__section-title">Comments</div>
-            <div className="recipe-details__comments-list">
-              {comments.length === 0 && (
-                <div className="recipe-details__no-comments">
-                  No comments yet.
-                </div>
-              )}
-              {comments.map((c, i) => (
-                <div key={i} className="recipe-details__comment-item">
-                  <div className="recipe-details__comment-user">
-                    <strong>{c.username || c.user || "User"}</strong>:
-                  </div>
-                  <div className="recipe-details__comment-text">{c.text}</div>
-                  <div className="recipe-details__comment-date">
-                    {c.createdAt ? timeAgo(c.createdAt) : ""}
-                  </div>
-                </div>
-              ))}
+            <div className="recipe-details__section">
+              <div className="recipe-details__section-title">Description</div>
+              <div className="recipe-details__description">
+                {recipe.description}
+              </div>
             </div>
-            {user ? (
-              <form
-                className="recipe-details__comment-form"
-                onSubmit={handleCommentSubmit}
-              >
-                <textarea
-                  className="recipe-details__comment-textarea"
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Add a comment..."
-                  rows={2}
-                  disabled={commentLoading}
-                />
+            <div className="recipe-details__section">
+              <div className="recipe-details__section-title">Ingredients</div>
+              <ul className="recipe-details__list">
+                {recipe.ingredients &&
+                  recipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
+            </div>
+            <div className="recipe-details__section">
+              <div className="recipe-details__section-title">Steps</div>
+              <ol className="recipe-details__list">
+                {recipe.steps &&
+                  recipe.steps.map((step, i) => <li key={i}>{step}</li>)}
+              </ol>
+              {recipe.storySteps && recipe.storySteps.length > 0 && (
                 <button
                   className="recipe-details__btn"
-                  type="submit"
-                  disabled={commentLoading || !commentText.trim()}
+                  style={{ marginTop: 12, background: "#facc15", color: "#222" }}
+                  onClick={() => setStoryMode(true)}
                 >
-                  {commentLoading ? "Posting..." : "Post Comment"}
+                  View as Story
                 </button>
-              </form>
-            ) : (
-              <div className="recipe-details__login-message">
-                Log in to post a comment.
+              )}
+            </div>
+            {/* Comments Section */}
+            <div className="recipe-details__section">
+              <div className="recipe-details__section-title">Comments</div>
+              <div className="recipe-details__comments-list">
+                {comments.length === 0 && (
+                  <div className="recipe-details__no-comments">
+                    No comments yet.
+                  </div>
+                )}
+                {comments.map((c, i) => (
+                  <div key={i} className="recipe-details__comment-item">
+                    <div className="recipe-details__comment-user">
+                      <strong>{c.username || c.user || "User"}</strong>:
+                    </div>
+                    <div className="recipe-details__comment-text">{c.text}</div>
+                    <div className="recipe-details__comment-date">
+                      {c.createdAt ? timeAgo(c.createdAt) : ""}
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-          {/* Always show edit/delete buttons (original behavior) */}
-          <div className="recipe-details__actions">
-            <button
-              className="recipe-details__btn"
-              onClick={() => setEditMode(true)}
-            >
-              Edit
-            </button>
-            <button
-              className="recipe-details__btn recipe-details__btn--delete"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-          </div>
-        </>
-      )}
+              {user ? (
+                <form
+                  className="recipe-details__comment-form"
+                  onSubmit={handleCommentSubmit}
+                >
+                  <textarea
+                    className="recipe-details__comment-textarea"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Add a comment..."
+                    rows={2}
+                    disabled={commentLoading}
+                  />
+                  <button
+                    className="recipe-details__btn"
+                    type="submit"
+                    disabled={commentLoading || !commentText.trim()}
+                  >
+                    {commentLoading ? "Posting..." : "Post Comment"}
+                  </button>
+                </form>
+              ) : (
+                <div className="recipe-details__login-message">
+                  Log in to post a comment.
+                </div>
+              )}
+            </div>
+            {/* Always show edit/delete buttons (original behavior) */}
+            <div className="recipe-details__actions">
+              <button
+                className="recipe-details__btn"
+                onClick={() => setEditMode(true)}
+              >
+                Edit
+              </button>
+              <button
+                className="recipe-details__btn recipe-details__btn--delete"
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </>
+        )}
 
-    </div>
+      </motion.div>
     </>
   );
 }

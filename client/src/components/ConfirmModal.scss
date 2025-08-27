@@ -1,0 +1,128 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.55);
+    padding: 2rem;
+    border-radius: 22px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px 0 rgba(60, 72, 41, 0.18), 0 1.5px 8px 0 rgba(251, 191, 36, 0.13);
+    animation: slideUp 0.3s ease-out;
+    backdrop-filter: blur(12px) saturate(1.2);
+    border: 1.5px solid rgba(132, 204, 22, 0.18);
+
+    .dark & {
+        background: rgba(31, 41, 55, 0.85);
+        color: #f3f4f6;
+        border: 1.5px solid rgba(250, 204, 21, 0.18);
+    }
+}
+
+.modal-title {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+
+    .dark & {
+        color: #f3f4f6;
+    }
+}
+
+.modal-message {
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #4b5563;
+
+    .dark & {
+        color: #d1d5db;
+    }
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.modal-button {
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &--primary {
+        background-color: #818cf8;
+        color: white;
+        border: none;
+
+        &:hover {
+            background-color: #6366f1;
+        }
+
+        .dark & {
+            background-color: #6366f1;
+
+            &:hover {
+                background-color: #4f46e5;
+            }
+        }
+    }
+
+    &--secondary {
+        background-color: transparent;
+        border: 1px solid #d1d5db;
+        color: #4b5563;
+
+        &:hover {
+            background-color: #f3f4f6;
+        }
+
+        .dark & {
+            border-color: #4b5563;
+            color: #e5e7eb;
+
+            &:hover {
+                background-color: #374151;
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
+import RecipePreviewCard from "./RecipePreviewCard";
 import "./AddRecipe.scss";
 
 /**
@@ -9,7 +10,8 @@ import "./AddRecipe.scss";
  * @component
  */
 function AddRecipe() {
-  // --- State ---
+  // --- Stepper State ---
+  const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -23,249 +25,179 @@ function AddRecipe() {
   const [cookMinutes, setCookMinutes] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const navigate = useNavigate(); // Redirect after adding recipe
+  const navigate = useNavigate();
 
-  // --- Handlers (in order of user flow) ---
-  /**
-   * Handles changes to text/number input fields (except ingredients and steps)
-   * @param {React.ChangeEvent<HTMLInputElement>} e
-   */
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Step definitions
+  const steps = [
+    {
+      title: "Basic Info",
+      description: "Add title and description",
+      fields: ["title", "description"]
+    },
+    {
+      title: "Ingredients",
+      description: "List your ingredients",
+      fields: ["ingredients"]
+    },
+    {
+      title: "Steps",
+      description: "Explain how to make it",
+      fields: ["steps"]
+    },
+    {
+      title: "Details",
+      description: "Add final details",
+      fields: ["category", "diet", "cookHours", "cookMinutes", "imageUrl"]
+    }
+  ];
 
-  /**
-   * Handles changes to the ingredients field (comma separated).
-   * @param {React.ChangeEvent<HTMLInputElement>} e
-   */
-  const handleIngredientsChange = (e) =>
-    setForm({ ...form, ingredients: e.target.value.split(",") });
+  // Handlers
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleIngredientsChange = (e) => setForm({ ...form, ingredients: e.target.value.split(",") });
+  const handleStepsChange = (e) => setForm({ ...form, steps: e.target.value.split(",") });
 
-  /**
-   * Handles changes to the steps field (comma separated).
-   * @param {React.ChangeEvent<HTMLInputElement>} e
-   */
-  const handleStepsChange = (e) =>
-    setForm({ ...form, steps: e.target.value.split(",") });
+  // Step validation
+  const validateStep = () => {
+    const currentFields = steps[activeStep].fields;
+    for (let field of currentFields) {
+      if (field === "ingredients" || field === "steps") {
+        if (!form[field] || form[field].length === 0 || form[field].every(item => !item.trim())) {
+          setError(`Please fill in the ${field} field`);
+          return false;
+        }
+      } else if (field === "cookHours" || field === "cookMinutes") {
+        // Optional
+        continue;
+      } else if (!form[field] || !form[field].trim()) {
+        setError(`Please fill in the ${field} field`);
+        return false;
+      }
+    }
+    setError("");
+    return true;
+  };
 
-  /**
-   * Handles form submission, sends recipe data to backend
-   * @param {React.FormEvent} e
-   */
+  const handleNext = () => {
+    if (validateStep()) setActiveStep((prev) => prev + 1);
+  };
+  const handleBack = () => {
+    setActiveStep((prev) => prev - 1);
+    setError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Combine hours, minutes, seconds into total seconds
-    const cookTime =
-      (parseInt(cookHours) || 0) * 3600 + (parseInt(cookMinutes) || 0);
+    const cookTime = (parseInt(cookHours) || 0) * 3600 + (parseInt(cookMinutes) || 0);
     setError("");
     setSuccess("");
     try {
       await API.post("/recipes", { ...form, cookTime });
       setSuccess("Recipe added!");
-      setTimeout(() => navigate("/"), 1200); // Redirect after short delay
+      setTimeout(() => navigate("/"), 1200);
     } catch (err) {
       setError(err.response?.data?.msg || "Error adding recipe");
     }
   };
 
-  // --- Render logic (in order of user flow) ---
+  // Step content rendering
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 0:
+        return (
+          <>
+            <label className="add-recipe-form__label" htmlFor="title">Title</label>
+            <input className="add-recipe-form__input" id="title" name="title" placeholder="Title" value={form.title} onChange={handleChange} aria-required="true" />
+            <label className="add-recipe-form__label" htmlFor="description">Description</label>
+            <input className="add-recipe-form__input" id="description" name="description" placeholder="Description" value={form.description} onChange={handleChange} aria-required="true" />
+          </>
+        );
+      case 1:
+        return (
+          <>
+            <label className="add-recipe-form__label" htmlFor="ingredients">Ingredients (comma separated)</label>
+            <input className="add-recipe-form__input" id="ingredients" name="ingredients" placeholder="e.g. flour, sugar, eggs" value={form.ingredients.join(",")} onChange={handleIngredientsChange} aria-required="true" />
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <label className="add-recipe-form__label" htmlFor="steps">Steps (comma separated)</label>
+            <input className="add-recipe-form__input" id="steps" name="steps" placeholder="e.g. mix, bake, serve" value={form.steps.join(",")} onChange={handleStepsChange} aria-required="true" />
+          </>
+        );
+      case 3:
+        return (
+          <>
+            <label className="add-recipe-form__label" htmlFor="category">Category</label>
+            <select className="add-recipe-form__select" id="category" name="category" value={form.category} onChange={handleChange} aria-required="true">
+              <option value="">Select category</option>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Dessert">Dessert</option>
+              <option value="Snack">Snack</option>
+              <option value="Beverage">Beverage</option>
+              <option value="Other">Other</option>
+            </select>
+            <label className="add-recipe-form__label" htmlFor="diet">Diet Type</label>
+            <select className="add-recipe-form__select" id="diet" name="diet" value={form.diet} onChange={handleChange} aria-required="true">
+              <option value="">Select diet type</option>
+              <option value="vegan">Vegan</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="pescatarian">Pescatarian</option>
+              <option value="gluten-free">Gluten-Free</option>
+              <option value="keto">Keto</option>
+              <option value="paleo">Paleo</option>
+              <option value="omnivore">Omnivore</option>
+              <option value="other">Other</option>
+            </select>
+            <label className="add-recipe-form__label" htmlFor="imageUrl">Add Image</label>
+            <input className="add-recipe-form__input" id="imageUrl" name="imageUrl" placeholder="JPG/PNG, 800x450px" value={form.imageUrl} onChange={handleChange} aria-required="false" />
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <input className="add-recipe-form__input" type="number" min="0" value={cookHours} onChange={e => setCookHours(e.target.value)} placeholder="Hrs" style={{ flex: 1 }} id="cook-hours" aria-label="Cook time hours" />
+              <input className="add-recipe-form__input" type="number" min="0" max="59" value={cookMinutes} onChange={e => setCookMinutes(e.target.value)} placeholder="Min" style={{ flex: 1 }} id="cook-minutes" aria-label="Cook time minutes" />
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <form
-      className="add-recipe-form"
-      onSubmit={handleSubmit}
-      aria-label="Add recipe form"
-    >
-      <h2 className="add-recipe-form__h2">Add Recipe</h2>
-      {error && (
-        <div
-          className="form-error"
-          role="alert"
-          style={{ color: "red", marginBottom: 8 }}
-        >
-          {error}
+    <div className="add-recipe-form-preview-layout">
+      <form className="add-recipe-form" onSubmit={handleSubmit} aria-label="Add recipe form">
+        <h2 className="add-recipe-form__h2">Add Recipe</h2>
+        <div className="stepper">
+          {steps.map((step, idx) => (
+            <div key={step.title} className={`stepper__step ${idx === activeStep ? "active" : ""} ${idx < activeStep ? "completed" : ""}`}>
+              <div className="stepper__step-number">{idx + 1}</div>
+              <div className="stepper__step-text">
+                <div className="stepper__step-title">{step.title}</div>
+                <div className="stepper__step-description">{step.description}</div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
-      {success && (
-        <div
-          className="form-success"
-          role="alert"
-          style={{ color: "green", marginBottom: 8 }}
-        >
-          {success}
+        {error && <div className="form-error" role="alert">{error}</div>}
+        {success && <div className="form-success" role="alert">{success}</div>}
+        <div className="form-content">{renderStepContent(activeStep)}</div>
+        <div className="form-navigation">
+          <div className="form-navigation__buttons">
+            {activeStep > 0 && (
+              <button type="button" onClick={handleBack} className="form-btn form-btn--secondary">Back</button>
+            )}
+            {activeStep === steps.length - 1 ? (
+              <button type="submit" className="form-btn form-btn--primary" disabled={!!error}>Submit Recipe</button>
+            ) : (
+              <button type="button" onClick={handleNext} className="form-btn form-btn--primary">Continue</button>
+            )}
+          </div>
+          <div className="form-navigation__progress">Step {activeStep + 1} of {steps.length}</div>
         </div>
-      )}
-      <label className="add-recipe-form__label visually-hidden" htmlFor="title">
-        Title
-      </label>
-      <input
-        className="add-recipe-form__input"
-        id="title"
-        name="title"
-        placeholder="Title"
-        onChange={handleChange}
-        aria-required="true"
-      />
-
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="description"
-      >
-        Description
-      </label>
-      <input
-        className="add-recipe-form__input"
-        id="description"
-        name="description"
-        placeholder="Description"
-        onChange={handleChange}
-        aria-required="true"
-      />
-
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="category"
-      >
-        Category
-      </label>
-      <select
-        className="add-recipe-form__select"
-        id="category"
-        name="category"
-        value={form.category}
-        onChange={handleChange}
-        aria-required="true"
-      >
-        <option value="">Select category</option>
-        <option value="Breakfast">Breakfast</option>
-        <option value="Lunch">Lunch</option>
-        <option value="Dinner">Dinner</option>
-        <option value="Dessert">Dessert</option>
-        <option value="Snack">Snack</option>
-        <option value="Beverage">Beverage</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <label className="add-recipe-form__label visually-hidden" htmlFor="diet">
-        Diet Type
-      </label>
-      <select
-        className="add-recipe-form__select"
-        id="diet"
-        name="diet"
-        value={form.diet}
-        onChange={handleChange}
-        aria-required="true"
-      >
-        <option value="">Select diet type</option>
-        <option value="vegan">Vegan</option>
-        <option value="vegetarian">Vegetarian</option>
-        <option value="pescatarian">Pescatarian</option>
-        <option value="gluten-free">Gluten-Free</option>
-        <option value="keto">Keto</option>
-        <option value="paleo">Paleo</option>
-        <option value="omnivore">Omnivore</option>
-        <option value="other">Other</option>
-      </select>
-
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="imageUrl"
-      >
-        Add Image
-      </label>
-      <input
-        className="add-recipe-form__input"
-        id="imageUrl"
-        name="imageUrl"
-        placeholder="JPG/PNG, 800x450px"
-        onChange={handleChange}
-        aria-required="false"
-      />
-
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="ingredients"
-      >
-        Ingredients (comma separated)
-      </label>
-      <input
-        className="add-recipe-form__input"
-        id="ingredients"
-        name="ingredients"
-        placeholder="e.g. flour, sugar, eggs"
-        onChange={handleIngredientsChange}
-        aria-required="true"
-      />
-
-      <label className="add-recipe-form__label visually-hidden" htmlFor="steps">
-        Steps (comma separated)
-      </label>
-      <input
-        className="add-recipe-form__input"
-        id="steps"
-        name="steps"
-        placeholder="e.g. mix, bake, serve"
-        onChange={handleStepsChange}
-        aria-required="true"
-      />
-
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="cook-hours"
-      >
-        Cook Time Hours
-      </label>
-      <label
-        className="add-recipe-form__label visually-hidden"
-        htmlFor="cook-minutes"
-      >
-        Cook Time Minutes
-      </label>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <input
-          className="add-recipe-form__input"
-          type="number"
-          min="0"
-          value={cookHours}
-          onChange={(e) =>
-            setCookHours(
-              e.target.value === ""
-                ? ""
-                : e.target.value.replace(/^0+(?!$)/, "")
-            )
-          }
-          placeholder="Hrs"
-          style={{ flex: 1 }}
-          id="cook-hours"
-          aria-label="Cook time hours"
-        />
-        <input
-          className="add-recipe-form__input"
-          type="number"
-          min="0"
-          max="59"
-          value={cookMinutes}
-          onChange={(e) =>
-            setCookMinutes(
-              e.target.value === ""
-                ? ""
-                : e.target.value.replace(/^0+(?!$)/, "")
-            )
-          }
-          placeholder="Min"
-          style={{ flex: 1 }}
-          id="cook-minutes"
-          aria-label="Cook time minutes"
-        />
-      </div>
-
-      <button
-        className="add-recipe-form__button"
-        type="submit"
-        aria-label="Add recipe"
-      >
-        Add Recipe
-      </button>
-    </form>
+      </form>
+      <RecipePreviewCard form={form} cookHours={cookHours} cookMinutes={cookMinutes} />
+    </div>
   );
 }
 
