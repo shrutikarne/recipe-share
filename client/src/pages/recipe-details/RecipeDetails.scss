@@ -1,20 +1,20 @@
 /* RecipeDetails.scss - SCSS version with nesting and BEM style */
-
-
+// Glassmorphic recipe details card
 .recipe-details {
   max-width: 700px;
   margin: 40px auto;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(132, 204, 22, 0.1),
-    0 1.5px 4px rgba(251, 113, 133, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 28px;
+  box-shadow: 0 12px 48px 0 rgba(60, 72, 41, 0.18), 0 1.5px 8px 0 rgba(251, 191, 36, 0.13);
   padding: 32px 36px 36px 36px;
-  font-family: "Roboto";
+  font-family: "Roboto", "Inter", sans-serif;
   color: #374151;
-  border: 1.5px solid #84cc16;
+  border: 1.5px solid rgba(132, 204, 22, 0.18);
   position: relative;
+  backdrop-filter: blur(14px) saturate(1.2);
+  transition: box-shadow 0.25s, background 0.18s;
 
-  &__title {
+  .recipe-details__title {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 12px;
@@ -22,7 +22,7 @@
     letter-spacing: 1px;
   }
 
-  &__meta {
+  .recipe-details__meta {
     display: flex;
     gap: 24px;
     font-size: 12px;
@@ -30,19 +30,19 @@
     margin-bottom: 18px;
   }
 
-  &__image {
+  .recipe-details__image {
     width: 100%;
     max-height: 320px;
-    border-radius: 12px;
+    border-radius: 18px;
     margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 2px 12px rgba(132, 204, 22, 0.08);
   }
 
-  &__section {
+  .recipe-details__section {
     margin-bottom: 28px;
   }
 
-  &__section-title {
+  .recipe-details__section-title {
     font-size: 15px;
     font-weight: 600;
     color: #fb7185;
@@ -50,132 +50,146 @@
     letter-spacing: 0.5px;
   }
 
-  &__list {
+  .recipe-details__list {
     padding-left: 20px;
     margin: 0;
     color: #374151;
   }
 
-  &__description {
+  .recipe-details__description {
     font-size: 12px;
     color: #374151;
     margin-bottom: 18px;
     line-height: 1.6;
   }
 
-  &__actions {
+  .recipe-details__actions {
     display: flex;
     gap: 16px;
     margin-top: 18px;
   }
 
-  &__btn {
+  .recipe-details__btn {
     padding: 8px 22px;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     background: #fb7185;
     color: #fff;
     font-size: 10px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    box-shadow: 0 2px 8px rgba(251, 113, 133, 0.1);
-    &--delete {
-      background: #84cc16;
-      color: #374151;
-    }
-    &:hover {
-      background: #84cc16;
-      color: #374151;
-    }
-    &--delete:hover {
-      background: #fb7185;
-      color: #fff;
-    }
+    transition: background 0.2s, color 0.2s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.13);
   }
-}
 
-// HERO SECTION
-.recipe-hero {
-  width: 100vw;
-  min-height: 320px;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  margin-top: -40px;
-  margin-bottom: 32px;
-  z-index: 1;
-}
-.recipe-hero__bg {
-  width: 100vw;
-  min-height: 320px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-}
-.recipe-hero__overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.68) 100%);
-  z-index: 1;
-}
-.recipe-hero__content {
-  position: relative;
-  z-index: 2;
-  padding: 48px 36px 36px 48px;
-  color: #fff;
-  max-width: 700px;
-}
-.recipe-hero__title {
-  font-size: 38px;
-  font-weight: 800;
-  margin-bottom: 18px;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.18);
-}
-.recipe-hero__actions {
-  display: flex;
-  gap: 18px;
-}
-.recipe-hero__btn {
-  padding: 12px 32px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.recipe-hero__btn--save {
-  background: #fb7185;
-  color: #fff;
-}
-.recipe-hero__btn--save:hover {
-  background: #f43f5e;
-}
-.recipe-hero__btn--cook {
-  background: #22c55e;
-  color: #fff;
-}
-.recipe-hero__btn--cook:hover {
-  background: #16a34a;
-}
+  .recipe-details__btn--delete {
+    background: #84cc16;
+    color: #374151;
+  }
+
+  .recipe-details__btn:hover {
+    background: #84cc16;
+    color: #374151;
+    box-shadow: 0 8px 24px rgba(132, 204, 22, 0.18);
+  }
+
+  .recipe-details__btn--delete:hover {
+    background: #fb7185;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.18);
+  }
+
+  // HERO SECTION
+  .recipe-hero {
+    width: 100%;
+    min-height: 320px;
+    position: relative;
+    margin: -40px auto 32px auto;
+    z-index: 1;
+  }
+
+  .recipe-hero__bg {
+    width: 100%;
+    min-height: 320px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    border-radius: 28px 28px 0 0;
+    overflow: hidden;
+  }
+
+  .recipe-hero__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.68) 100%);
+    z-index: 1;
+    backdrop-filter: blur(8px) saturate(1.1);
+  }
+
+  .recipe-hero__content {
+    position: relative;
+    z-index: 2;
+    padding: 48px 36px 36px 48px;
+    color: #fff;
+    max-width: 700px;
+  }
+
+  .recipe-hero__title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 18px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  }
+
+  .recipe-hero__actions {
+    display: flex;
+    gap: 18px;
+  }
+
+  .recipe-hero__btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .recipe-hero__btn--save {
+    background: #fb7185;
+    color: #fff;
+  }
+
+  .recipe-hero__btn--save:hover {
+    background: #f43f5e;
+  }
+
+  .recipe-hero__btn--cook {
+    background: #22c55e;
+    color: #fff;
+  }
+
+  .recipe-hero__btn--cook:hover {
+    background: #16a34a;
+  }
 
 
-@media (max-width: 600px) {
-  .recipe-details {
-    padding: 18px 6vw 24px 6vw;
-    &__title {
-  font-size: 18px;
+  @media (max-width: 600px) {
+    .recipe-details {
+      padding: 18px 6vw 24px 6vw;
+
+      &__title {
+        font-size: 18px;
+      }
     }
   }
 }

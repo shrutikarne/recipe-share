@@ -24,9 +24,9 @@ test.describe("Add Recipe", () => {
     // Set token in localStorage before navigating to /add
     await page.goto("/");
     await page.evaluate((token) => localStorage.setItem("token", token), token);
-    await page.goto("/add");
+    await page.goto("/add-recipe");
     // Now go to add-recipe page
-    await page.goto("/add");
+    await page.goto("/add-recipe");
     await page.fill("#title", "Test Recipe");
     await page.fill("#description", "A delicious test recipe");
     await page.fill("#ingredients", "flour,sugar,eggs");
@@ -48,7 +48,7 @@ test.describe("Add Recipe", () => {
         { timeout: 4000 }
       );
       navigated = true;
-    } catch {}
+    } catch { }
     // Now check for main content
     const heading = page.getByRole("heading", { name: /All Recipes/i });
     const fallback = page.locator(".recipe-list, .home, main");

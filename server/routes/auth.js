@@ -26,6 +26,34 @@ const registerLimiter = rateLimit({
   legacyHeaders: false,
 });
 const router = express.Router();
+const passport = require("../config/passport");
+// --- Google OAuth ---
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/?error=google" }),
+  (req, res) => {
+    // Issue JWT and redirect to frontend with token
+    const payload = { user: { id: req.user.id } };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30m" });
+    // Redirect to frontend with token in query param (or set cookie)
+    res.redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/auth/social?token=${token}`);
+  }
+);
+
+// --- Facebook OAuth ---
+router.get("/facebook", passport.authenticate("facebook", { scope: ["email"] }));
+
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", { session: false, failureRedirect: "/?error=facebook" }),
+  (req, res) => {
+    const payload = { user: { id: req.user.id } };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30m" });
+    res.redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/auth/social?token=${token}`);
+  }
+);
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("../middleware/auth");

@@ -26,6 +26,7 @@ import {
   FaRegBookmark,
 } from "react-icons/fa";
 import Masonry from "react-masonry-css";
+import Footer from "../../components/Footer";
 
 /**
  * Home component
@@ -103,7 +104,7 @@ function Home() {
   };
   // Upload button navigates to add page
   const handleUpload = () => {
-    window.location.href = "/add";
+    window.location.href = "/add-recipe";
   };
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [saveLoading, setSaveLoading] = useState({});
@@ -227,7 +228,7 @@ function Home() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 300 &&
+        document.documentElement.offsetHeight - 300 &&
         !loading &&
         hasMore
       ) {
@@ -267,11 +268,11 @@ function Home() {
         prev.map((r) =>
           r._id === recipeId
             ? {
-                ...r,
-                likes: res.data.liked
-                  ? [...(r.likes || []), userId]
-                  : (r.likes || []).filter((id) => id !== userId),
-              }
+              ...r,
+              likes: res.data.liked
+                ? [...(r.likes || []), userId]
+                : (r.likes || []).filter((id) => id !== userId),
+            }
             : r
         )
       );
@@ -315,9 +316,10 @@ function Home() {
         onBrowse={handleBrowse}
         onUpload={handleUpload}
       />
-  <FeaturedCarousel recipes={trendingRecipes} title="🔥 Trending Now" />
-  <CategoryTiles onSelect={handleCategorySelect} />
-  <EditorsPicks recipes={editorsPicks} title="👩‍🍳 Editor's Picks" />
+      <FeaturedCarousel recipes={trendingRecipes} title="🔥 Trending Now" />
+      <Footer />
+      <CategoryTiles onSelect={handleCategorySelect} />
+      <EditorsPicks recipes={editorsPicks} title="👩‍🍳 Editor's Picks" />
       <div ref={recipesRef} />
       <div className="home-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontWeight: 600, fontSize: 18 }}>Recipes</span>
@@ -683,29 +685,29 @@ function Home() {
             recipe={previewRecipe}
             onViewFullRecipe={handleViewFullRecipe}
           />
-            {/* Load More button for recipes */}
-            {hasMore && !loading && (
-              <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-                <button
-                  onClick={() => fetchRecipes()}
-                  style={{
-                    background: 'linear-gradient(90deg,#facc15 0%,#f7b731 100%)',
-                    color: '#222',
-                    border: 'none',
-                    borderRadius: '1.5rem',
-                    fontWeight: 600,
-                    fontSize: '1.1rem',
-                    padding: '0.7rem 2.2rem',
-                    boxShadow: '0 2px 16px #facc15cc',
-                    cursor: 'pointer',
-                    marginTop: '0.5rem',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  Load More Recipes
-                </button>
-              </div>
-            )}
+          {/* Load More button for recipes */}
+          {hasMore && !loading && (
+            <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+              <button
+                onClick={() => fetchRecipes()}
+                style={{
+                  background: 'linear-gradient(90deg,#facc15 0%,#f7b731 100%)',
+                  color: '#222',
+                  border: 'none',
+                  borderRadius: '1.5rem',
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  padding: '0.7rem 2.2rem',
+                  boxShadow: '0 2px 16px #facc15cc',
+                  cursor: 'pointer',
+                  marginTop: '0.5rem',
+                  transition: 'background 0.2s',
+                }}
+              >
+                Load More Recipes
+              </button>
+            </div>
+          )}
           {fullDetailOpen && fullDetailRecipe && fullDetailRecipe._id && (
             <Modal
               isOpen={true}

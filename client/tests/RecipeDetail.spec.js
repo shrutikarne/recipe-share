@@ -34,9 +34,9 @@ test.describe("RecipeDetail page", () => {
     // Set token in localStorage before navigating to /add
     await page.goto("/");
     await page.evaluate((token) => localStorage.setItem("token", token), token);
-    await page.goto("/add");
+    await page.goto("/add-recipe");
     // Go to add-recipe and add a recipe
-    await page.goto("/add");
+    await page.goto("/add-recipe");
     await page.fill("#title", "Test Recipe");
     await page.fill("#description", "A delicious test recipe");
     await page.fill("#ingredients", "flour,sugar,eggs");
@@ -55,7 +55,7 @@ test.describe("RecipeDetail page", () => {
     try {
       await successMsg.waitFor({ timeout: 2000 });
       added = true;
-    } catch {}
+    } catch { }
     if (!added) {
       if (await errorMsg.isVisible({ timeout: 500 })) {
         const msg = await errorMsg.textContent();
