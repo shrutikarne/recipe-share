@@ -42,21 +42,24 @@ const recipeWriteLimiter = rateLimit({
 const { verifyToken } = require("../middleware/auth");
 
 /**
- * @route   GET /api/recipes
- * @desc    Get all recipes
+ * @route   GET /api/recipes/count
+ * @desc    Get count of recipes with filters
  * @access  Public
  */
-// Enhanced: filter by tags, infinite scroll, etc.
-router.get("/", async (req, res) => {
+router.get("/count", async (req, res) => {
   try {
     const {
       search,
       category,
       ingredient,
       tag,
-      skip = 0,
-      limit = 20,
+      diet,
+      cuisine,
+      prepTime,
+      vegetarian,
+      difficulty
     } = req.query;
+
     let filter = {};
     if (search) {
       filter.title = { $regex: search, $options: "i" };
@@ -73,6 +76,84 @@ router.get("/", async (req, res) => {
     if (tag) {
       filter.tags = tag;
     }
+    if (diet) {
+      filter.dietaryPreferences = diet;
+    }
+    if (cuisine) {
+      filter.cuisine = cuisine;
+    }
+    if (prepTime) {
+      filter.prepTime = { $lte: Number(prepTime) };
+    }
+    if (vegetarian === 'true') {
+      filter.isVegetarian = true;
+    }
+    if (difficulty) {
+      filter.difficulty = difficulty;
+    }
+
+    const count = await Recipe.countDocuments(filter);
+    res.json({ count });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+/**
+ * @route   GET /api/recipes
+ * @desc    Get all recipes
+ * @access  Public
+ */
+// Enhanced: filter by tags, infinite scroll, etc.
+router.get("/", async (req, res) => {
+  try {
+    const {
+      search,
+      category,
+      ingredient,
+      tag,
+      diet,
+      cuisine,
+      prepTime,
+      vegetarian,
+      difficulty,
+      skip = 0,
+      limit = 20,
+    } = req.query;
+
+    let filter = {};
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+    if (category) {
+      filter.category = category;
+    }
+    if (ingredient && typeof ingredient === "string") {
+      const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.ingredients = {
+        $elemMatch: { $regex: escapeRegex(ingredient), $options: "i" },
+      };
+    }
+    if (tag) {
+      filter.tags = tag;
+    }
+    if (diet) {
+      filter.dietaryPreferences = diet;
+    }
+    if (cuisine) {
+      filter.cuisine = cuisine;
+    }
+    if (prepTime) {
+      filter.prepTime = { $lte: Number(prepTime) };
+    }
+    if (vegetarian === 'true') {
+      filter.isVegetarian = true;
+    }
+    if (difficulty) {
+      filter.difficulty = difficulty;
+    }
+
     const recipes = await Recipe.find(filter)
       .skip(Number(skip))
       .limit(Number(limit))

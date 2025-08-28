@@ -31,29 +31,38 @@ export default function Navbar({ user, onLogout }) {
                     <li><Link to="/about">About</Link></li>
                 </ul>
                 <div className="navbar-glass__profile">
-                    {user ? (
-                        <div className="navbar-glass__avatar-dropdown" ref={dropdownRef}>
-                            <button
-                                className="navbar-glass__avatar-btn"
-                                onClick={() => setDropdownOpen((v) => !v)}
-                                aria-haspopup="true"
-                                aria-expanded={dropdownOpen}
-                                aria-label="Profile menu"
-                            >
+                    <div className="navbar-glass__avatar-dropdown" ref={dropdownRef}>
+                        <button
+                            className="navbar-glass__avatar-btn"
+                            onClick={() => setDropdownOpen((v) => !v)}
+                            aria-haspopup="true"
+                            aria-expanded={dropdownOpen}
+                            aria-label="Profile menu"
+                        >
+                            {user ? (
                                 <img src={user.avatar || "/default-avatar.png"} alt="avatar" className="navbar-glass__avatar" />
-                                <span className="navbar-glass__caret" style={{ marginLeft: 6, fontSize: 16, color: '#84cc16' }}>▼</span>
-                            </button>
-                            {dropdownOpen && (
-                                <div className="navbar-glass__dropdown">
-                                    <button onClick={() => setShowLogoutModal(true)}>Logout</button>
+                            ) : (
+                                <div className="navbar-glass__avatar navbar-glass__avatar--default">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
+                                    </svg>
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <div className="navbar-glass__auth">
-                            <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
-                        </div>
-                    )}
+                            <span className="navbar-glass__caret" style={{ marginLeft: 6, fontSize: 16, color: '#84cc16' }}>▼</span>
+                        </button>
+                        {dropdownOpen && (
+                            <div className="navbar-glass__dropdown">
+                                {user ? (
+                                    <button onClick={() => setShowLogoutModal(true)}>Logout</button>
+                                ) : (
+                                    <>
+                                        <Link to="/login" className="navbar-glass__dropdown-link">Login</Link>
+                                        <Link to="/register" className="navbar-glass__dropdown-link">Register</Link>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </nav>
             <ConfirmModal
