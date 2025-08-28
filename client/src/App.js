@@ -33,7 +33,6 @@ import AddRecipe from "./pages/add-recipe/AddRecipe";
 import RecipeDetail from "./pages/recipe-details/RecipeDetail";
 import Navbar from "./components/Navbar";
 import "./components/Navbar.scss";
-import Categories from "./pages/categories/Categories";
 
 function Layout({ dark, setDark, loggedIn, handleSignOut, showLogoutModal, setShowLogoutModal, confirmSignOut }) {
   const navigate = useNavigate();
@@ -138,7 +137,6 @@ function AnimatedRoutes() {
             </motion.div>
           }
         />
-        <Route path="/categories" element={<Categories />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />

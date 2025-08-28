@@ -1,7 +1,6 @@
 .featured-carousel-section {
   width: 100%;
   position: relative;
-  margin: 0 auto 3rem auto;
   padding: 0;
   background: none;
   box-sizing: border-box;
@@ -12,17 +11,50 @@
   }
 
   &.horizontal-scroll {
-    margin: 0 auto 1.5rem auto;
+    padding: 16px 0;
+    position: relative;
+
+    // Add gradient fade effects on the sides to indicate more content
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 80px;
+      background: linear-gradient(to left, var(--bg-color, white), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    &::before {
+      content: '🔥 Trending Now';
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: var(--heading-color, #222);
+    }
 
     .featured-carousel {
       display: flex;
       flex-wrap: nowrap;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x proximity; // Changed to proximity for smoother scrolling
       scrollbar-width: none;
       /* Firefox */
       -ms-overflow-style: none;
       /* IE and Edge */
+      scroll-behavior: smooth;
+
+      // Add extra space at the end to allow for continuous scrolling illusion
+      &::after {
+        padding: 16px 32px;
+        content: '';
+        min-width: 20px;
+        height: 1px;
+      }
 
       &::-webkit-scrollbar {
         display: none;
@@ -31,10 +63,26 @@
 
       .featured-carousel-card {
         flex: 0 0 auto;
-        width: 250px;
-        margin-right: 1rem;
+        width: 240px;
         scroll-snap-align: start;
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+          transform: translateY(-8px);
+        }
       }
+    }
+
+    // Show a title for the horizontal scroll carousel
+    &::before {
+      content: "🔥 Trending Now";
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: var(--heading-color, #222);
     }
   }
 }
@@ -43,8 +91,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding: 0 0.5rem;
+  margin-bottom: 16px;
+  padding: 0 8px;
 
   .carousel-controls {
     display: flex;
@@ -52,7 +100,7 @@
 
     span {
       color: var(--accent, #f7b731);
-      font-size: 0.9rem;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
 
@@ -64,7 +112,7 @@
 }
 
 .featured-carousel-title {
-  font-size: 1.75rem;
+  font-size: 28px;
   font-weight: 700;
   color: var(--heading-color, #222);
   margin: 0;
@@ -78,20 +126,19 @@
 
 .carousel-container {
   position: relative;
-  padding: 1.5rem 0;
-  margin: 0 -2rem;
+  padding-bottom: 16px;
 
   .nav-button {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.5);
     border: none;
     color: white;
-    font-size: 1.5rem;
+    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,11 +153,11 @@
     }
 
     &.prev {
-      left: 1rem;
+      left: 16px;
     }
 
     &.next {
-      right: 1rem;
+      right: 16px;
     }
 
     &:hover {
@@ -127,10 +174,9 @@
 
 .featured-carousel {
   display: flex;
-  gap: 1rem;
+  gap: 16px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 1rem 2rem;
   margin: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -140,11 +186,12 @@
   display: none;
 }
 
+// Card width will be set inline from the component for consistency
 .featured-carousel-card {
-  min-width: 240px;
-  width: 240px;
+  min-width: unset;
+  width: unset;
   background: var(--card-bg, #fff);
-  border-radius: 0.5rem;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -190,7 +237,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0.75rem;
+  padding: 12px;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -202,12 +249,12 @@
   .time-badge {
     background: rgba(0, 0, 0, 0.6);
     color: white;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 4px;
   }
 }
 
@@ -216,17 +263,17 @@
   background: var(--accent, #f7b731);
   color: white;
   border: none;
-  border-radius: 2rem;
-  padding: 0.5rem 1.25rem;
+  border-radius: 32px;
+  padding: 8px 20px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 
   &:hover {
     background: var(--accent-dark, #e1a500);
@@ -235,14 +282,14 @@
 }
 
 .featured-carousel-info {
-  padding: 0.75rem 1rem;
+  padding: 12px 16px;
   background: var(--card-bg, #fff);
 }
 
 .featured-carousel-title-row {
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -252,21 +299,21 @@
 .featured-carousel-meta {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.8rem;
+  gap: 12px;
+  font-size: 13px;
   color: var(--text-light, #666);
 
   .rating {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 4px;
   }
 
   .category {
     background: var(--tag-bg, #f0f0f0);
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
   }
 }
 

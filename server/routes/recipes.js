@@ -185,6 +185,30 @@ router.post("/", recipeWriteLimiter, verifyToken, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/recipes/autocomplete
+ * @desc    Get recipe title suggestions for autocomplete
+ * @access  Public
+ */
+router.get("/autocomplete", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query || typeof query !== "string" || query.trim().length === 0) {
+      return res.json([]);
+    }
+    // Find up to 10 recipe titles that match the query (case-insensitive, partial match)
+    const suggestions = await Recipe.find({
+      title: { $regex: query, $options: "i" }
+    })
+      .limit(10)
+      .select("title _id");
+    res.json(suggestions);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+/**
  * @route   GET /api/recipes/:id
  * @desc    Get a single recipe by ID
  * @access  Public
@@ -297,6 +321,8 @@ router.post("/:id/like", recipeWriteLimiter, verifyToken, async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// Autocomplete endpoint moved to higher in the file to avoid conflict with :id route
 
 /**
  * @route   GET /api/recipes/:id/comments

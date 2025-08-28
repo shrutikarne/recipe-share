@@ -1,11 +1,31 @@
+// Footer navigation links
+.footer-minimal__links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.footer-link {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.footer-link:hover {
+    color: #f7b731;
+    text-decoration: underline;
+}
+
 .footer-minimal {
     width: 100%;
     background: #f9fafb;
     border-top: 1px solid #e5e7eb;
-    padding: 1.5rem 0 1rem 0;
-    font-size: 1rem;
+    padding: 24px 0 16px 0;
+    font-size: 16px;
     color: #64748b;
-    margin-top: 4rem;
+    margin-top: 64px;
     clear: both;
 }
 
@@ -15,13 +35,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1.5rem;
+    padding: 0 24px;
 }
 
 .footer-minimal__logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 12px;
 }
 
 .footer-logo {
@@ -31,17 +51,17 @@
 
 .logo-text {
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 19px;
     color: #f7b731;
 }
 
 .footer-minimal__socials {
     display: flex;
-    gap: 1.2rem;
+    gap: 16px;
 }
 
 .social-icon {
-    font-size: 1.3rem;
+    font-size: 21px;
     color: #64748b;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -54,9 +74,9 @@
 
 .footer-minimal__copyright {
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 14px;
     color: #94a3b8;
-    margin-top: 1.5rem;
+    margin-top: 24px;
 }
 
 // Dark mode styles
@@ -77,6 +97,6 @@
 @media (max-width: 640px) {
     .footer-minimal__container {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 24px;
     }
 }
