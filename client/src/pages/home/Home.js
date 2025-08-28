@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FeaturedCarousel from "../../components/FeaturedCarousel";
 import CategoryTiles from "../../components/CategoryTiles";
-import EditorsPicks from "../../components/EditorsPicks";
-import CookSuggestion from "../../components/CookSuggestion";
 import RecipeGrid from "../../components/RecipeGrid";
-import "../../components/EditorsPicks.scss";
 import "../../components/CategoryTiles.scss";
 import "../../components/FeaturedCarousel.scss";
 import "../../components/RecipeGrid.scss";
@@ -15,10 +12,8 @@ import API from "../../api/api";
 import "./Home.scss";
 import { motion } from "framer-motion";
 import RecipeQuickPreviewModal from "../../components/RecipeQuickPreviewModal";
-import DarkModeToggle from "../../components/DarkModeToggle";
 import Modal from "react-modal";
 import RecipeDetail from "../recipe-details/RecipeDetail";
-import { FaFilter } from "react-icons/fa";
 import Footer from "../../components/Footer";
 
 /**
@@ -28,27 +23,8 @@ import Footer from "../../components/Footer";
  */
 function Home() {
   const [recipes, setRecipes] = useState([]);
-  const [dark, setDark] = React.useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-  React.useEffect(() => {
-    if (dark) {
-      document.body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [dark]);
-  // (All state variables declared only once, above this comment)
   const recipesRef = React.useRef(null);
 
-  // Editor's Picks: random 6 recipes (could be personalized in future)
-  const editorsPicks = React.useMemo(() => {
-    if (!recipes || recipes.length === 0) return [];
-    const shuffled = [...recipes].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 6);
-  }, [recipes]);
   // Category tile click handler
   const handleCategorySelect = (cat) => {
     if (!cat) return;
@@ -89,11 +65,11 @@ function Home() {
       recipesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-  // Browse button scrolls to recipes
+  // State for Browse Recipes modal
+  const [showBrowseModal, setShowBrowseModal] = useState(false);
+  // Browse button opens modal with all filtered recipes
   const handleBrowse = () => {
-    if (recipesRef.current) {
-      recipesRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    setShowBrowseModal(true);
   };
   // Upload button navigates to add page
   const handleUpload = () => {
@@ -109,7 +85,6 @@ function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [totalRecipes, setTotalRecipes] = useState(0);
   // --- State for the list of recipes ---
-
   const [likeLoading, setLikeLoading] = useState({});
   const [userId, setUserId] = useState(null);
   const [search, setSearch] = useState("");
@@ -117,6 +92,8 @@ function Home() {
   const [ingredient, setIngredient] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [autocomplete, setAutocomplete] = useState([]);
+  const searchInputRef = React.useRef(null);
   const [diet, setDiet] = useState("");
   // New filter state
   const [cuisine, setCuisine] = useState("");
@@ -124,9 +101,6 @@ function Home() {
   // eslint-disable-next-line no-unused-vars
   const [vegetarian, setVegetarian] = useState("");
   const [difficulty, setDifficulty] = useState("");
-  // Autocomplete
-  const [autocomplete, setAutocomplete] = useState([]);
-  const [showAutocomplete, setShowAutocomplete] = useState(false);
   // Fetch autocomplete suggestions
   useEffect(() => {
     let active = true;
@@ -305,59 +279,51 @@ function Home() {
     >
       <form
         className="recipe-filter-form"
+        autoComplete="off"
         onSubmit={(e) => {
           e.preventDefault();
           setShowSearch(false);
           fetchRecipes(true);
+          setTimeout(() => {
+            const el = document.getElementById("browse-all-recipes-section");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }, 200);
         }}
       >
-        <div className="recipe-filter-form__header">
-          <h2>Filter Recipes</h2>
-          <button
-            type="button"
-            className="recipe-filter-form__close"
-            onClick={() => setShowSearch(false)}
-            aria-label="Close filters"
-          >
-            &times;
-          </button>
-        </div>
         <div className="recipe-filter-form__fields">
-          <div className="recipe-filter-form__field">
-            <label htmlFor="search-term">Search Term</label>
-            <div className="recipe-filter-form__search-container">
-              <input
-                id="search-term"
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowAutocomplete(true);
-                }}
-                className="recipe-filter-form__input"
-                placeholder="Search recipes..."
-                onBlur={() => setTimeout(() => setShowAutocomplete(false), 200)}
-                onFocus={() => setShowAutocomplete(true)}
-              />
-              {showAutocomplete && autocomplete.length > 0 && (
-                <ul className="search-autocomplete">
-                  {autocomplete.map((item) => (
-                    <li
-                      key={item._id || item}
-                      className="search-autocomplete__item"
-                      onClick={() => {
-                        setSearch(item.title || item);
-                        setShowAutocomplete(false);
-                      }}
-                    >
-                      {item.title || item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+          <div className="recipe-filter-form__field" style={{ position: 'relative', flexBasis: '100%' }}>
+            <label htmlFor="search-term">Search</label>
+            <input
+              id="search-term"
+              type="text"
+              value={search}
+              ref={searchInputRef}
+              onChange={e => {
+                setSearch(e.target.value);
+              }}
+              className="recipe-filter-form__input"
+              placeholder="Search recipes..."
+              autoComplete="off"
+              onFocus={() => { if (search.length > 1) setAutocomplete(autocomplete); }}
+            />
+            {autocomplete.length > 0 && search.length > 1 && (
+              <ul className="search-autocomplete">
+                {autocomplete.map((item, idx) => (
+                  <li
+                    key={item._id || item.title || idx}
+                    className="search-autocomplete__item"
+                    onMouseDown={() => {
+                      setSearch(item.title || item);
+                      setAutocomplete([]);
+                      setTimeout(() => searchInputRef.current && searchInputRef.current.blur(), 100);
+                    }}
+                  >
+                    {item.title || item}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
           <div className="recipe-filter-form__field">
             <label htmlFor="search-ingredient">Ingredient</label>
             <input
@@ -488,105 +454,83 @@ function Home() {
         />
       </section>
 
+      {/* Browse Recipes Modal - Only Search/Filter Options */}
+      <Modal
+        isOpen={showBrowseModal}
+        onRequestClose={() => setShowBrowseModal(false)}
+        className="recipe-preview-modal browse-modal"
+        overlayClassName="recipe-preview-overlay"
+        contentLabel="Browse Recipes Filters"
+        ariaHideApp={false}
+        shouldCloseOnOverlayClick={true}
+      >
+        <div className="recipe-modal-content">
+          <button
+            className="close-btn"
+            onClick={() => setShowBrowseModal(false)}
+            aria-label="Close browse modal"
+          >
+            &times;
+          </button>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Search & Filter Recipes</h2>
+          <FilterForm />
+        </div>
+      </Modal>
+
       <section className="content-section">
-        {/* Featured Recipes */}
-        <div className="section-divider">
-          <span className="section-title">Featured Recipes</span>
-        </div>
-        <FeaturedCarousel recipes={trendingRecipes} />
-
-        {/* What Should I Cook Today and Editor's Picks - 2 Column Layout */}
-        <div className="two-column-section">
-          <div className="left-column">
-            {/* Explore by Mood - Vibrant Grid */}
-            <div className="section-divider">
-              <span className="section-title">What Should I Cook Today?</span>
-            </div>
-            <div className="mood-exploration-section">
-              <CookSuggestion />
-            </div>
-          </div>
-          <div className="right-column">
-            {/* Editor's Picks - Editorial Carousel */}
-            <div className="section-divider">
-              <span className="section-title">Editor's Picks</span>
-            </div>
-            <EditorsPicks recipes={editorsPicks} />
-          </div>
-        </div>
-
         {/* Category Browse */}
-        <div className="section-divider">
-          <span className="section-title">Browse by Category</span>
+        <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+          <CategoryTiles onCategorySelect={handleCategorySelect} />
         </div>
-        <CategoryTiles onCategorySelect={handleCategorySelect} />
+
+        {/* Trending Now carousel only (Editor's Picks removed) */}
+        <div style={{ width: '100%', maxWidth: '1200px', margin: '32px auto' }}>
+          <FeaturedCarousel
+            recipes={trendingRecipes}
+            horizontalScroll={true}
+            title="🔥 Trending Now"
+            visibleCount={4}
+            cardWidth={300}
+            onViewRecipe={(recipe) => {
+              if (recipe && recipe._id) {
+                window.location.href = `/recipe/${recipe._id}`;
+              }
+            }}
+          />
+        </div>
 
         <div ref={recipesRef} />
-        <div className="home-header-bar">
-          <span className="header-title">All Recipes</span>
-          <div className="header-actions">
-            <DarkModeToggle dark={dark} setDark={setDark} />
-            <button
-              className="search-icon-btn"
-              aria-label="Open search"
-              onClick={() => setShowSearch((s) => !s)}
-              tabIndex={0}
-            >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#374151"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
         {showSearch && <FilterForm />}
 
-        <div className="all-recipes-section">
-          <div className="section-divider smaller">
-            <span className="section-title">Browse All Recipes</span>
-            <button
-              className="filter-button"
-              onClick={() => setShowSearch(!showSearch)}
-              aria-label="Toggle filters"
-            >
-              <FaFilter /> Filters
-            </button>
+        <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="all-recipes-section" id="browse-all-recipes-section">
+            <h2 style={{ textAlign: 'center', margin: '32px 0 16px 0', fontWeight: 700, fontSize: '2rem' }}>Browse All Recipes</h2>
+            <RecipeGrid
+              recipes={recipes}
+              isLoading={loading}
+              onLike={handleLike}
+              onSave={handleSave}
+              onRate={handleRate}
+              onRecipeClick={handleCardClick}
+              onQuickView={(recipe) => {
+                setPreviewRecipe(recipe);
+                setPreviewOpen(true);
+              }}
+              likeLoading={likeLoading}
+              saveLoading={saveLoading}
+              totalRecipes={totalRecipes}
+              currentPage={page}
+              onPageChange={(newPage) => {
+                setPage(newPage);
+                fetchRecipes(true);
+                window.scrollTo({
+                  top: recipesRef.current.offsetTop - 100,
+                  behavior: "smooth"
+                });
+              }}
+            />
           </div>
-
-          <RecipeGrid
-            recipes={recipes}
-            isLoading={loading}
-            onLike={handleLike}
-            onSave={handleSave}
-            onRate={handleRate}
-            onRecipeClick={handleCardClick}
-            onQuickView={(recipe) => {
-              setPreviewRecipe(recipe);
-              setPreviewOpen(true);
-            }}
-            likeLoading={likeLoading}
-            saveLoading={saveLoading}
-            totalRecipes={totalRecipes}
-            currentPage={page}
-            onPageChange={(newPage) => {
-              setPage(newPage);
-              fetchRecipes(true);
-              window.scrollTo({
-                top: recipesRef.current.offsetTop - 100,
-                behavior: "smooth"
-              });
-            }}
-          />
         </div>
       </section>
 

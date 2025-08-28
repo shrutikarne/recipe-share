@@ -24,12 +24,6 @@ export default function Navbar({ user, onLogout }) {
         <>
             <nav className="navbar-glass">
                 <div className="navbar-glass__logo" onClick={() => navigate("/")}>🍳 RecipeShare</div>
-                <ul className="navbar-glass__links">
-                    <li><Link to="/">Home</Link></li>
-                    <li><Link to="/add-recipe">Add Recipe</Link></li>
-                    <li><Link to="/categories">Categories</Link></li>
-                    <li><Link to="/about">About</Link></li>
-                </ul>
                 <div className="navbar-glass__profile">
                     <div className="navbar-glass__avatar-dropdown" ref={dropdownRef}>
                         <button
