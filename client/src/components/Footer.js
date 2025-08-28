@@ -1,26 +1,33 @@
 import React from "react";
 import "./Footer.scss";
+import { FaTwitter, FaInstagram, FaPinterest, FaFacebook } from "react-icons/fa";
 
 export default function Footer() {
     return (
-        <footer className="footer-clean">
-            <div className="footer-clean__container">
-                <div className="footer-clean__links">
-                    <a href="/" className="footer-clean__link">Home</a>
-                    <a href="/categories" className="footer-clean__link">Categories</a>
-                    <a href="/about" className="footer-clean__link">About</a>
+        <footer className="footer-minimal">
+            <div className="footer-minimal__container">
+                <div className="footer-minimal__logo">
+                    <img src="/logo192.png" alt="Recipe Share Logo" className="footer-logo" />
+                    <span className="logo-text">Recipe Share</span>
                 </div>
-                <div className="footer-clean__contact">
-                    <span>Contact: <a href="mailto:hello@recipeshare.com">hello@recipeshare.com</a></span>
-                </div>
-                <div className="footer-clean__socials">
-                    <a href="https://twitter.com" target="_blank" rel="noreferrer noopener" aria-label="Twitter" className="footer-clean__icon">🐦</a>
-                    <a href="https://instagram.com" target="_blank" rel="noreferrer noopener" aria-label="Instagram" className="footer-clean__icon">📸</a>
-                    <a href="https://github.com" target="_blank" rel="noreferrer noopener" aria-label="GitHub" className="footer-clean__icon">💻</a>
+
+                <div className="footer-minimal__socials">
+                    <a href="https://twitter.com" target="_blank" rel="noreferrer noopener" aria-label="Twitter" className="social-icon">
+                        <FaTwitter />
+                    </a>
+                    <a href="https://instagram.com" target="_blank" rel="noreferrer noopener" aria-label="Instagram" className="social-icon">
+                        <FaInstagram />
+                    </a>
+                    <a href="https://pinterest.com" target="_blank" rel="noreferrer noopener" aria-label="Pinterest" className="social-icon">
+                        <FaPinterest />
+                    </a>
+                    <a href="https://facebook.com" target="_blank" rel="noreferrer noopener" aria-label="Facebook" className="social-icon">
+                        <FaFacebook />
+                    </a>
                 </div>
             </div>
-            <div className="footer-clean__copyright">
-                &copy; {new Date().getFullYear()} RecipeShare. All rights reserved.
+            <div className="footer-minimal__copyright">
+                &copy; {new Date().getFullYear()} Recipe Share. All rights reserved.
             </div>
         </footer>
     );

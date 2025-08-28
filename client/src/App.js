@@ -177,9 +177,32 @@ function App() {
     window.location.href = "/";
   };
 
-  // Simulate user state for demo
-  const [user, setUser] = useState(null); // Replace with real auth logic
-  const handleLogout = () => setUser(null);
+  // User authentication state
+  const [user, setUser] = useState(null);
+
+  // Load user data when component mounts or token changes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // In a real app, you would fetch user data from the API
+      // For now, create a simple user object if token exists
+      setUser({ id: "user-123", avatar: null });
+      setLoggedIn(true);
+    } else {
+      setUser(null);
+      setLoggedIn(false);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("token");
+    setLoggedIn(false);
+    toast.info("👋 We'll miss you! Come back soon for more recipes.", {
+      position: "top-center",
+      autoClose: 3000
+    });
+  };
 
   return (
     <BrowserRouter>
