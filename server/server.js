@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
+const path = require("path");
 const config = require("./config/config"); // Import central config
 const connectDB = require("./config/db"); // Import DB connection
 const passport = require("./config/passport");
@@ -84,10 +85,14 @@ app.use(limitJsonPayload('2mb'));  // Limit payload size to 2MB
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Register authentication, recipe, and user routes
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Register authentication, recipe, user, and upload routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/recipes", require("./routes/recipes"));
 app.use("/api/user", require("./routes/user"));
+app.use("/api/uploads", require("./routes/uploads"));
 
 // Connect to MongoDB database
 connectDB();

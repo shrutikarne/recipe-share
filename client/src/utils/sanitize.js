@@ -4,20 +4,43 @@
  */
 
 /**
- * Sanitizes a string by encoding HTML entities
+ * Sanitizes a string by encoding potentially dangerous HTML entities
+ * but preserves common special characters for better user experience
  * @param {string} input - String to sanitize
  * @returns {string} - Sanitized string
  */
 export const sanitizeString = (input) => {
   if (!input || typeof input !== 'string') return '';
 
-  return input
-    .replace(/&/g, '&amp;')
+  // First decode any existing HTML entities to prevent double encoding
+  const decodedInput = decodeHtmlEntities(input);
+  
+  // Only encode characters that could be used for XSS
+  // We're not encoding quotes, apostrophes, ampersands and slashes for better UX
+  return decodedInput
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+    .replace(/>/g, '&gt;');
+};
+
+/**
+ * A more comprehensive function for decoding HTML entities
+ * @param {string} input - String with possible HTML entities
+ * @returns {string} - Decoded string
+ */
+const decodeHtmlEntities = (input) => {
+  if (!input || typeof input !== 'string') return '';
+  
+  // Create a textarea element to leverage browser's native HTML decoding
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = input;
+  
+  // Get the decoded content
+  const decoded = textarea.value;
+  
+  // Clean up
+  textarea.remove();
+  
+  return decoded;
 };
 
 /**
