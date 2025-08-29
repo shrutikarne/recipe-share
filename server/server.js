@@ -4,32 +4,81 @@
  */
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const config = require("./config/config"); // Import central config
 const connectDB = require("./config/db"); // Import DB connection
 const passport = require("./config/passport");
 const session = require("express-session");
-
-// Load environment variables from .env file
-dotenv.config();
+const { sanitizeRequests } = require("./middleware/sanitization");
+const {
+  secureHeaders,
+  preventParamPollution,
+  limitJsonPayload
+} = require("./middleware/security");
 
 const app = express();
 
 // Enable Cross-Origin Resource Sharing for all routes
 app.use(cors({
-  origin: true,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = Array.isArray(config.CORS.ORIGIN) 
+      ? config.CORS.ORIGIN 
+      : [config.CORS.ORIGIN];
+      
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
+    }
+  },
   credentials: true,
 }));
 
 // Session middleware (required for passport, even if not using sessions for JWT)
 app.use(session({
-  secret: process.env.JWT_SECRET || "keyboard cat",
+  secret: config.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false },
+  cookie: {
+    secure: config.COOKIE.SECURE,
+    maxAge: config.COOKIE.MAX_AGE
+  },
 }));
 
 // Parse incoming JSON requests
 app.use(express.json());
+
+// Add cookie parser middleware
+app.use(cookieParser());
+
+// Apply security headers with helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https://storage.googleapis.com", "https://*.googleusercontent.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://api.example.com"]
+    }
+  },
+  // These settings can be adjusted based on your app's needs
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Apply XSS sanitization to all requests
+app.use(sanitizeRequests);
+
+// Apply additional security middleware
+app.use(secureHeaders);
+app.use(preventParamPollution);
+app.use(limitJsonPayload('2mb'));  // Limit payload size to 2MB
 
 // Initialize passport
 app.use(passport.initialize());
@@ -43,11 +92,9 @@ app.use("/api/user", require("./routes/user"));
 // Connect to MongoDB database
 connectDB();
 
-const PORT = process.env.PORT || 5000;
-
 if (require.main === module) {
-  app.listen(PORT, () =>
-    console.log(`Server running on http://localhost:${PORT}`)
+  app.listen(config.PORT, () =>
+    console.log(`Server running in ${config.NODE_ENV} mode on http://localhost:${config.PORT}`)
   );
 }
 

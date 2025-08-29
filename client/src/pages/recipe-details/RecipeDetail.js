@@ -4,22 +4,8 @@ import { motion } from "framer-motion";
 import CookingMode from "../../components/CookingMode";
 import API from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
+import { getUserFromToken } from "../../utils/tokenManager";
 import "./RecipeDetails.scss";
-
-/**
- * Retrieves the user payload from the JWT token stored in localStorage.
- * @returns {object|null} The user payload object if token exists and is valid, otherwise null.
- */
-function getUserFromToken() {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Formats a date string into a relative time ago string (e.g., '2h ago', '3d ago').
@@ -100,13 +86,25 @@ function RecipeDetail(props) {
   };
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    // Combine hours and minutes into total seconds for cookTime
+    // Combine hours and minutes into total minutes for cookTime (not seconds)
     const cookTime =
-      (parseInt(editForm.cookHours) || 0) * 3600 +
-      (parseInt(editForm.cookMinutes) || 0) * 60;
-    const updatedForm = { ...editForm, cookTime };
+      (parseInt(editForm.cookHours) || 0) * 60 +
+      (parseInt(editForm.cookMinutes) || 0);
+
+    // Ensure imageUrls is populated from imageUrl if needed
+    const updatedForm = {
+      ...editForm,
+      cookTime,
+      // If imageUrls is empty but imageUrl exists, use imageUrl
+      imageUrls: editForm.imageUrls?.length ?
+        editForm.imageUrls :
+        (editForm.imageUrl ? [editForm.imageUrl] : [])
+    };
+
+    // Clean up temporary form fields
     delete updatedForm.cookHours;
     delete updatedForm.cookMinutes;
+
     try {
       const res = await API.put(`/recipes/${id}`, updatedForm);
       setRecipe(res.data);

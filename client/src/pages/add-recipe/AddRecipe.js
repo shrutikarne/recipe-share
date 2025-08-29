@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
 import RecipePreviewCard from "./RecipePreviewCard";
+import { sanitizeString, sanitizeFormData } from "../../utils/sanitize";
 import "./AddRecipe.scss";
 
 /**
@@ -51,10 +52,16 @@ function AddRecipe() {
     }
   ];
 
-  // Handlers
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleIngredientsChange = (e) => setForm({ ...form, ingredients: e.target.value.split(",") });
-  const handleStepsChange = (e) => setForm({ ...form, steps: e.target.value.split(",") });
+  // Handlers with sanitization
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: sanitizeString(e.target.value) });
+  const handleIngredientsChange = (e) => {
+    const sanitizedValue = sanitizeString(e.target.value);
+    setForm({ ...form, ingredients: sanitizedValue.split(",").map(item => sanitizeString(item.trim())) });
+  };
+  const handleStepsChange = (e) => {
+    const sanitizedValue = sanitizeString(e.target.value);
+    setForm({ ...form, steps: sanitizedValue.split(",").map(item => sanitizeString(item.trim())) });
+  };
 
   // Step validation
   const validateStep = () => {
@@ -87,11 +94,22 @@ function AddRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const cookTime = (parseInt(cookHours) || 0) * 3600 + (parseInt(cookMinutes) || 0);
+    // Convert hours and minutes to minutes for the backend
+    const cookTime = (parseInt(cookHours) || 0) * 60 + (parseInt(cookMinutes) || 0);
     setError("");
     setSuccess("");
     try {
-      await API.post("/recipes", { ...form, cookTime });
+      // Convert imageUrl to imageUrls array for consistency with schema
+      const imageUrls = form.imageUrl ? [sanitizeString(form.imageUrl)] : [];
+
+      // Sanitize all form data before submission
+      const sanitizedForm = sanitizeFormData(form);
+
+      await API.post("/recipes", {
+        ...sanitizedForm,
+        cookTime,
+        imageUrls
+      });
       setSuccess("Recipe added!");
       setTimeout(() => navigate("/"), 1200);
     } catch (err) {

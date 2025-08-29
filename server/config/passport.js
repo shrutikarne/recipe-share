@@ -2,6 +2,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const User = require("../models/User");
+const config = require("./config");
 
 // Serialize user for session (not used for JWT, but required by passport)
 passport.serializeUser((user, done) => {
@@ -15,8 +16,8 @@ passport.deserializeUser((id, done) => {
 // passport.use(
 //   new GoogleStrategy(
 //     {
-//       clientID: process.env.GOOGLE_CLIENT_ID,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//       clientID: config.OAUTH.GOOGLE.CLIENT_ID,
+//       clientSecret: config.OAUTH.GOOGLE.CLIENT_SECRET,
 //       callbackURL: "/api/auth/google/callback",
 //     },
 //     async (accessToken, refreshToken, profile, done) => {
@@ -42,8 +43,8 @@ passport.deserializeUser((id, done) => {
 // passport.use(
 //   new FacebookStrategy(
 //     {
-//       clientID: process.env.FACEBOOK_APP_ID,
-//       clientSecret: process.env.FACEBOOK_APP_SECRET,
+//       clientID: config.OAUTH.FACEBOOK.APP_ID,
+//       clientSecret: config.OAUTH.FACEBOOK.APP_SECRET,
 //       callbackURL: "/api/auth/facebook/callback",
 //       profileFields: ["id", "displayName", "photos", "email"],
 //     },
