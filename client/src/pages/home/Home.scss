@@ -1,3 +1,34 @@
+// Browse All Recipes section styles
+.browse-all-recipes-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.browse-all-recipes-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.browse-all-recipes-icon {
+  font-size: 28px;
+  vertical-align: middle;
+}
+
+.browse-all-recipes-subtitle {
+  text-align: center;
+  color: var(--text-light, #666);
+  font-size: 16px;
+  margin: 8px 0 16px 0;
+}
+
 .recipe-filter-form__container {
   border-radius: 16px;
   padding: 16px;
@@ -125,8 +156,8 @@
 .content-section {
   width: 100%;
   max-width: 1280px;
-  margin: 0 auto;
   padding: 0 16px;
+  margin: 0 auto;
 }
 
 // Two column layout for Featured & Cook Today
@@ -165,10 +196,6 @@
   background: linear-gradient(to right, rgba(247, 183, 49, 0.1), rgba(247, 183, 49, 0.05));
   border-radius: 16px;
   padding: 24px;
-}
-
-.all-recipes-section {
-  margin-top: 32px;
 }
 
 // Dark mode styles
@@ -574,11 +601,6 @@
   .recipe-masonry-col {
     padding-left: 16px;
   }
-}
-
-// New section divider styles
-.content-section {
-  margin-top: 30px;
 }
 
 .section-divider {

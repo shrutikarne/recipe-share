@@ -11,7 +11,6 @@
   }
 
   &.horizontal-scroll {
-    padding: 16px 0;
     position: relative;
 
     // Add gradient fade effects on the sides to indicate more content
@@ -27,88 +26,32 @@
       z-index: 1;
     }
 
-    &::before {
-      content: '🔥 Trending Now';
-      display: block;
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      padding-left: 24px;
-      color: var(--heading-color, #222);
-    }
+    .featured-carousel-card {
+      flex: 0 0 auto;
+      width: 240px;
+      scroll-snap-align: start;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
-    .featured-carousel {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      scroll-snap-type: x proximity; // Changed to proximity for smoother scrolling
-      scrollbar-width: none;
-      /* Firefox */
-      -ms-overflow-style: none;
-      /* IE and Edge */
-      scroll-behavior: smooth;
-
-      // Add extra space at the end to allow for continuous scrolling illusion
-      &::after {
-        padding: 16px 32px;
-        content: '';
-        min-width: 20px;
-        height: 1px;
-      }
-
-      &::-webkit-scrollbar {
-        display: none;
-        /* Chrome, Safari, Opera */
-      }
-
-      .featured-carousel-card {
-        flex: 0 0 auto;
-        width: 240px;
-        scroll-snap-align: start;
-        transition: transform 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-        &:hover {
-          transform: translateY(-8px);
-        }
+      &:hover {
+        transform: translateY(-8px);
       }
     }
+  }
 
-    // Show a title for the horizontal scroll carousel
-    &::before {
-      content: "🔥 Trending Now";
-      display: block;
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      padding-left: 24px;
-      color: var(--heading-color, #222);
-    }
+  .featured-carousel-subtitle {
+    font-size: 16px;
+    color: var(--text-light, #666);
+    margin: 8px 0 0;
   }
 }
 
 .carousel-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   margin-bottom: 16px;
-  padding: 0 8px;
-
-  .carousel-controls {
-    display: flex;
-    align-items: center;
-
-    span {
-      color: var(--accent, #f7b731);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
 }
 
 .featured-carousel-title {
@@ -125,8 +68,6 @@
 }
 
 .carousel-container {
-  position: relative;
-  padding-bottom: 16px;
 
   .nav-button {
     position: absolute;

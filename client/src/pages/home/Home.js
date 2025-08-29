@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import RecipeQuickPreviewModal from "../../components/RecipeQuickPreviewModal";
 import Modal from "react-modal";
 import RecipeDetail from "../recipe-details/RecipeDetail";
+import { FaUtensils } from "react-icons/fa";
 import Footer from "../../components/Footer";
 
 /**
@@ -502,34 +503,38 @@ function Home() {
 
         {showSearch && <FilterForm />}
 
-        <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="all-recipes-section" id="browse-all-recipes-section">
-            <h2 style={{ textAlign: 'center', margin: '32px 0 16px 0', fontWeight: 700, fontSize: '2rem' }}>Browse All Recipes</h2>
-            <RecipeGrid
-              recipes={recipes}
-              isLoading={loading}
-              onLike={handleLike}
-              onSave={handleSave}
-              onRate={handleRate}
-              onViewRecipe={handleCardClick}
-              onQuickView={(recipe) => {
-                setPreviewRecipe(recipe);
-                setPreviewOpen(true);
-              }}
-              likeLoading={likeLoading}
-              saveLoading={saveLoading}
-              totalRecipes={totalRecipes}
-              currentPage={page}
-              onPageChange={(newPage) => {
-                setPage(newPage);
-                fetchRecipes(true);
-                window.scrollTo({
-                  top: recipesRef.current.offsetTop - 100,
-                  behavior: "smooth"
-                });
-              }}
-            />
+        <div className="all-recipes-section" id="browse-all-recipes-section">
+          <div className="browse-all-recipes-section">
+            <h2 className="browse-all-recipes-title">
+              <FaUtensils className="browse-all-recipes-icon" />
+              Browse All Recipes
+            </h2>
+            <p className="browse-all-recipes-subtitle">Find your next favorite dish from all recipes</p>
           </div>
+          <RecipeGrid
+            recipes={recipes}
+            isLoading={loading}
+            onLike={handleLike}
+            onSave={handleSave}
+            onRate={handleRate}
+            onViewRecipe={handleCardClick}
+            onQuickView={(recipe) => {
+              setPreviewRecipe(recipe);
+              setPreviewOpen(true);
+            }}
+            likeLoading={likeLoading}
+            saveLoading={saveLoading}
+            totalRecipes={totalRecipes}
+            currentPage={page}
+            onPageChange={(newPage) => {
+              setPage(newPage);
+              fetchRecipes(true);
+              window.scrollTo({
+                top: recipesRef.current.offsetTop - 100,
+                behavior: "smooth"
+              });
+            }}
+          />
         </div>
       </section>
 
