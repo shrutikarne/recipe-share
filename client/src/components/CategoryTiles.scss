@@ -1,14 +1,15 @@
 .category-tiles-section {
   width: 100%;
   max-width: 1200px;
-  margin: 32px auto 48px auto;
+  margin: 24px 0;
   padding: 0;
   background: none;
   box-sizing: border-box;
 }
 
 .section-header {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
   text-align: center;
 }
 
@@ -36,9 +37,8 @@
 .category-tiles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
-  padding: 8px;
-  margin-top: 24px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .category-tile {

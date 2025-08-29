@@ -93,14 +93,10 @@ export default function FeaturedCarousel({
         // Auto-scrolling will resume due to useEffect dependency on hovered state
       }}
     >
-      {!horizontalScroll && (
-        <div className="carousel-header">
-          <h2 className="featured-carousel-title">{title}</h2>
-          <div className="carousel-controls">
-            <span>View all</span>
-          </div>
-        </div>
-      )}
+      <div className="carousel-header">
+        <h2 className="featured-carousel-title">{title}</h2>
+        <p className="featured-carousel-subtitle">See what recipes are hot this week</p>
+      </div>
 
       <div className="carousel-container">
         {!horizontalScroll && (

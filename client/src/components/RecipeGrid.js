@@ -16,7 +16,7 @@ export default function RecipeGrid({
   loading = false,
   hasMore = false,
   onLoadMore,
-  itemsPerPage = 6
+  itemsPerPage = 8 // 4 per row, 2 rows
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRecipeId, setHoveredRecipeId] = useState(null);
