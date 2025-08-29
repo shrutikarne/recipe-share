@@ -8,17 +8,35 @@ export default function Navbar({ user, onLogout }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const dropdownRef = useRef(null);
+    const avatarButtonRef = useRef(null);
 
+
+
+    // Handle click outside to close dropdown
     useEffect(() => {
         if (!dropdownOpen) return;
+
         function handleClickOutside(e) {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            // Only close if click is outside both dropdown and button
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target) &&
+                avatarButtonRef.current &&
+                !avatarButtonRef.current.contains(e.target)
+            ) {
                 setDropdownOpen(false);
             }
         }
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen]);
+
+    // Toggle dropdown function
+    const toggleDropdown = () => {
+
+        setDropdownOpen(prevState => !prevState);
+    };
 
     return (
         <>
@@ -26,12 +44,17 @@ export default function Navbar({ user, onLogout }) {
                 <div className="navbar-glass__logo" onClick={() => navigate("/")}>🍳 RecipeShare</div>
                 <div className="navbar-glass__profile">
                     <div className="navbar-glass__avatar-dropdown" ref={dropdownRef}>
-                        <button
+                        {/* Avatar button */}
+                        <div
+                            ref={avatarButtonRef}
                             className="navbar-glass__avatar-btn"
-                            onClick={() => setDropdownOpen((v) => !v)}
-                            aria-haspopup="true"
-                            aria-expanded={dropdownOpen}
-                            aria-label="Profile menu"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                toggleDropdown();
+                            }}
+                            style={{ cursor: 'pointer' }}
                         >
                             {user ? (
                                 <img src={user.avatar || "/default-avatar.png"} alt="avatar" className="navbar-glass__avatar" />
@@ -43,15 +66,23 @@ export default function Navbar({ user, onLogout }) {
                                 </div>
                             )}
                             <span className="navbar-glass__caret" style={{ marginLeft: 6, fontSize: 16, color: '#84cc16' }}>▼</span>
-                        </button>
+                        </div>
+
+                        {/* Dropdown menu */}
                         {dropdownOpen && (
-                            <div className="navbar-glass__dropdown">
+                            <div
+                                className="navbar-glass__dropdown"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 {user ? (
-                                    <button onClick={() => setShowLogoutModal(true)}>Logout</button>
+                                    <>
+                                        <Link to="/profile" className="navbar-glass__dropdown-link">My Profile</Link>
+                                        <button onClick={() => setShowLogoutModal(true)}>Logout</button>
+                                    </>
                                 ) : (
                                     <>
-                                        <Link to="/login" className="navbar-glass__dropdown-link">Login</Link>
-                                        <Link to="/register" className="navbar-glass__dropdown-link">Register</Link>
+                                        <Link to="/auth" className="navbar-glass__dropdown-link">Login</Link>
+                                        <Link to="/auth" className="navbar-glass__dropdown-link">Register</Link>
                                     </>
                                 )}
                             </div>

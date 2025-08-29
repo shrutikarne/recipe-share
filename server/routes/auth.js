@@ -4,10 +4,24 @@
  */
 const express = require("express");
 const rateLimit = require("express-rate-limit");
-// Rate limiter for login route (e.g., max 5 requests per minute per IP)
+// Import validation middleware
+const {
+  validateRequiredFields,
+  validateFields,
+  sanitizeBody,
+  validateEmail,
+  validatePassword,
+  validateName,
+  sanitizeEmail,
+  sanitizeString
+} = require("../middleware/validation");
+
+const config = require("../config/config");
+
+// Rate limiter for login route
 const loginLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 5,
+  windowMs: config.RATE_LIMIT.WINDOW_MS,
+  max: config.RATE_LIMIT.MAX_LOGIN,
   message: {
     msg: "Too many login attempts from this IP, please try again later.",
   },
@@ -15,10 +29,10 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiter for registration route (e.g., max 5 requests per minute per IP)
+// Rate limiter for registration route
 const registerLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 5,
+  windowMs: config.RATE_LIMIT.WINDOW_MS,
+  max: config.RATE_LIMIT.MAX_REGISTER,
   message: {
     msg: "Too many registration attempts from this IP, please try again later.",
   },
@@ -34,11 +48,13 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false, failureRedirect: "/?error=google" }),
   (req, res) => {
-    // Issue JWT and redirect to frontend with token
+    // Issue JWT and set as cookie
     const payload = { user: { id: req.user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30m" });
-    // Redirect to frontend with token in query param (or set cookie)
-    res.redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/auth/social?token=${token}`);
+    const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT.EXPIRATION });
+    // Set the token as HTTP-only cookie
+    setTokenCookie(res, token);
+    // Redirect to frontend without token in query param
+    res.redirect(`${config.CLIENT_URL}/auth/social?success=true`);
   }
 );
 
@@ -50,13 +66,15 @@ router.get(
   passport.authenticate("facebook", { session: false, failureRedirect: "/?error=facebook" }),
   (req, res) => {
     const payload = { user: { id: req.user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30m" });
-    res.redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/auth/social?token=${token}`);
+    const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT.EXPIRATION });
+    // Set the token as HTTP-only cookie
+    setTokenCookie(res, token);
+    res.redirect(`${config.CLIENT_URL}/auth/social?success=true`);
   }
 );
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { verifyToken } = require("../middleware/auth");
+const { verifyToken, setTokenCookie, clearTokenCookie } = require("../middleware/auth");
 const User = require("../models/User");
 
 /**
@@ -64,90 +82,149 @@ const User = require("../models/User");
  * @desc    Register a new user and return a JWT token
  * @access  Public
  */
-router.post("/register", registerLimiter, async (req, res) => {
-  const { name, email, password } = req.body;
+router.post("/register",
+  registerLimiter,
+  validateRequiredFields(['name', 'email', 'password']),
+  validateFields({
+    name: validateName,
+    email: validateEmail,
+    password: validatePassword
+  }),
+  sanitizeBody({
+    name: sanitizeString,
+    email: sanitizeEmail
+  }),
+  async (req, res) => {
+    const { name, email, password } = req.body;
 
-  // Validate required fields
-  if (!name || !email || !password) {
-    return res
-      .status(400)
-      .json({ msg: "Name, email, and password are required" });
-  }
+    try {
+      // Check if user already exists
+      let user = await User.findOne({ email });
+      if (user) return res.status(400).json({ msg: "User already exists" });
 
-  // Validate email is a string and matches a safe email pattern
-  if (
-    typeof email !== "string" ||
-    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-  ) {
-    return res.status(400).json({ msg: "Invalid email format" });
-  }
+      // Hash the password before saving
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-  try {
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ msg: "User already exists" });
+      // Create and save the new user
+      user = new User({ name, email, password: hashedPassword });
+      await user.save();
 
-    // Hash the password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+      // Create JWT payload and sign token
+      const payload = { user: { id: user.id } };
+      const token = jwt.sign(payload, config.JWT_SECRET, {
+        expiresIn: config.JWT.EXPIRATION,
+      });
 
-    // Create and save the new user
-    user = new User({ name, email, password: hashedPassword });
-    await user.save();
-
-    // Create JWT payload and sign token
-    const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "30m", // 30 minutes
-    });
-
-    // Return the token
-    res.json({ token });
-  } catch (err) {
-    // Log and return server error
-    console.error(err && err.message ? err.message : err);
-    res.status(500).send("Server error");
-  }
-});
+      // Return the token
+      res.json({ token });
+    } catch (err) {
+      // Log and return server error
+      console.error(err && err.message ? err.message : err);
+      res.status(500).send("Server error");
+    }
+  });
 
 /**
  * @route   POST /api/auth/login
  * @desc    Authenticate user and return a JWT token
  * @access  Public
  */
-router.post("/login", loginLimiter, async (req, res) => {
-  const { email, password } = req.body;
+router.post("/login",
+  loginLimiter,
+  validateRequiredFields(['email', 'password']),
+  validateFields({
+    email: validateEmail,
+    password: (password) => typeof password === 'string' ? true : 'Password must be a string'
+  }),
+  sanitizeBody({
+    email: sanitizeEmail
+  }),
+  async (req, res) => {
+    const { email, password } = req.body;
 
-  // Validate email is a string and matches a safe email pattern
-  if (
-    typeof email !== "string" ||
-    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-  ) {
-    return res.status(400).json({ msg: "Invalid email format" });
-  }
+    try {
+      // Find user by email
+      const user = await User.findOne({ email });
+      if (!user) return res.status(401).json({ msg: "Invalid credentials" });
 
+      // Compare provided password with hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
+
+      // Create JWT payload and sign token
+      const payload = { user: { id: user.id } };
+      const token = jwt.sign(payload, config.JWT_SECRET, {
+        expiresIn: config.JWT.EXPIRATION,
+      });
+
+      // Set the token as HTTP-only cookie
+      setTokenCookie(res, token);
+
+      // Return success without the token in the body
+      res.json({
+        success: true,
+        userId: user.id,
+        expiresIn: parseInt(config.JWT.EXPIRATION) || 30
+      });
+    } catch (err) {
+      // Log and return server error
+      console.error(err && err.message ? err.message : err);
+      res.status(500).send("Server error");
+    }
+  });
+
+/**
+ * @route   POST /api/auth/refresh
+ * @desc    Refresh JWT token before expiration
+ * @access  Private (requires valid token)
+ */
+router.post("/refresh", verifyToken, async (req, res) => {
   try {
-    // Find user by email
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ msg: "Invalid credentials" });
+    // Get user id from verified token
+    const userId = req.user.id;
 
-    // Compare provided password with hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
+    if (!userId) {
+      return res.status(401).json({ msg: "Invalid token format" });
+    }
 
-    // Create JWT payload and sign token
-    const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "30m", // 30 minutes
+    // Find the user to ensure they still exist
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ msg: "User not found" });
+    }
+
+    // Create a new token with a fresh expiration time
+    const payload = { user: { id: userId } };
+    const newToken = jwt.sign(payload, config.JWT_SECRET, {
+      expiresIn: config.JWT.EXPIRATION,
     });
 
-    // Return the token
-    res.json({ token });
+    // Set the new token as HTTP-only cookie
+    setTokenCookie(res, newToken);
+
+    // Return success without the token in the body
+    res.json({
+      success: true,
+      expiresIn: parseInt(config.JWT.EXPIRATION) || 30
+    });
   } catch (err) {
-    // Log and return server error
-    console.error(err && err.message ? err.message : err);
+    console.error(err.message);
     res.status(500).send("Server error");
   }
+});
+
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Logout user by clearing the cookie
+ * @access  Public
+ */
+router.post("/logout", (req, res) => {
+  // Clear the token cookie
+  clearTokenCookie(res);
+
+  // Return success
+  res.json({ success: true, msg: "Logged out successfully" });
 });
 
 module.exports = router;

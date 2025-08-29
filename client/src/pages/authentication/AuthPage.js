@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import API from "../../api/api";
+import { sanitizeFormData } from "../../utils/sanitize";
 import "./AuthPage.scss";
 
 /**
@@ -43,12 +44,18 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await API.post("/auth/login", loginForm);
-      localStorage.setItem("token", res.data.token);
-      toast.success("Login successful! 🎉");
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1200);
+      // Sanitize form data before submission
+      const sanitizedForm = sanitizeFormData(loginForm);
+      const res = await API.post("/auth/login", sanitizedForm);
+      // With HTTP-only cookies, we don't have access to the token directly
+      // Instead, we'll use our session-based authentication tracking
+      import("../../utils/tokenManager").then(({ setAuthenticated }) => {
+        setAuthenticated(res.data.userId, res.data.expiresIn);
+        toast.success("Login successful! 🎉");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1200);
+      });
     } catch (err) {
       toast.error(err.response?.data?.msg || "Error logging in");
     } finally {
@@ -64,7 +71,9 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post("/auth/register", registerForm);
+      // Sanitize form data before submission
+      const sanitizedForm = sanitizeFormData(registerForm);
+      await API.post("/auth/register", sanitizedForm);
       toast.success("Registered successfully! Please login.");
       setTab("login"); // Switch to login tab
     } catch (err) {

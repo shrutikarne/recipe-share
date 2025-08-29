@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FeaturedCarousel from "../../components/FeaturedCarousel";
 import CategoryTiles from "../../components/CategoryTiles";
 import RecipeGrid from "../../components/RecipeGrid";
@@ -23,6 +24,7 @@ import Footer from "../../components/Footer";
  */
 function Home() {
   const [recipes, setRecipes] = useState([]);
+  const navigate = useNavigate();
   const recipesRef = React.useRef(null);
 
   // Category tile click handler
@@ -154,25 +156,21 @@ function Home() {
 
   useEffect(() => {
     fetchRecipes(true);
-    // Get userId from JWT (if logged in)
-    const token = localStorage.getItem("token");
-    if (token) {
-      let payload;
-      try {
-        payload = JSON.parse(atob(token.split(".")[1]));
-      } catch {
-        payload = null;
+    // Use the token manager to check authentication status
+    import("../../utils/tokenManager").then(({ isAuthenticated, getUserId }) => {
+      if (isAuthenticated()) {
+        const userId = getUserId();
+        if (userId) {
+          setUserId(userId);
+          // Fetch user's saved recipes
+          API.get("/user/saved")
+            .then((res) => {
+              // Store saved recipe IDs in recipe objects directly when they're fetched
+            })
+            .catch(console.error);
+        }
       }
-      if (payload && payload.user && payload.user.id) {
-        setUserId(payload.user.id);
-        // Fetch user's saved recipes
-        API.get("/user/saved")
-          .then((res) => {
-            // Store saved recipe IDs in recipe objects directly when they're fetched
-          })
-          .catch(console.error);
-      }
-    }
+    });
 
     // Attach scroll listener for infinite scrolling
     const handleScroll = () => {
@@ -192,8 +190,9 @@ function Home() {
 
   // Recipe card click handler
   const handleCardClick = (r) => {
-    setPreviewRecipe(r);
-    setPreviewOpen(true);
+    if (r && r._id) {
+      navigate(`/recipe/${r._id}`);
+    }
   };
 
   const handleViewFullRecipe = (recipe) => {
@@ -512,7 +511,7 @@ function Home() {
               onLike={handleLike}
               onSave={handleSave}
               onRate={handleRate}
-              onRecipeClick={handleCardClick}
+              onViewRecipe={handleCardClick}
               onQuickView={(recipe) => {
                 setPreviewRecipe(recipe);
                 setPreviewOpen(true);

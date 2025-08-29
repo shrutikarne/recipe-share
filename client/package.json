@@ -25,6 +25,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:unit": "react-scripts test --testMatch='**/*.unit.test.js'",
+    "test:e2e": "npx playwright test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

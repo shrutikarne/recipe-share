@@ -16,7 +16,7 @@
      border-bottom: 1.5px solid #e5e7eb;
      font-family: inherit;
      transition: background 0.2s;
-     overflow-x: hidden;
+    /* overflow-x: hidden; removed to allow dropdown to overflow */
  }
 
  .navbar-glass__logo {
@@ -95,23 +95,26 @@
  .navbar-glass__dropdown {
      position: absolute;
      right: 0;
-     top: 120%;
-     background: rgba(255, 255, 255, 0.95);
+     top: 45px; /* Fixed position from the top */
+     background: rgba(255, 255, 255, 0.98); /* More opaque background */
      border-radius: 10px;
-     box-shadow: 0 2px 12px rgba(132, 204, 22, 0.08);
+     z-index: 9999; /* Highest z-index to ensure visibility */
+     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* More visible shadow */
      padding: 12px 0;
      min-width: 140px;
-     border: 1px solid #e5e7eb;
-     z-index: 10;
+     border: 2px solid #84cc16; /* Highlight border */
+     display: block !important; /* Force display */
  }
 
  .navbar-glass__avatar-btn {
      background: none;
      border: none;
      cursor: pointer;
-     padding: 0;
+     padding: 5px;  /* Add some padding to increase click area */
      display: flex;
      align-items: center;
+     position: relative; /* Ensure proper positioning */
+     z-index: 50; /* Make sure it's above other elements */
  }
 
  .navbar-glass__dropdown button,
@@ -120,10 +123,10 @@
      background: none;
      border: none;
      color: #fb7185;
-     font-weight: 500;
+     font-weight: 600; /* Make text bolder */
      font-size: 16px;
      cursor: pointer;
-     padding: 8px 16px;
+     padding: 10px 16px; /* Slightly larger padding */
      width: 100%;
      text-align: left;
      text-decoration: none;
