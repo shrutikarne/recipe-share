@@ -151,7 +151,6 @@ function Home() {
         }
         setHasMore(res.data.length === 9);
       })
-      .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   };
 
@@ -168,7 +167,6 @@ function Home() {
             .then((res) => {
               // Store saved recipe IDs in recipe objects directly when they're fetched
             })
-            .catch(console.error);
         }
       }
     });
@@ -218,7 +216,6 @@ function Home() {
           )
         );
       })
-      .catch(console.error)
       .finally(() => {
         setLikeLoading((prev) => ({ ...prev, [recipeId]: false }));
       });
@@ -239,7 +236,6 @@ function Home() {
           )
         );
       })
-      .catch(console.error)
       .finally(() => {
         setSaveLoading((prev) => ({ ...prev, [recipeId]: false }));
       });
@@ -265,7 +261,6 @@ function Home() {
           )
         );
       })
-      .catch(console.error);
   };
 
   // This functional component + the framer-motion tag creates a nice animation for recipe filters

@@ -22,14 +22,14 @@ const app = express();
 
 // Enable Cross-Origin Resource Sharing for all routes
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
-    const allowedOrigins = Array.isArray(config.CORS.ORIGIN) 
-      ? config.CORS.ORIGIN 
+
+    const allowedOrigins = Array.isArray(config.CORS.ORIGIN)
+      ? config.CORS.ORIGIN
       : [config.CORS.ORIGIN];
-      
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -98,9 +98,7 @@ app.use("/api/uploads", require("./routes/uploads"));
 connectDB();
 
 if (require.main === module) {
-  app.listen(config.PORT, () =>
-    console.log(`Server running in ${config.NODE_ENV} mode on http://localhost:${config.PORT}`)
-  );
+  app.listen(config.PORT);
 }
 
 module.exports = app;

@@ -49,7 +49,6 @@ router.post("/save/:id",
       await user.save();
       res.json({ saved: true });
     } catch (err) {
-      console.error(err.message);
 
       // Better error handling
       if (err.name === 'ValidationError') {
@@ -94,7 +93,6 @@ router.post("/unsave/:id",
       await user.save();
       res.json({ saved: false });
     } catch (err) {
-      console.error(err.message);
 
       // Better error handling
       if (err.name === 'ValidationError') {

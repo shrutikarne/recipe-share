@@ -51,7 +51,6 @@ const Profile = () => {
                 if (recipesResult.status === 'fulfilled') {
                     setRecipes(recipesResult.value);
                 } else {
-                    console.error('Error fetching recipes:', recipesResult.reason);
                     showWarningToast('Could not load your recipes');
                 }
 
@@ -63,7 +62,6 @@ const Profile = () => {
                         savedAt: item.savedAt
                     })));
                 } else {
-                    console.error('Error fetching saved recipes:', savedResult.reason);
                     showWarningToast('Could not load your saved recipes');
                 }
             } catch (error) {

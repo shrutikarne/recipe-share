@@ -67,32 +67,32 @@ function AddRecipe() {
   // Enhanced handlers with proper sanitization
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Apply minimal sanitization for all inputs to allow most special characters
-    setForm({ 
-      ...form, 
-      [name]: value 
+    setForm({
+      ...form,
+      [name]: value
     });
   };
-  
+
   // Only sanitize on form submission, not during input
   const prepareForSubmission = (formData) => {
     const sanitizedData = {};
-    
+
     // Make sure required fields are present and not empty
     // According to server validation, title and steps are required
     if (!formData.title || formData.title.trim() === '') {
       throw new Error('Title is required');
     }
-    
+
     if (!formData.steps || !Array.isArray(formData.steps) || formData.steps.length === 0) {
       throw new Error('At least one step is required');
     }
-    
+
     if (!formData.ingredients || !Array.isArray(formData.ingredients) || formData.ingredients.length === 0) {
       throw new Error('At least one ingredient is required');
     }
-    
+
     // Process each field
     for (const [key, value] of Object.entries(formData)) {
       if (typeof value === 'string') {
@@ -107,10 +107,10 @@ function AddRecipe() {
         sanitizedData[key] = value;
       }
     }
-    
+
     return sanitizedData;
   };
-  
+
   const handleAddIngredient = () => {
     if (ingredientInput.trim()) {
       // Don't sanitize during input to preserve user's text as-is
@@ -121,13 +121,13 @@ function AddRecipe() {
       setIngredientInput("");
     }
   };
-  
+
   const handleRemoveIngredient = (index) => {
     const updatedIngredients = [...form.ingredients];
     updatedIngredients.splice(index, 1);
     setForm({ ...form, ingredients: updatedIngredients });
   };
-  
+
   const handleAddStep = () => {
     if (stepInput.trim()) {
       // Don't sanitize during input to preserve user's text as-is
@@ -138,7 +138,7 @@ function AddRecipe() {
       setStepInput("");
     }
   };
-  
+
   const handleRemoveStep = (index) => {
     const updatedSteps = [...form.steps];
     updatedSteps.splice(index, 1);
@@ -152,15 +152,14 @@ function AddRecipe() {
       try {
         // Show loading state
         setIsSubmitting(true);
-        
+
         // For preview purposes, create a local object URL
         const localPreviewUrl = URL.createObjectURL(file);
         setForm({ ...form, imagePreview: localPreviewUrl, imageFile: file });
-        
+
         // No need to upload immediately, we'll do it on form submission
         setIsSubmitting(false);
       } catch (err) {
-        console.error('Error handling image:', err);
         setError('Failed to process image. Please try again.');
         setIsSubmitting(false);
       }
@@ -200,7 +199,7 @@ function AddRecipe() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-  
+
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
     setError("");
@@ -209,42 +208,42 @@ function AddRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields before submission
     if (!form.title || !form.title.trim()) {
       setError("Please enter a recipe title");
       return;
     }
-    
+
     if (!form.steps || form.steps.length === 0) {
       setError("Please add at least one step");
       return;
     }
-    
+
     if (!form.ingredients || form.ingredients.length === 0) {
       setError("Please add at least one ingredient");
       return;
     }
-    
+
     // Validate category (must be at least 2 characters)
     if (!form.category || form.category.trim().length < 2) {
       setError("Please select a valid category");
       return;
     }
-    
+
     // Calculate cookTime in minutes
-    const cookTime = 
+    const cookTime =
       (parseInt(cookHours || 0) * 60) + parseInt(cookMinutes || 0);
-    
+
     // Prevent submission if cookTime is 0
     if (cookTime <= 0) {
       setError("Please set a valid cook time");
       return;
     }
-    
+
     setIsSubmitting(true);
     setError("");
-    
+
     try {
       // First, handle image upload if we have a new image file
       let finalImageUrl = form.imageUrl; // Start with existing URL if any
@@ -252,13 +251,10 @@ function AddRecipe() {
       if (form.imageFile) {
         // Upload the image and get its URL
         finalImageUrl = await uploadRecipeImage(form.imageFile);
-        console.log("Image uploaded successfully:", finalImageUrl);
       }
 
       // Ensure the image URL is absolute (required by backend)
-      if (finalImageUrl && finalImageUrl.startsWith('/uploads/')) {
-        finalImageUrl = `http://localhost:5000${finalImageUrl}`;
-      }
+      // If using S3, the URL will be absolute. No need to prefix with localhost.
 
       // Apply sanitization to the form data
       const sanitizedForm = prepareForSubmission({
@@ -269,24 +265,17 @@ function AddRecipe() {
       // Convert imageUrl to imageUrls array for consistency with schema
       const imageUrls = finalImageUrl ? [finalImageUrl] : [];
 
-      // Log the data being sent (for debugging)
-      console.log("Submitting recipe data:", {
+
+
+      await API.post("/recipes", {
         ...sanitizedForm,
         cookTime,
         imageUrls
       });
 
-      const response = await API.post("/recipes", {
-        ...sanitizedForm,
-        cookTime,
-        imageUrls
-      });
-
-      console.log("Server response:", response);
       setSuccess("Recipe added!");
       setTimeout(() => navigate("/"), 1200);
     } catch (err) {
-      console.error("Submission error:", err);
       if (err.response?.data?.details) {
         // Show specific validation errors if available
         const errorDetails = err.response.data.details;
@@ -313,30 +302,30 @@ function AddRecipe() {
             transition={{ duration: 0.3 }}
           >
             <label className="add-recipe-form__label" htmlFor="title">Recipe Title</label>
-            <input 
-              className="add-recipe-form__input" 
-              id="title" 
-              name="title" 
-              placeholder="E.g., Homemade Margherita Pizza" 
-              value={form.title} 
-              onChange={handleChange} 
-              aria-required="true" 
+            <input
+              className="add-recipe-form__input"
+              id="title"
+              name="title"
+              placeholder="E.g., Homemade Margherita Pizza"
+              value={form.title}
+              onChange={handleChange}
+              aria-required="true"
             />
-            
+
             <label className="add-recipe-form__label" htmlFor="description">Description</label>
-            <textarea 
-              className="add-recipe-form__textarea" 
-              id="description" 
-              name="description" 
-              placeholder="Describe your recipe in a few sentences..." 
-              value={form.description} 
-              onChange={handleChange} 
+            <textarea
+              className="add-recipe-form__textarea"
+              id="description"
+              name="description"
+              placeholder="Describe your recipe in a few sentences..."
+              value={form.description}
+              onChange={handleChange}
               aria-required="true"
               rows={4}
             />
           </motion.div>
         );
-        
+
       case 1:
         return (
           <motion.div
@@ -346,38 +335,38 @@ function AddRecipe() {
             transition={{ duration: 0.3 }}
           >
             <label className="add-recipe-form__label">Ingredients</label>
-            
+
             <div className="item-list">
               {form.ingredients.map((ingredient, index) => (
                 <div key={index} className="item-list__item">
                   <div className="item-list__item-content">{ingredient}</div>
-                  <button 
-                    type="button" 
-                    className="item-list__item-remove" 
+                  <button
+                    type="button"
+                    className="item-list__item-remove"
                     onClick={() => handleRemoveIngredient(index)}
                     aria-label={`Remove ingredient: ${ingredient}`}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>
               ))}
             </div>
-            
+
             <div style={{ display: "flex", gap: 8 }}>
-              <input 
-                className="add-recipe-form__input" 
-                value={ingredientInput} 
+              <input
+                className="add-recipe-form__input"
+                value={ingredientInput}
                 onChange={e => setIngredientInput(e.target.value)}
                 onKeyPress={e => e.key === "Enter" && handleAddIngredient()}
-                placeholder="Type an ingredient and press Enter" 
+                placeholder="Type an ingredient and press Enter"
                 style={{ flex: 1 }}
               />
-              <button 
-                type="button" 
-                onClick={handleAddIngredient} 
-                className="form-btn form-btn--primary" 
+              <button
+                type="button"
+                onClick={handleAddIngredient}
+                className="form-btn form-btn--primary"
                 style={{ padding: "0 16px" }}
               >
                 Add
@@ -385,7 +374,7 @@ function AddRecipe() {
             </div>
           </motion.div>
         );
-        
+
       case 2:
         return (
           <motion.div
@@ -395,38 +384,38 @@ function AddRecipe() {
             transition={{ duration: 0.3 }}
           >
             <label className="add-recipe-form__label">Preparation Steps</label>
-            
+
             <div className="item-list">
               {form.steps.map((step, index) => (
                 <div key={index} className="item-list__item">
                   <div className="item-list__item-number">{index + 1}</div>
                   <div className="item-list__item-content">{step}</div>
-                  <button 
-                    type="button" 
-                    className="item-list__item-remove" 
+                  <button
+                    type="button"
+                    className="item-list__item-remove"
                     onClick={() => handleRemoveStep(index)}
                     aria-label={`Remove step ${index + 1}`}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>
               ))}
             </div>
-            
+
             <div style={{ display: "flex", gap: 8 }}>
-              <textarea 
-                className="add-recipe-form__textarea" 
-                value={stepInput} 
+              <textarea
+                className="add-recipe-form__textarea"
+                value={stepInput}
                 onChange={e => setStepInput(e.target.value)}
-                placeholder="Describe a step in the cooking process..." 
+                placeholder="Describe a step in the cooking process..."
                 style={{ flex: 1 }}
                 rows={2}
               />
-              <button 
-                type="button" 
-                onClick={handleAddStep} 
+              <button
+                type="button"
+                onClick={handleAddStep}
                 className="form-btn form-btn--primary"
                 style={{ padding: "0 16px", alignSelf: "flex-start" }}
               >
@@ -435,7 +424,7 @@ function AddRecipe() {
             </div>
           </motion.div>
         );
-        
+
       case 3:
         return (
           <motion.div
@@ -445,31 +434,31 @@ function AddRecipe() {
             transition={{ duration: 0.3 }}
           >
             <div className="add-recipe-form__file-input-container">
-              <input 
+              <input
                 ref={fileInputRef}
-                type="file" 
-                className="add-recipe-form__file-input" 
-                id="recipe-image" 
-                accept="image/*" 
-                onChange={handleImageUpload} 
+                type="file"
+                className="add-recipe-form__file-input"
+                id="recipe-image"
+                accept="image/*"
+                onChange={handleImageUpload}
               />
               <label htmlFor="recipe-image" className="add-recipe-form__file-label">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 16V17C7 19.7614 9.23858 22 12 22C14.7614 22 17 19.7614 17 17V16M12 2V12M12 2L8 6M12 2L16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 16V17C7 19.7614 9.23858 22 12 22C14.7614 22 17 19.7614 17 17V16M12 2V12M12 2L8 6M12 2L16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span>{form.imagePreview || form.imageUrl ? "Change Image" : "Upload Recipe Image"}</span>
               </label>
             </div>
-            
+
             <div className="add-recipe-form__grid">
               <div>
                 <label className="add-recipe-form__label" htmlFor="category">Category <span style={{ color: '#666', fontSize: '0.85em' }}>(required)</span></label>
-                <select 
-                  className={`add-recipe-form__select ${!form.category ? 'add-recipe-form__select--required' : ''}`} 
-                  id="category" 
-                  name="category" 
-                  value={form.category} 
-                  onChange={handleChange} 
+                <select
+                  className={`add-recipe-form__select ${!form.category ? 'add-recipe-form__select--required' : ''}`}
+                  id="category"
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
                   aria-required="true"
                 >
                   <option value="">Select category</option>
@@ -487,7 +476,7 @@ function AddRecipe() {
                   </div>
                 )}
               </div>
-              
+
               <div>
                 <label className="add-recipe-form__label" htmlFor="diet">Diet Type</label>
                 <select className="add-recipe-form__select" id="diet" name="diet" value={form.diet} onChange={handleChange} aria-required="true">
@@ -503,28 +492,28 @@ function AddRecipe() {
                 </select>
               </div>
             </div>
-            
+
             <label className="add-recipe-form__label">Cook Time <span style={{ color: '#666', fontSize: '0.85em' }}>(required, at least 1 minute)</span></label>
             <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
               <div style={{ flex: 1 }}>
-                <input 
-                  className="add-recipe-form__input" 
-                  type="number" 
-                  min="0" 
-                  value={cookHours} 
-                  onChange={e => setCookHours(e.target.value)} 
-                  placeholder="Hours" 
-                  id="cook-hours" 
-                  aria-label="Cook time hours" 
+                <input
+                  className="add-recipe-form__input"
+                  type="number"
+                  min="0"
+                  value={cookHours}
+                  onChange={e => setCookHours(e.target.value)}
+                  placeholder="Hours"
+                  id="cook-hours"
+                  aria-label="Cook time hours"
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <input 
-                  className="add-recipe-form__input" 
-                  type="number" 
-                  min="0" 
-                  max="59" 
-                  value={cookMinutes} 
+                <input
+                  className="add-recipe-form__input"
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={cookMinutes}
                   onChange={e => {
                     // Ensure minutes are between 0-59
                     const val = parseInt(e.target.value);
@@ -533,22 +522,22 @@ function AddRecipe() {
                     } else if (e.target.value === '') {
                       setCookMinutes('');
                     }
-                  }} 
-                  placeholder="Minutes" 
-                  id="cook-minutes" 
-                  aria-label="Cook time minutes" 
+                  }}
+                  placeholder="Minutes"
+                  id="cook-minutes"
+                  aria-label="Cook time minutes"
                 />
               </div>
             </div>
-            {(cookHours === '0' || cookHours === 0 || cookHours === '') && 
-             (cookMinutes === '0' || cookMinutes === 0 || cookMinutes === '') && (
-              <div style={{ color: '#ef4444', fontSize: '0.85em', marginTop: -16, marginBottom: 16 }}>
-                Please set cook time to at least 1 minute
-              </div>
-            )}
+            {(cookHours === '0' || cookHours === 0 || cookHours === '') &&
+              (cookMinutes === '0' || cookMinutes === 0 || cookMinutes === '') && (
+                <div style={{ color: '#ef4444', fontSize: '0.85em', marginTop: -16, marginBottom: 16 }}>
+                  Please set cook time to at least 1 minute
+                </div>
+              )}
           </motion.div>
         );
-        
+
       default:
         return null;
     }
@@ -556,20 +545,20 @@ function AddRecipe() {
 
   return (
     <div className="add-recipe-form-preview-layout">
-      <motion.form 
-        className="add-recipe-form" 
-        onSubmit={handleSubmit} 
+      <motion.form
+        className="add-recipe-form"
+        onSubmit={handleSubmit}
         aria-label="Add recipe form"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         <h2 className="add-recipe-form__h2">Create Your Recipe</h2>
-        
+
         <div className="stepper">
           {steps.map((step, idx) => (
-            <div 
-              key={step.title} 
+            <div
+              key={step.title}
               className={`stepper__step ${idx === activeStep ? "active" : ""} ${idx < activeStep ? "completed" : ""}`}
             >
               <div className="stepper__step-number">
@@ -582,11 +571,11 @@ function AddRecipe() {
             </div>
           ))}
         </div>
-        
+
         <AnimatePresence mode="wait">
           {error && (
-            <motion.div 
-              className="form-error" 
+            <motion.div
+              className="form-error"
               role="alert"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -595,10 +584,10 @@ function AddRecipe() {
               {error}
             </motion.div>
           )}
-          
+
           {success && (
-            <motion.div 
-              className="form-success" 
+            <motion.div
+              className="form-success"
               role="alert"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -608,7 +597,7 @@ function AddRecipe() {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         <div className="form-content">
           <AnimatePresence mode="wait">
             <motion.div
@@ -622,13 +611,13 @@ function AddRecipe() {
             </motion.div>
           </AnimatePresence>
         </div>
-        
+
         <div className="form-navigation">
           <div className="form-navigation__buttons">
             {activeStep > 0 && (
-              <motion.button 
-                type="button" 
-                onClick={handleBack} 
+              <motion.button
+                type="button"
+                onClick={handleBack}
                 className="form-btn form-btn--secondary"
                 disabled={isSubmitting}
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
@@ -637,12 +626,12 @@ function AddRecipe() {
                 Back
               </motion.button>
             )}
-            
+
             {activeStep === steps.length - 1 ? (
-              <motion.button 
-                type="submit" 
-                className="form-btn form-btn--primary" 
-                disabled={isSubmitting || !!error || !form.category || ((cookHours === '0' || cookHours === 0 || cookHours === '') && 
+              <motion.button
+                type="submit"
+                className="form-btn form-btn--primary"
+                disabled={isSubmitting || !!error || !form.category || ((cookHours === '0' || cookHours === 0 || cookHours === '') &&
                   (cookMinutes === '0' || cookMinutes === 0 || cookMinutes === ''))}
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                 whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
@@ -650,9 +639,9 @@ function AddRecipe() {
                 {isSubmitting ? "Submitting..." : "Submit Recipe"}
               </motion.button>
             ) : (
-              <motion.button 
-                type="button" 
-                onClick={handleNext} 
+              <motion.button
+                type="button"
+                onClick={handleNext}
                 className="form-btn form-btn--primary"
                 disabled={isSubmitting}
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
@@ -662,11 +651,11 @@ function AddRecipe() {
               </motion.button>
             )}
           </div>
-          
+
           <div className="form-navigation__progress">Step {activeStep + 1} of {steps.length}</div>
         </div>
       </motion.form>
-      
+
       <RecipePreviewCard form={form} cookHours={cookHours} cookMinutes={cookMinutes} />
     </div>
   );

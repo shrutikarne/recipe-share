@@ -50,7 +50,6 @@ const refreshToken = async () => {
 
     return true;
   } catch (error) {
-    console.error("Token refresh failed:", error);
 
     // If refresh failed, we need to log the user out
     if (error.response?.status === 401) {

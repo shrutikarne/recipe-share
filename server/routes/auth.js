@@ -120,7 +120,6 @@ router.post("/register",
       res.json({ token });
     } catch (err) {
       // Log and return server error
-      console.error(err && err.message ? err.message : err);
       res.status(500).send("Server error");
     }
   });
@@ -169,7 +168,6 @@ router.post("/login",
       });
     } catch (err) {
       // Log and return server error
-      console.error(err && err.message ? err.message : err);
       res.status(500).send("Server error");
     }
   });
@@ -209,7 +207,6 @@ router.post("/refresh", verifyToken, async (req, res) => {
       expiresIn: parseInt(config.JWT.EXPIRATION) || 30
     });
   } catch (err) {
-    console.error(err.message);
     res.status(500).send("Server error");
   }
 });

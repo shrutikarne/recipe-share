@@ -46,7 +46,6 @@ router.get("/random", async (req, res) => {
     const recipe = await Recipe.findOne().skip(random).populate("author", "name _id");
     res.json(recipe);
   } catch (err) {
-    console.error(err.message);
     res.status(500).send("Server error");
   }
 });
@@ -127,7 +126,6 @@ router.get("/count", async (req, res) => {
     const count = await Recipe.countDocuments(filter);
     res.json({ count });
   } catch (err) {
-    console.error(err.message);
     res.status(500).send("Server error");
   }
 });
@@ -197,7 +195,6 @@ router.get("/",
         .populate("author", "name");
       res.json(recipes);
     } catch (err) {
-      console.error(err.message);
       res.status(500).send("Server error");
     }
   });
@@ -248,7 +245,6 @@ router.post("/",
       const savedRecipe = await newRecipe.save();
       res.json(savedRecipe);
     } catch (err) {
-      console.error(err.message);
 
       // Better error handling for validation errors
       if (err.name === 'ValidationError') {

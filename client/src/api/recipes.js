@@ -10,7 +10,6 @@ export const fetchRecipe = async (id) => {
         const response = await API.get(`/recipes/${id}`);
         return response.data;
     } catch (error) {
-        console.error(`Error fetching recipe ${id}:`, error);
         throw error;
     }
 };
@@ -33,7 +32,6 @@ export const fetchRecipes = async (page = 1, limit = 10, filters = {}) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error fetching recipes:', error);
         throw error;
     }
 };
@@ -48,7 +46,6 @@ export const createRecipe = async (recipeData) => {
         const response = await API.post('/recipes', recipeData);
         return response.data;
     } catch (error) {
-        console.error('Error creating recipe:', error);
         throw error;
     }
 };
@@ -64,7 +61,6 @@ export const updateRecipe = async (id, recipeData) => {
         const response = await API.put(`/recipes/${id}`, recipeData);
         return response.data;
     } catch (error) {
-        console.error(`Error updating recipe ${id}:`, error);
         throw error;
     }
 };
@@ -79,7 +75,6 @@ export const deleteRecipe = async (id) => {
         const response = await API.delete(`/recipes/${id}`);
         return response.data;
     } catch (error) {
-        console.error(`Error deleting recipe ${id}:`, error);
         throw error;
     }
 };
@@ -95,7 +90,6 @@ export const addComment = async (recipeId, comment) => {
         const response = await API.post(`/recipes/${recipeId}/comments`, { text: comment });
         return response.data;
     } catch (error) {
-        console.error(`Error adding comment to recipe ${recipeId}:`, error);
         throw error;
     }
 };

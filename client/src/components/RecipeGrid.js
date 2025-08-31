@@ -83,7 +83,6 @@ export default function RecipeGrid({
                 <div className="recipe-card">
                   <div className="recipe-image-container">
                     <img
-                      src={recipe.imageUrl || (recipe.imageUrls && recipe.imageUrls[0]) || "/logo512.png"}
                       alt={recipe.title}
                       className="recipe-image"
                     />

@@ -29,7 +29,6 @@ function verifyToken(req, res, next) {
     req.user = decoded.user;
     next();
   } catch (err) {
-    console.error('Token verification failed:', err.message);
 
     // Provide specific error messages for different error types
     if (err.name === 'TokenExpiredError') {

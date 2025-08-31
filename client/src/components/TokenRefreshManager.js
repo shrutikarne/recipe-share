@@ -27,9 +27,7 @@ function TokenRefreshManager() {
         try {
           // Call the refresh endpoint
           await API.post('/auth/refresh');
-          console.log('Token refreshed successfully');
         } catch (error) {
-          console.error('Token refresh failed:', error);
           // If refresh fails, clear the interval
           if (refreshTimerRef.current) {
             clearInterval(refreshTimerRef.current);

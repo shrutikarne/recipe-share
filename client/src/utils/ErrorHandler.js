@@ -88,7 +88,6 @@ export const handleApiError = (error, customMessage = null) => {
   }
 
   // Log error for debugging
-  console.error(`[${errorType.toUpperCase()}]`, error);
 
   // Display toast message
   toast.error(errorMessage);

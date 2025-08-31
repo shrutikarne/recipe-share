@@ -209,7 +209,6 @@ function App() {
         });
       })
       .catch((error) => {
-        console.error("Logout failed:", error);
         // Even if the server-side logout fails, clear local state
         import("./utils/tokenManager").then(({ setLoggedOut }) => {
           setLoggedOut();

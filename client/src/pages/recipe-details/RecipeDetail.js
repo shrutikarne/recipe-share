@@ -32,7 +32,6 @@ function RecipeDetail() {
             setRecipe(getMockRecipe(id));
           }
         } catch (apiError) {
-          console.warn("API fetch failed, using mock data:", apiError);
           // Use mock data if API fails
           setRecipe(getMockRecipe(id));
         }
@@ -44,7 +43,6 @@ function RecipeDetail() {
 
         setLoading(false);
       } catch (err) {
-        console.error("Error in recipe loading process:", err);
         setError("Failed to load the recipe. Please try again.");
         setLoading(false);
       }

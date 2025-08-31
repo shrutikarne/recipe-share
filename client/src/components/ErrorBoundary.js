@@ -22,7 +22,6 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     // You can log the error to an error reporting service
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
     this.setState({ errorInfo });
 
     // Optional: send error to your error tracking service
