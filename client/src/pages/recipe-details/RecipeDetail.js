@@ -204,11 +204,15 @@ function RecipeDetail() {
     );
   }
 
+  // Prefer backend fields (imageUrl/imageUrls); fall back to mock field
+  const heroImageSrc =
+    recipe?.imageUrl || (Array.isArray(recipe?.imageUrls) && recipe.imageUrls[0]) || recipe?.image || "/hero-food.jpg";
+
   return (
     <div className="recipe-details">
       {/* --- Hero Section --- */}
       <div className="recipe-hero">
-        <img src={recipe?.image} alt={recipe?.title} className="recipe-img" />
+        <img src={heroImageSrc} alt={recipe?.title} className="recipe-img" />
         <div className="recipe-hero-overlay">
           <div className="recipe-meta">
             {recipe?.category && <span className="recipe-category">{recipe.category}</span>}
@@ -231,7 +235,7 @@ function RecipeDetail() {
       <div className={`action-bar ${isSticky ? 'sticky' : ''}`}>
         <div className="action-bar-content">
           <div className="recipe-mini-info">
-            <img src={recipe?.image} alt={recipe?.title} className="mini-img" />
+          <img src={heroImageSrc} alt={recipe?.title} className="mini-img" />
             <span className="mini-title">{recipe?.title}</span>
           </div>
           <div className="action-buttons">

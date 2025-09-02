@@ -1,5 +1,6 @@
 // RecipeGrid.js - Paginated recipe grid component
 import React, { useState } from 'react';
+import API from '../api/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaBookmark, FaRegBookmark, FaClock, FaUtensils } from 'react-icons/fa';
 import './RecipeGrid.scss';
@@ -50,6 +51,30 @@ export default function RecipeGrid({
     );
   }
 
+  // Get recipe image URL with legacy support
+  const getRecipeImage = (r) => (
+    (typeof r.imageUrl === 'string' && r.imageUrl.trim()) ||
+    (Array.isArray(r.imageUrls) && r.imageUrls.find(u => typeof u === 'string' && u.trim())) ||
+    (Array.isArray(r.images) && r.images.find(u => typeof u === 'string' && u.trim())) ||
+    (typeof r.image === 'string' && r.image.trim()) ||
+    "/hero-food.jpg"
+  );
+
+  // Get API base URL
+  const apiBase = (API && API.defaults && API.defaults.baseURL) || '';
+  const apiOrigin = apiBase.replace(/\/api\/?$/, '');
+
+  // Get S3 proxy URL
+  const toProxyIfS3 = (url) => {
+    if (typeof url !== 'string') return url;
+    const idx = url.indexOf('.amazonaws.com/');
+    if (idx !== -1) {
+      const key = url.substring(idx + '.amazonaws.com/'.length);
+      return `${apiOrigin}/api/images?key=${encodeURIComponent(key)}`;
+    }
+    return url;
+  };
+
   return (
     <div className="recipe-grid-container">
       <div className="recipe-grid">
@@ -63,6 +88,12 @@ export default function RecipeGrid({
 
             const isHovered = hoveredRecipeId === recipe._id;
 
+            const imageSrc = toProxyIfS3(getRecipeImage(recipe));
+            if (process.env.NODE_ENV !== 'production') {
+              // Lightweight debug to verify which image each card uses
+              // eslint-disable-next-line no-console
+              console.debug('RecipeGrid image', { id: recipe._id, imageUrl: recipe.imageUrl, imageUrls: recipe.imageUrls, images: recipe.images, legacyImage: recipe.image, chosen: imageSrc });
+            }
             return (
               <motion.div
                 key={recipe._id}
@@ -83,8 +114,14 @@ export default function RecipeGrid({
                 <div className="recipe-card">
                   <div className="recipe-image-container">
                     <img
+                      src={imageSrc}
                       alt={recipe.title}
                       className="recipe-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        if (e.currentTarget.src.endsWith('/hero-food.jpg')) return;
+                        e.currentTarget.src = '/hero-food.jpg';
+                      }}
                     />
 
                     {recipe.category && (

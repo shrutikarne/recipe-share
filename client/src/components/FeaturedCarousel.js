@@ -1,5 +1,6 @@
 // FeaturedCarousel.js - Netflix-style horizontal scroll carousel for trending recipes
 import React, { useRef, useState, useEffect } from "react";
+import API from '../api/api';
 import { motion } from "framer-motion";
 import { FaChevronLeft, FaChevronRight, FaPlay, FaClock } from "react-icons/fa";
 import "./FeaturedCarousel.scss";
@@ -77,6 +78,30 @@ export default function FeaturedCarousel({
     }
   };
 
+  // Get recipe image URL
+  const getRecipeImage = (r) => (
+    (typeof r.imageUrl === 'string' && r.imageUrl.trim()) ||
+    (Array.isArray(r.imageUrls) && r.imageUrls.find(u => typeof u === 'string' && u.trim())) ||
+    (Array.isArray(r.images) && r.images.find(u => typeof u === 'string' && u.trim())) ||
+    (typeof r.image === 'string' && r.image.trim()) ||
+    "/logo512.png"
+  );
+
+  // Get API base URL
+  const apiBase = (API && API.defaults && API.defaults.baseURL) || '';
+  const apiOrigin = apiBase.replace(/\/api\/?$/, '');
+
+  // Get S3 proxy URL
+  const toProxyIfS3 = (url) => {
+    if (typeof url !== 'string') return url;
+    const idx = url.indexOf('.amazonaws.com/');
+    if (idx !== -1) {
+      const key = url.substring(idx + '.amazonaws.com/'.length);
+      return `${apiOrigin}/api/images?key=${encodeURIComponent(key)}`;
+    }
+    return url;
+  };
+
   return (
     <section
       className={`featured-carousel-section ${hovered ? 'hovered' : ''} ${horizontalScroll ? 'horizontal-scroll' : ''}`}
@@ -127,9 +152,14 @@ export default function FeaturedCarousel({
             >
               <div className="card-image-container">
                 <img
-                  src={r.imageUrl || (r.imageUrls && r.imageUrls[0]) || "/logo512.png"}
+                  src={toProxyIfS3(getRecipeImage(r))}
                   alt={r.title}
                   className="featured-carousel-img"
+                  loading="lazy"
+                  onError={(e) => {
+                    if (e.currentTarget.src.endsWith('/logo512.png')) return;
+                    e.currentTarget.src = '/logo512.png';
+                  }}
                 />
                 <div className="card-overlay">
                   <div className="card-badges">

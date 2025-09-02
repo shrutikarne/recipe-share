@@ -93,6 +93,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/recipes", require("./routes/recipes"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/uploads", require("./routes/uploads"));
+app.use("/api/images", require("./routes/images"));
 
 // Connect to MongoDB database
 connectDB();
