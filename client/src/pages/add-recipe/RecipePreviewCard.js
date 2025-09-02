@@ -3,6 +3,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import "./AddRecipe.scss";
 
+/**
+ * RecipePreviewCard component for displaying a preview of the recipe being created.
+ *
+ * @param {Object} props
+ * @param {Object} props.form - The form state containing recipe fields.
+ * @param {string|number} [props.cookHours] - Number of cook hours.
+ * @param {string|number} [props.cookMinutes] - Number of cook minutes.
+ * @returns {JSX.Element}
+ */
 export default function RecipePreviewCard({ form, cookHours, cookMinutes }) {
     // No need for decoding in the preview component now
     // We're showing the text exactly as entered by the user

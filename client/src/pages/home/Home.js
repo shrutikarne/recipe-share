@@ -22,6 +22,7 @@ import Footer from "../../components/Footer";
  * Home component
  * Fetches and displays a list of all recipes from the backend API.
  * @component
+ * @returns {JSX.Element}
  */
 function Home() {
   const [recipes, setRecipes] = useState([]);

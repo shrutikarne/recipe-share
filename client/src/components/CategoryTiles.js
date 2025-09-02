@@ -69,6 +69,13 @@ const categories = [
   },
 ];
 
+/**
+ * CategoryTiles component for displaying recipe categories/moods as clickable cards.
+ *
+ * @param {Object} props
+ * @param {function} props.onSelect - Callback when a category is selected.
+ * @returns {JSX.Element}
+ */
 export default function CategoryTiles({ onSelect }) {
   return (
     <section className="category-tiles-section">

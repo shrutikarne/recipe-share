@@ -3,6 +3,14 @@ import "./RecipeStoryView.scss";
 
 const AUTO_ADVANCE_MS = 4000;
 
+/**
+ * RecipeStoryView component for displaying recipe steps in a story/slideshow format.
+ *
+ * @param {Object} props
+ * @param {Array<{mediaUrl?: string, text: string}>} [props.storySteps] - Array of story steps with optional media.
+ * @param {function} props.onExit - Function to call when exiting the story view.
+ * @returns {JSX.Element|null}
+ */
 const RecipeStoryView = ({ storySteps = [], onExit }) => {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef();

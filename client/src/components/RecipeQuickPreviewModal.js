@@ -5,6 +5,28 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "./RecipeQuickPreviewModal.scss";
 
+/**
+ * Modal component for quickly previewing a recipe with images, nutrition, fun facts, and story.
+ *
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the modal is open.
+ * @param {function} props.onRequestClose - Function to call when closing the modal.
+ * @param {Object} props.recipe - The recipe object to preview.
+ * @param {string} [props.recipe.title] - Title of the recipe.
+ * @param {string[]} [props.recipe.imageUrls] - Array of image URLs for the recipe gallery.
+ * @param {string} [props.recipe.imageUrl] - Main image URL for the recipe.
+ * @param {string[]} [props.recipe.tags] - Tags associated with the recipe.
+ * @param {string} [props.recipe.description] - Description of the recipe.
+ * @param {Object} [props.recipe.nutrition] - Nutrition information.
+ * @param {number|string} [props.recipe.nutrition.calories] - Calories in the recipe.
+ * @param {number|string} [props.recipe.nutrition.protein] - Protein content in grams.
+ * @param {number|string} [props.recipe.nutrition.carbs] - Carbohydrates in grams.
+ * @param {number|string} [props.recipe.nutrition.fat] - Fat in grams.
+ * @param {string[]} [props.recipe.funFacts] - Fun facts about the recipe.
+ * @param {Array<{mediaUrl?: string, text: string}>} [props.recipe.story] - Story steps for the recipe.
+ * @param {function} props.onViewFullRecipe - Function to call when the user wants to view the full recipe.
+ * @returns {JSX.Element}
+ */
 const RecipeQuickPreviewModal = ({
   isOpen,
   onRequestClose,

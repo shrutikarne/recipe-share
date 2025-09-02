@@ -4,6 +4,13 @@ import "./RecipeDetails.scss";
 import CookingMode from "../../components/CookingMode";
 import { fetchRecipe } from "../../api/recipes";
 
+/**
+ * RecipeDetail page component
+ * Fetches and displays a single recipe with all details, comments, and related recipes.
+ * Handles loading, error, and mock data fallback.
+ *
+ * @returns {JSX.Element}
+ */
 function RecipeDetail() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
@@ -65,6 +72,11 @@ function RecipeDetail() {
   }, [recipe]);
 
   // Mock recipe data for testing - remove in production
+  /**
+   * Returns mock recipe data for testing (used if API fails).
+   * @param {string} recipeId
+   * @returns {Object}
+   */
   const getMockRecipe = (recipeId) => {
     return {
       id: recipeId,
@@ -151,6 +163,10 @@ function RecipeDetail() {
   };
 
   // Handle ingredient checkbox toggle
+  /**
+   * Toggles the checked state of an ingredient.
+   * @param {number} index
+   */
   const toggleIngredient = (index) => {
     setCheckedIngredients(prev => ({
       ...prev,
@@ -159,6 +175,9 @@ function RecipeDetail() {
   };
 
   // Scroll to steps when "Start Cooking" is clicked
+  /**
+   * Scrolls to the steps section when called.
+   */
   const scrollToSteps = () => {
     stepsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -175,6 +194,11 @@ function RecipeDetail() {
   }, []);
 
   // Format for cook time display
+  /**
+   * Formats time in minutes to a human-readable string.
+   * @param {number} minutes
+   * @returns {string}
+   */
   const formatTime = (minutes) => {
     if (minutes < 60) return `${minutes} mins`;
     const hrs = Math.floor(minutes / 60);

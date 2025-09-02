@@ -3,6 +3,19 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ConfirmModal.scss';
 
+/**
+ * ConfirmModal component for displaying a confirmation dialog modal.
+ *
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the modal is open.
+ * @param {function} props.onClose - Function to call when closing the modal.
+ * @param {function} props.onConfirm - Function to call when confirming the action.
+ * @param {string} props.title - Title of the modal.
+ * @param {string} props.message - Message to display in the modal.
+ * @param {string} [props.confirmText] - Text for the confirm button.
+ * @param {string} [props.cancelText] - Text for the cancel button.
+ * @returns {JSX.Element}
+ */
 function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText }) {
     const modalRef = useRef(null);
 

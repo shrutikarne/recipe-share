@@ -6,6 +6,11 @@ import { showSuccessToast, showErrorToast, showWarningToast } from '../../utils/
 import useErrorHandling from '../../hooks/useErrorHandling';
 import './Profile.scss';
 
+/**
+ * Profile page component
+ * Displays user profile, recipes, saved recipes, and settings.
+ * @returns {JSX.Element}
+ */
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [activeTab, setActiveTab] = useState('recipes');

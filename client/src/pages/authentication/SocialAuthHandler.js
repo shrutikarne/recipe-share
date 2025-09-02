@@ -3,7 +3,11 @@ import { showSuccessToast, showErrorToast } from "../../utils/ToastConfig";
 import { setAuthenticated } from "../../utils/tokenManager";
 import "./SocialAuthHandler.scss";
 
-// This page handles the redirect from social login with HTTP-only cookie
+/**
+ * SocialAuthHandler page component
+ * Handles the redirect from social login and sets authentication state.
+ * @returns {JSX.Element}
+ */
 export default function SocialAuthHandler() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);

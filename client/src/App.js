@@ -42,7 +42,17 @@ import PrivateRoute from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import "./components/Navbar.scss";
 
-function Layout({ dark, setDark, loggedIn, handleSignOut, showLogoutModal, setShowLogoutModal, confirmSignOut }) {
+/**
+ * Layout component for the main app shell, including navbar, modals, and floating action button.
+ *
+ * @param {Object} props
+ * @param {boolean} props.loggedIn - Whether the user is logged in.
+ * @param {boolean} props.showLogoutModal - Whether the logout modal is open.
+ * @param {function} props.setShowLogoutModal - Function to set logout modal state.
+ * @param {function} props.confirmSignOut - Function to confirm sign out.
+ * @returns {JSX.Element}
+ */
+function Layout({ loggedIn, showLogoutModal, setShowLogoutModal, confirmSignOut }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -91,6 +101,10 @@ function Layout({ dark, setDark, loggedIn, handleSignOut, showLogoutModal, setSh
   );
 }
 
+/**
+ * AnimatedRoutes component for handling route transitions with animation.
+ * @returns {JSX.Element}
+ */
 function AnimatedRoutes() {
   const location = useLocation();
   return (
@@ -173,6 +187,11 @@ function AnimatedRoutes() {
   );
 }
 
+/**
+ * Main App component for Recipe Share frontend.
+ * Handles authentication, theme, routing, and global state.
+ * @returns {JSX.Element}
+ */
 function App() {
   // State hooks
   const [loggedIn, setLoggedIn] = useState(() => {

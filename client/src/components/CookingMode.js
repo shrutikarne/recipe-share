@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import "./CookingMode.scss";
 
+/**
+ * CookingMode component for step-by-step cooking instructions.
+ *
+ * @param {Object} props
+ * @param {string[]} props.steps - Array of step instructions.
+ * @param {string[]} [props.stepImages] - Array of image URLs for each step.
+ * @param {function} props.onExit - Function to call when exiting cooking mode.
+ * @returns {JSX.Element}
+ */
 const CookingMode = ({ steps, stepImages = [], onExit }) => {
   const [current, setCurrent] = useState(0);
   const total = steps.length;

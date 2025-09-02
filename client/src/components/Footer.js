@@ -2,6 +2,11 @@ import React from "react";
 import "./Footer.scss";
 import { FaInstagram, FaPinterest, FaFacebook } from "react-icons/fa";
 
+/**
+ * Footer component for the Recipe Share app.
+ * Displays navigation links and social media icons.
+ * @returns {JSX.Element}
+ */
 export default function Footer() {
     return (
         <footer className="footer-minimal">

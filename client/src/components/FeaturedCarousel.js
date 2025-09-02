@@ -5,6 +5,17 @@ import { motion } from "framer-motion";
 import { FaChevronLeft, FaChevronRight, FaPlay, FaClock } from "react-icons/fa";
 import "./FeaturedCarousel.scss";
 
+/**
+ * FeaturedCarousel component
+ * Netflix-style horizontal scroll carousel for trending recipes.
+ *
+ * @param {Object} props
+ * @param {Array<Object>} props.recipes - Array of recipe objects to display.
+ * @param {string} [props.title] - Title for the carousel (default: "🔥 Trending Now").
+ * @param {function} props.onViewRecipe - Function to call when a recipe is clicked.
+ * @param {boolean} [props.horizontalScroll] - Enable horizontal auto-scroll (default: false).
+ * @returns {JSX.Element}
+ */
 export default function FeaturedCarousel({
   recipes,
   title = "🔥 Trending Now",

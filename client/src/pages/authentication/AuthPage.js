@@ -8,6 +8,7 @@ import "./AuthPage.scss";
  * AuthPage component
  * Combines Login and Register forms with tab switching.
  * @component
+ * @returns {JSX.Element}
  */
 function AuthPage() {
   // --- State ---

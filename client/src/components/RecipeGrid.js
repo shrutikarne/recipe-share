@@ -5,6 +5,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaBookmark, FaRegBookmark, FaClock, FaUtensils } from 'react-icons/fa';
 import './RecipeGrid.scss';
 
+/**
+ * Paginated grid component for displaying recipe cards with like, save, and view actions.
+ *
+ * @param {Object} props
+ * @param {Array<Object>} props.recipes - Array of recipe objects to display.
+ * @param {function} props.onViewRecipe - Function to call when a recipe is clicked.
+ * @param {function} props.onLike - Function to call when a recipe is liked.
+ * @param {function} props.onSave - Function to call when a recipe is saved.
+ * @param {string} props.userId - Current user's ID.
+ * @param {Array<string>} [props.savedRecipes] - IDs of recipes saved by the user.
+ * @param {Object} [props.likeLoading] - Loading state for like actions by recipe ID.
+ * @param {Object} [props.saveLoading] - Loading state for save actions by recipe ID.
+ * @param {boolean} [props.loading] - Whether recipes are loading.
+ * @param {boolean} [props.hasMore] - Whether there are more recipes to load from the server.
+ * @param {function} [props.onLoadMore] - Function to call to load more recipes from the server.
+ * @param {number} [props.itemsPerPage] - Number of recipes to show per page (default 8).
+ * @returns {JSX.Element}
+ */
 export default function RecipeGrid({
   recipes,
   onViewRecipe,

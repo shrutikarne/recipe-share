@@ -1,12 +1,19 @@
 import React, { useRef, useState, useEffect } from "react";
-import ConfirmModal from "./ConfirmModal";
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.scss";
 
+/**
+ * Navbar component for the Recipe Share app.
+ * Displays navigation, user avatar, and dropdown menu.
+ *
+ * @param {Object} props
+ * @param {Object|null} props.user - The current user object or null if not logged in.
+ * @param {function} props.onLogout - Function to call when logging out.
+ * @returns {JSX.Element}
+ */
 export default function Navbar({ user, onLogout }) {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const dropdownRef = useRef(null);
     const avatarButtonRef = useRef(null);
 
@@ -77,7 +84,7 @@ export default function Navbar({ user, onLogout }) {
                                 {user ? (
                                     <>
                                         <Link to="/profile" className="navbar-glass__dropdown-link">My Profile</Link>
-                                        <button onClick={() => setShowLogoutModal(true)}>Logout</button>
+                                        <button onClick={() => { setDropdownOpen(false); onLogout(); }}>Logout</button>
                                     </>
                                 ) : (
                                     <>
@@ -90,19 +97,6 @@ export default function Navbar({ user, onLogout }) {
                     </div>
                 </div>
             </nav>
-            <ConfirmModal
-                isOpen={showLogoutModal}
-                onClose={() => setShowLogoutModal(false)}
-                onConfirm={() => {
-                    setShowLogoutModal(false);
-                    setDropdownOpen(false);
-                    onLogout();
-                }}
-                title="Log out?"
-                message="We’ll miss you! 👋 Come back soon for more recipes."
-                confirmText="Log out"
-                cancelText="Stay"
-            />
         </>
     );
 }
