@@ -42,7 +42,7 @@
 .recipe-filter-form__close {
   background: none;
   border: none;
-  font-size: 2rem;
+  font-size: 32px;
   color: #888;
   cursor: pointer;
   transition: color 0.2s;
@@ -71,7 +71,7 @@
   padding: 8px 10px;
   border-radius: 10px;
   border: 1.2px solid #e0e7ef;
-  font-size: 0.98rem;
+  font-size: 15.68px;
   background: #f9fafb;
   color: #23262f;
   transition: border 0.2s, box-shadow 0.2s;
@@ -103,7 +103,7 @@
 .search-autocomplete__item {
   padding: 10px 16px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 16px;
   color: #23262f;
   transition: background 0.18s, color 0.18s;
 
@@ -120,7 +120,7 @@
   border: none;
   border-radius: 16px;
   padding: 16px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 8px 0 #2563eb22;

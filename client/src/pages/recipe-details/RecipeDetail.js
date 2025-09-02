@@ -14,6 +14,8 @@ function RecipeDetail() {
   const [isSticky, setIsSticky] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [newComment, setNewComment] = useState("");
+  const [baseServings, setBaseServings] = useState(1);
+  const [servings, setServings] = useState(1);
   const stepsRef = useRef(null);
 
   // Fetch recipe data when component mounts
@@ -50,6 +52,17 @@ function RecipeDetail() {
 
     getRecipeData();
   }, [id]);
+
+  // Initialize servings when recipe loads
+  useEffect(() => {
+    if (recipe?.servings) {
+      setBaseServings(recipe.servings);
+      setServings(recipe.servings);
+    } else {
+      setBaseServings(1);
+      setServings(1);
+    }
+  }, [recipe]);
 
   // Mock recipe data for testing - remove in production
   const getMockRecipe = (recipeId) => {
@@ -184,6 +197,12 @@ function RecipeDetail() {
     return (
       <div className="loading-container">
         <p className="loading">Loading recipe...</p>
+        <div className="loading-skeleton" aria-hidden>
+          <div className="sk-hero" />
+          <div className="sk-line w80" />
+          <div className="sk-line w60" />
+          <div className="sk-line w40" />
+        </div>
       </div>
     );
   }
@@ -191,7 +210,7 @@ function RecipeDetail() {
   if (error) {
     return (
       <div className="error-container">
-        <p className="error-message">{error}</p>
+        <p className="error-message" role="alert">{error}</p>
       </div>
     );
   }
@@ -214,20 +233,22 @@ function RecipeDetail() {
       <div className="recipe-hero">
         <img src={heroImageSrc} alt={recipe?.title} className="recipe-img" />
         <div className="recipe-hero-overlay">
-          <div className="recipe-meta">
-            {recipe?.category && <span className="recipe-category">{recipe.category}</span>}
-            {recipe?.cuisine && <span className="recipe-cuisine">{recipe.cuisine}</span>}
+          <div className="hero-content-card">
+            <div className="recipe-meta">
+              {recipe?.category && <span className="recipe-category">{recipe.category}</span>}
+              {recipe?.cuisine && <span className="recipe-cuisine">{recipe.cuisine}</span>}
+            </div>
+            <h1>{recipe?.title}</h1>
+            <p className="recipe-tagline">
+              {recipe?.tagline || "Delicious, Homemade & Perfect for Any Occasion"}
+            </p>
+            <div className="hero-meta">
+              <span>⏱ {formatTime(totalTime)}</span>
+              <span>👥 {recipe?.servings || 0} servings</span>
+              <span>⭐ {getDifficulty()}</span>
+            </div>
+            <button className="start-btn" onClick={scrollToSteps} aria-label="Start Cooking">▶ Start Cooking</button>
           </div>
-          <h1>{recipe?.title}</h1>
-          <p className="recipe-tagline">
-            {recipe?.tagline || "Delicious, Homemade & Perfect for Any Occasion"}
-          </p>
-          <div className="hero-meta">
-            <span>⏱ {formatTime(totalTime)}</span>
-            <span>👥 {recipe?.servings || 0} servings</span>
-            <span>⭐ {getDifficulty()}</span>
-          </div>
-          <button className="start-btn" onClick={scrollToSteps}>▶ Start Cooking</button>
         </div>
       </div>
 
@@ -242,6 +263,8 @@ function RecipeDetail() {
             <button className="save-btn">❤️ Save</button>
             <button className="cook-btn" onClick={() => setShowCookingMode(true)}>🍴 Start Cooking</button>
             <button className="comment-btn">💬 Comment</button>
+            <button className="share-btn" onClick={() => handleShare(recipe)} aria-label="Share recipe">📤 Share</button>
+            <button className="print-btn" onClick={() => window.print()} aria-label="Print recipe">🖨️ Print</button>
             {currentUser && currentUser.id === recipe?.authorId && (
               <>
                 <button className="edit-btn">✏️ Edit</button>
@@ -271,9 +294,21 @@ function RecipeDetail() {
             <div className="ingredients-card">
               <div className="servings-adjuster">
                 <span>Servings:</span>
-                <button>-</button>
-                <span>{recipe?.servings || 0}</span>
-                <button>+</button>
+                <button
+                  aria-label="Decrease servings"
+                  title="Decrease servings"
+                  onClick={() => setServings((s) => Math.max(1, s - 1))}
+                >
+                  -
+                </button>
+                <span aria-live="polite">{servings}</span>
+                <button
+                  aria-label="Increase servings"
+                  title="Increase servings"
+                  onClick={() => setServings((s) => Math.min(20, s + 1))}
+                >
+                  +
+                </button>
               </div>
               <ul className="ingredients-list">
                 {recipe?.ingredients?.map((ingredient, index) => (
@@ -284,7 +319,7 @@ function RecipeDetail() {
                         checked={!!checkedIngredients[index]}
                         onChange={() => toggleIngredient(index)}
                       />
-                      <span>{ingredient}</span>
+                      <span>{scaleIngredient(ingredient, servings, baseServings)}</span>
                     </label>
                   </li>
                 )) || <li>No ingredients available</li>}
@@ -421,3 +456,68 @@ function RecipeDetail() {
 }
 
 export default RecipeDetail;
+
+// --- Helpers ---
+function handleShare(recipe) {
+  const shareData = {
+    title: recipe?.title || 'Recipe',
+    text: recipe?.tagline || 'Check out this recipe',
+    url: typeof window !== 'undefined' ? window.location.href : undefined,
+  };
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => {});
+  } else if (navigator.clipboard && shareData.url) {
+    navigator.clipboard.writeText(shareData.url).then(() => {
+      alert('Link copied to clipboard');
+    }).catch(() => {
+      // noop
+    });
+  }
+}
+
+function scaleIngredient(line, servings, baseServings) {
+  if (!line || !baseServings || !servings) return line;
+  const mult = servings / baseServings;
+  if (Math.abs(mult - 1) < 1e-6) return line;
+
+  const parsed = parseLeadingQuantity(line);
+  if (!parsed) return line;
+  const scaled = parsed.value * mult;
+  const formatted = formatQuantity(scaled);
+  const rest = line.slice(parsed.matchedLength).trimStart();
+  return `${formatted} ${rest}`.trim();
+}
+
+// Parse a leading quantity like "2", "1 1/2", "0.5", "1/3"
+function parseLeadingQuantity(str) {
+  const s = String(str);
+  const re = /^\s*(?:(\d+(?:\.\d+)?)\s*)?(?:(\d+)\/(\d+))?/; // integer/decimal + optional fraction
+  const m = s.match(re);
+  if (!m) return null;
+  const [matched, whole, num, den] = m;
+  if (!whole && !num) return null; // no numeric at start
+  let value = 0;
+  if (whole) value += parseFloat(whole);
+  if (num && den) value += parseInt(num, 10) / parseInt(den, 10);
+  return { value, matchedLength: matched.length };
+}
+
+function formatQuantity(value) {
+  const eps = 1e-2;
+  const whole = Math.floor(value + eps);
+  const frac = value - whole;
+  if (Math.abs(frac) < 0.02) return String(whole);
+  // Try common denominators
+  const dens = [2, 3, 4, 6, 8];
+  let best = { err: Infinity, n: 0, d: 1 };
+  for (const d of dens) {
+    const n = Math.round(frac * d);
+    const err = Math.abs(frac - n / d);
+    if (err < best.err) best = { err, n, d };
+  }
+  let parts = [];
+  if (whole > 0) parts.push(String(whole));
+  if (best.n > 0) parts.push(`${best.n}/${best.d}`);
+  if (parts.length === 0) return value.toFixed(1);
+  return parts.join(' ');
+}

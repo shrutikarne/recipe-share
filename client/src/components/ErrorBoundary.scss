@@ -4,8 +4,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 2rem;
-  margin: 2rem auto;
+  padding: 32px;
+  margin: 32px auto;
   max-width: 800px;
   background-color: var(--card-bg);
   border-radius: 8px;
@@ -13,17 +13,17 @@
 
   h2 {
     color: var(--danger);
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
   }
 
   p {
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
     color: var(--text-primary);
   }
 
   details {
-    margin: 1rem 0;
-    padding: 1rem;
+    margin: 16px 0;
+    padding: 16px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
     background-color: var(--bg-light);
@@ -34,7 +34,7 @@
     summary {
       cursor: pointer;
       font-weight: 500;
-      margin-bottom: 0.5rem;
+      margin-bottom: 8px;
       color: var(--text-secondary);
 
       &:focus {
@@ -43,22 +43,22 @@
     }
 
     div {
-      margin-top: 0.5rem;
+      margin-top: 8px;
       font-family: monospace;
-      font-size: 0.9rem;
+      font-size: 14.4px;
       white-space: pre-wrap;
       color: var(--text-secondary);
     }
   }
 
   .error-boundary-button {
-    padding: 0.75rem 1.5rem;
-    margin-top: 1.5rem;
+    padding: 12px 24px;
+    margin-top: 24px;
     background-color: var(--primary);
     color: white;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s;
 

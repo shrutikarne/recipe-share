@@ -17,7 +17,7 @@ $transition: all 0.3s ease;
   padding: 40px 24px;
   max-width: 1200px;
   margin: 0 auto;
-  
+
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 32px;
@@ -33,7 +33,7 @@ $transition: all 0.3s ease;
   transition: $transition;
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -52,7 +52,7 @@ $transition: all 0.3s ease;
     text-align: center;
     letter-spacing: -0.5px;
   }
-  
+
   &__label {
     display: block;
     margin-bottom: 8px;
@@ -60,7 +60,7 @@ $transition: all 0.3s ease;
     color: $text-color;
     font-size: 14px;
   }
-  
+
   &__input,
   &__select,
   &__textarea {
@@ -74,14 +74,14 @@ $transition: all 0.3s ease;
     background: #fff;
     box-sizing: border-box;
     transition: $transition;
-    
+
     &:focus {
       border-color: $primary-color;
       box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
       outline: none;
     }
   }
-  
+
   &__textarea {
     min-height: 120px;
     resize: vertical;
@@ -93,18 +93,18 @@ $transition: all 0.3s ease;
     background-repeat: no-repeat;
     background-position: right 16px center;
     background-size: 16px;
-    
+
     &--required {
       border-color: #ef4444;
       background-color: rgba(239, 68, 68, 0.05);
     }
   }
-  
+
   &__file-input-container {
     position: relative;
     margin-bottom: 24px;
   }
-  
+
   &__file-input {
     position: absolute;
     width: 0.1px;
@@ -113,7 +113,7 @@ $transition: all 0.3s ease;
     overflow: hidden;
     z-index: -1;
   }
-  
+
   &__file-label {
     display: flex;
     flex-direction: column;
@@ -126,13 +126,13 @@ $transition: all 0.3s ease;
     border-radius: 8px;
     cursor: pointer;
     transition: $transition;
-    
+
     &:hover {
       border-color: $primary-color;
       background-color: rgba(16, 185, 129, 0.02);
     }
   }
-  
+
   &__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -149,14 +149,14 @@ $transition: all 0.3s ease;
   transition: $transition;
   position: sticky;
   top: 40px;
-  
+
   &__image {
     width: 100%;
     height: 240px;
     background: #f3f4f6;
     overflow: hidden;
     position: relative;
-    
+
     img {
       width: 100%;
       height: 100%;
@@ -164,7 +164,7 @@ $transition: all 0.3s ease;
       transition: $transition;
     }
   }
-  
+
   &__placeholder {
     display: flex;
     align-items: center;
@@ -173,30 +173,30 @@ $transition: all 0.3s ease;
     color: $light-text;
     font-size: 16px;
   }
-  
+
   &__content {
     padding: 24px;
   }
-  
+
   &__title {
     font-size: 22px;
     font-weight: 700;
     color: $text-color;
     margin-bottom: 8px;
   }
-  
+
   &__desc {
     color: $light-text;
     margin-bottom: 16px;
     line-height: 1.6;
   }
-  
+
   &__meta {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 20px;
-    
+
     span {
       background-color: #f9fafb;
       padding: 6px 12px;
@@ -206,7 +206,7 @@ $transition: all 0.3s ease;
       color: $text-color;
       display: flex;
       align-items: center;
-      
+
       &::before {
         content: '';
         display: inline-block;
@@ -218,10 +218,10 @@ $transition: all 0.3s ease;
       }
     }
   }
-  
+
   &__section {
     margin-bottom: 20px;
-    
+
     strong {
       display: block;
       margin-bottom: 12px;
@@ -229,11 +229,11 @@ $transition: all 0.3s ease;
       color: $text-color;
       font-size: 16px;
     }
-    
+
     ul, ol {
       margin: 0;
       padding: 0 0 0 18px;
-      
+
       li {
         margin-bottom: 8px;
         line-height: 1.5;
@@ -254,11 +254,11 @@ $transition: all 0.3s ease;
   flex-direction: column;
   gap: 16px;
   margin-top: 32px;
-  
+
   &__buttons {
     display: flex;
     gap: 16px;
-    
+
     button {
       flex: 1;
       padding: 14px 20px;
@@ -268,27 +268,27 @@ $transition: all 0.3s ease;
       border-radius: 8px;
       cursor: pointer;
       transition: $transition;
-      
+
       &.form-btn--primary {
         background: $primary-color;
         color: white;
-        
+
         &:hover {
           background: darken($primary-color, 5%);
         }
       }
-      
+
       &.form-btn--secondary {
         background: #f3f4f6;
         color: $text-color;
-        
+
         &:hover {
           background: #e5e7eb;
         }
       }
     }
   }
-  
+
   &__progress {
     text-align: center;
     color: $light-text;
@@ -302,7 +302,7 @@ $transition: all 0.3s ease;
   justify-content: space-between;
   margin-bottom: 40px;
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -313,7 +313,7 @@ $transition: all 0.3s ease;
     background-color: #e5e7eb;
     z-index: 0;
   }
-  
+
   &__step {
     position: relative;
     display: flex;
@@ -321,7 +321,7 @@ $transition: all 0.3s ease;
     align-items: center;
     flex: 1;
     z-index: 1;
-    
+
     &-number {
       width: 36px;
       height: 36px;
@@ -337,47 +337,47 @@ $transition: all 0.3s ease;
       margin-bottom: 8px;
       transition: $transition;
     }
-    
+
     &-text {
       text-align: center;
       transition: $transition;
       display: none;
-      
+
       @media (min-width: 640px) {
         display: block;
       }
     }
-    
+
     &-title {
       color: $text-color;
       font-weight: 600;
       font-size: 14px;
       margin-bottom: 2px;
     }
-    
+
     &-description {
       color: $light-text;
       font-size: 12px;
     }
-    
+
     &.active {
       .stepper__step-number {
         background-color: $primary-color;
         border-color: $primary-color;
         color: white;
       }
-      
+
       .stepper__step-title {
         color: $primary-color;
       }
     }
-    
+
     &.completed {
       .stepper__step-number {
         background-color: $primary-color;
         border-color: $primary-color;
         color: white;
-        
+
         &::after {
           content: '✓';
         }
@@ -387,7 +387,7 @@ $transition: all 0.3s ease;
 }
 
 // Alerts
-.form-error, 
+.form-error,
 .form-success {
   padding: 12px 16px;
   border-radius: 8px;
@@ -411,7 +411,7 @@ $transition: all 0.3s ease;
 // Item list (ingredients and steps)
 .item-list {
   margin-bottom: 24px;
-  
+
   &__item {
     display: flex;
     align-items: center;
@@ -420,12 +420,12 @@ $transition: all 0.3s ease;
     padding: 12px 16px;
     margin-bottom: 8px;
     animation: fadeIn 0.3s ease;
-    
+
     &-content {
       flex: 1;
       font-size: 14px;
     }
-    
+
     &-remove {
       background: transparent;
       border: none;
@@ -433,12 +433,12 @@ $transition: all 0.3s ease;
       cursor: pointer;
       padding: 4px;
       border-radius: 4px;
-      
+
       &:hover {
         background-color: rgba(239, 68, 68, 0.1);
       }
     }
-    
+
     &-number {
       display: flex;
       align-items: center;
@@ -472,7 +472,7 @@ $transition: all 0.3s ease;
   .add-recipe-form {
     padding: 24px 20px;
   }
-  
+
   .stepper {
     margin-bottom: 32px;
   }

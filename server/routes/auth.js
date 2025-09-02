@@ -143,13 +143,83 @@ router.post("/login",
     const { email, password } = req.body;
 
     try {
-      // Find user by email
-      const user = await User.findOne({ email });
-      if (!user) return res.status(401).json({ msg: "Invalid credentials" });
+      // Find user by email (normalized)
+      let user = await User.findOne({ email });
+
+      // Fallback: case-insensitive lookup for legacy records
+      if (!user) {
+        const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const ciEmail = new RegExp(`^${escapeRegex(email)}$`, 'i');
+        user = await User.findOne({ email: ciEmail });
+      }
+
+      if (!user) {
+        if (config.NODE_ENV !== 'production') {
+          return res.status(401).json({ msg: "Invalid credentials", reason: 'user_not_found' });
+        }
+        return res.status(401).json({ msg: "Invalid credentials" });
+      }
 
       // Compare provided password with hashed password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
+      let isMatch = false;
+      const xss = require('xss');
+
+      // 1) Raw password
+      try {
+        isMatch = await bcrypt.compare(password, user.password);
+      } catch (e) {
+        isMatch = false;
+      }
+
+      // 2) Trimmed password (handles accidental spaces)
+      if (!isMatch && typeof password === 'string' && password.trim() !== password) {
+        try {
+          isMatch = await bcrypt.compare(password.trim(), user.password);
+        } catch (e) { /* ignore */ }
+      }
+
+      // 3) Sanitized password (compat for historical sanitization)
+      if (!isMatch) {
+        const sanitizedPwd = xss(password);
+        if (sanitizedPwd !== password) {
+          try {
+            isMatch = await bcrypt.compare(sanitizedPwd, user.password);
+          } catch (e) { /* ignore */ }
+        }
+      }
+
+      // 4) Sanitized + trimmed
+      if (!isMatch) {
+        const sanitizedTrimmed = xss(password).trim();
+        if (sanitizedTrimmed !== password) {
+          try {
+            isMatch = await bcrypt.compare(sanitizedTrimmed, user.password);
+          } catch (e) { /* ignore */ }
+        }
+      }
+
+      // 5) Legacy plaintext password migration
+      if (!isMatch) {
+        const looksHashed = typeof user.password === 'string' && /^\$2[aby]\$\d{2}\$/.test(user.password);
+        const candidates = [password, typeof password === 'string' ? password.trim() : password, xss(password), xss(password).trim()].filter(v => typeof v === 'string');
+        const matchedPlain = !looksHashed && candidates.some(v => v === user.password);
+
+        if (matchedPlain) {
+          // Migrate: hash the provided raw password (not sanitized) and save
+          const salt = await bcrypt.genSalt(10);
+          const newHash = await bcrypt.hash(password, salt);
+          user.password = newHash;
+          await user.save();
+          isMatch = true;
+        }
+      }
+
+      if (!isMatch) {
+        if (config.NODE_ENV !== 'production') {
+          return res.status(401).json({ msg: "Invalid credentials", reason: 'password_mismatch' });
+        }
+        return res.status(401).json({ msg: "Invalid credentials" });
+      }
 
       // Create JWT payload and sign token
       const payload = { user: { id: user.id } };
@@ -224,6 +294,51 @@ router.post("/logout", (req, res) => {
   res.json({ success: true, msg: "Logged out successfully" });
 });
 
+/**
+ * @route   POST /api/auth/dev-reset-password
+ * @desc    Development-only: reset a user's password by email
+ * @access  Public in non-production (guarded by NODE_ENV)
+ */
+// Register dev-only password reset route only in non-production
+if (config.NODE_ENV !== 'production') {
+  router.post("/dev-reset-password",
+    validateRequiredFields(['email', 'newPassword']),
+    sanitizeBody({ email: sanitizeEmail }),
+    async (req, res) => {
+      try {
+        // Extra guard (defense-in-depth)
+        if (config.NODE_ENV === 'production') {
+          return res.status(403).json({ msg: 'Not available in production' });
+        }
+
+        const { email, newPassword } = req.body;
+
+        // Case-insensitive email lookup
+        const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const ciEmail = new RegExp(`^${escapeRegex(email)}$`, 'i');
+        const user = await User.findOne({ email: ciEmail });
+
+        if (!user) {
+          return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Validate password using same server-side validator
+        const pwdValidation = validatePassword(newPassword);
+        if (pwdValidation !== true) {
+          return res.status(400).json({ msg: pwdValidation });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        return res.json({ success: true, msg: 'Password reset. Please login.' });
+      } catch (err) {
+        return res.status(500).json({ msg: 'Server error' });
+      }
+    }
+  );
+}
+
 module.exports = router;
-// server/routes/auth.js
-// This file contains authentication routes for registration and login
+

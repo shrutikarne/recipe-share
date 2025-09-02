@@ -6,7 +6,10 @@ const xss = require('xss');
  * @param {*} data - The data to sanitize (object, array, or primitive)
  * @returns {*} Sanitized data with the same structure
  */
-const deepSanitize = (data) => {
+// Fields to exclude from sanitization (opaque secrets like passwords)
+const SENSITIVE_FIELDS = new Set(['password', 'newPassword', 'currentPassword']);
+
+const deepSanitize = (data, parentKey = null) => {
   // Handle null/undefined values
   if (data === null || data === undefined) {
     return data;
@@ -14,19 +17,23 @@ const deepSanitize = (data) => {
 
   // Handle strings - apply XSS sanitization
   if (typeof data === 'string') {
+    // Do not sanitize sensitive fields like passwords
+    if (parentKey && SENSITIVE_FIELDS.has(parentKey)) {
+      return data;
+    }
     return xss(data);
   }
 
   // Handle arrays - recursively sanitize each element
   if (Array.isArray(data)) {
-    return data.map(item => deepSanitize(item));
+    return data.map(item => deepSanitize(item, parentKey));
   }
 
   // Handle objects - recursively sanitize each property
   if (typeof data === 'object') {
     const sanitizedObj = {};
     for (const [key, value] of Object.entries(data)) {
-      sanitizedObj[key] = deepSanitize(value);
+      sanitizedObj[key] = deepSanitize(value, key);
     }
     return sanitizedObj;
   }
