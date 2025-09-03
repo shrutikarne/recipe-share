@@ -5,6 +5,12 @@ export default defineConfig({
   testDir: "./tests",
   timeout: 30000,
   retries: 0,
+  webServer: {
+    command: 'npm start',
+    url: 'http://localhost:3000',
+    timeout: 120000,
+    reuseExistingServer: true,
+  },
   use: {
     baseURL: "http://localhost:3000",
     headless: true,
