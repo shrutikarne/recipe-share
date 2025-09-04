@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./RecipeDetails.scss";
-import CookingMode from "../../components/CookingMode";
 import { fetchRecipe } from "../../api/recipes";
 
 /**
@@ -17,7 +16,6 @@ function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showCookingMode, setShowCookingMode] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [newComment, setNewComment] = useState("");
@@ -285,7 +283,6 @@ function RecipeDetail() {
           </div>
           <div className="action-buttons">
             <button className="save-btn">❤️ Save</button>
-            <button className="cook-btn" onClick={() => setShowCookingMode(true)}>🍴 Start Cooking</button>
             <button className="comment-btn">💬 Comment</button>
             <button className="share-btn" onClick={() => handleShare(recipe)} aria-label="Share recipe">📤 Share</button>
             <button className="print-btn" onClick={() => window.print()} aria-label="Print recipe">🖨️ Print</button>
@@ -366,9 +363,6 @@ function RecipeDetail() {
                 </div>
               )) || <p>No instructions available</p>}
             </div>
-            <button className="cook-mode-btn" onClick={() => setShowCookingMode(true)}>
-              Enter Cooking Mode
-            </button>
           </section>
 
           <section className="recipe-comments">
@@ -466,15 +460,6 @@ function RecipeDetail() {
           </div>
         </div>
       </div>
-
-      {/* Cooking Mode */}
-      {showCookingMode && recipe?.steps && (
-        <CookingMode
-          steps={recipe.steps}
-          stepImages={recipe?.stepImages || []}
-          onExit={() => setShowCookingMode(false)}
-        />
-      )}
     </div>
   );
 }

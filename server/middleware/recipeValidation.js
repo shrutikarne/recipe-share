@@ -126,43 +126,7 @@ const validateNutrition = (nutrition) => {
   return true;
 };
 
-/**
- * Validates a story step
- * @param {Object} storyStep - The story step to validate
- * @returns {boolean|string} True if valid, error message if not
- */
-const validateStoryStep = (storyStep) => {
-  if (!storyStep || typeof storyStep !== 'object') {
-    return 'Story step must be an object';
-  }
 
-  const { text, mediaUrl } = storyStep;
-
-  if (text !== undefined) {
-    const textResult = validateString(text, { min: 1 });
-    if (textResult !== true) return `Story text: ${textResult}`;
-  }
-
-  if (mediaUrl !== undefined) {
-    const mediaUrlResult = validateUrl(mediaUrl);
-    if (mediaUrlResult !== true) return `Media URL: ${mediaUrlResult}`;
-  }
-
-  return true;
-};
-
-/**
- * Validates an array of story steps
- * @param {Array} storySteps - The story steps to validate
- * @returns {boolean|string} True if valid, error message if not
- */
-const validateStorySteps = (storySteps) => {
-  if (!Array.isArray(storySteps)) {
-    return 'Story steps must be an array';
-  }
-
-  return validateArray(storySteps, validateStoryStep);
-};
 
 /**
  * Validates a comment object
@@ -288,7 +252,6 @@ module.exports = {
   validateImageUrls,
   validateTags,
   validateNutrition,
-  validateStorySteps,
   validateComments,
   validateRatings
 };

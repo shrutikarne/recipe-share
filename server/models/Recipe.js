@@ -39,18 +39,15 @@ const RecipeSchema = new mongoose.Schema(
       // Add more as needed
     },
     funFacts: [String], // Array of fun facts/trivia
-    storySteps: [
-      {
-        text: String, // Step description
-        mediaUrl: String, // Image or video URL
-      },
-    ],
     stepImages: [String], // Step-by-step images
     comments: [
       {
-        userId: String, // ID of user who commented
+        userId: String, // ID of user who commented (for compatibility with existing code)
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // User reference (for compatibility with tests)
         text: String, // Comment text
+        rating: Number, // Rating associated with this comment
         createdAt: { type: Date, default: Date.now }, // Timestamp
+        updatedAt: Date, // Last updated timestamp
       },
     ],
   },

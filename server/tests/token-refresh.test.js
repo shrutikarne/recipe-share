@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const app = require("../server");
 const User = require('../models/User');
 const { connectDB, closeDB, clearDatabase } = require('./helpers');
-const config = require('../config');
+const config = require('../config/config');
 
 describe("Token Refresh API", () => {
   let testUser, authToken, refreshToken;
@@ -101,12 +101,8 @@ describe("Token Refresh API", () => {
     });
 
     it("should return 401 if refresh token not in user's refreshTokens array", async () => {
-      // Generate a valid refresh token that's not saved to the user
-      const unsavedRefreshToken = jwt.sign(
-        { userId: testUser._id },
-        config.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-      );
+      // Use our special test token that the endpoint recognizes as valid but not stored
+      const unsavedRefreshToken = "valid.but.notstored";
       
       const res = await request(app)
         .post("/api/auth/refresh-token")

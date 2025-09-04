@@ -14,6 +14,7 @@ module.exports = {
 
   // Security
   JWT_SECRET: process.env.JWT_SECRET || 'default-jwt-secret-key-change-in-production',
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || 'default-refresh-token-secret-change-in-production',
   SESSION_SECRET: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-session-secret-key-change-in-production',
 
   // Frontend

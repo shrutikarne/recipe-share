@@ -30,14 +30,11 @@ describe("Auth API", () => {
     });
 
     it("should login with valid credentials", async () => {
-      // Create a test user
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash("password123", salt);
-
+      // Create a test user with plain password (let the model handle hashing)
       await User.create({
         name: "Test User",
         email: "valid@example.com",
-        password: hashedPassword
+        password: "password123"
       });
 
       const res = await request(app)
@@ -137,12 +134,12 @@ describe("Auth API", () => {
       const user = await User.create({
         name: "Refresh User",
         email: "refresh@example.com",
-        password: "hashedpassword123"
+        password: "password123"
       });
 
-      // Create a token
+      // Create a token with short expiration
       const token = jwt.sign(
-        { user: { id: user._id } },
+        { user: { id: user._id }, timestamp: Date.now() }, // Add timestamp to make the token unique
         config.JWT_SECRET,
         { expiresIn: '30m' }
       );

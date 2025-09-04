@@ -248,7 +248,7 @@ describe("Recipe Comments API", () => {
     let commentId;
 
     beforeEach(async () => {
-      // Add a comment to delete
+      // Add a comment to delete and also add the rating
       const updatedRecipe = await Recipe.findByIdAndUpdate(
         testRecipe._id,
         {
@@ -257,6 +257,10 @@ describe("Recipe Comments API", () => {
               user: testUser._id,
               text: "Comment to delete",
               rating: 3
+            },
+            ratings: {
+              userId: testUser._id,
+              value: 3
             }
           },
           $set: { averageRating: 3 }
@@ -295,7 +299,7 @@ describe("Recipe Comments API", () => {
     });
 
     it("should properly recalculate average rating after comment deletion", async () => {
-      // Add a second comment
+      // Add a second comment and also add the ratings
       await Recipe.findByIdAndUpdate(
         testRecipe._id,
         {
@@ -304,6 +308,10 @@ describe("Recipe Comments API", () => {
               user: testUser2._id,
               text: "Second comment",
               rating: 5
+            },
+            ratings: {
+              userId: testUser2._id,
+              value: 5
             }
           },
           $set: { averageRating: 4 } // (3+5)/2 = 4

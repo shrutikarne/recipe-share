@@ -13,7 +13,7 @@ describe("Auth Middleware", () => {
   });
 
   it("should return 401 if no auth header", () => {
-    const req = { header: jest.fn().mockReturnValue(undefined) };
+    const req = { cookies: {} };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
@@ -21,27 +21,34 @@ describe("Auth Middleware", () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
-      msg: "Authorization header missing"
+      msg: "No token found, authorization denied"
     });
     expect(next).not.toHaveBeenCalled();
   });
 
-  it("should return 401 for invalid auth header format", () => {
-    const req = { header: jest.fn().mockReturnValue("InvalidFormat") };
+  it("should return 401 for invalid token format", () => {
+    const req = { cookies: { token: "InvalidFormat" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
+
+    // Setup jwt.verify to throw an error
+    const error = new Error("jwt malformed");
+    error.name = "JsonWebTokenError";  // This will make it hit the correct case
+    jwt.verify.mockImplementation(() => {
+      throw error;
+    });
 
     verifyToken(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
-      msg: "Invalid authorization format. Use 'Bearer [token]'"
+      msg: "Invalid token"
     });
     expect(next).not.toHaveBeenCalled();
   });
 
   it("should return 401 for missing token", () => {
-    const req = { header: jest.fn().mockReturnValue("Bearer ") };
+    const req = { cookies: { token: "" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
@@ -49,14 +56,14 @@ describe("Auth Middleware", () => {
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
-      msg: "No token provided, authorization denied"
+      msg: "No token found, authorization denied"
     });
     expect(next).not.toHaveBeenCalled();
   });
 
   it("should call next() for valid token", () => {
     const userId = new mongoose.Types.ObjectId().toString();
-    const req = { header: jest.fn().mockReturnValue("Bearer valid.token") };
+    const req = { cookies: { token: "valid.token" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
@@ -74,7 +81,7 @@ describe("Auth Middleware", () => {
   });
 
   it("should return 401 for expired token", () => {
-    const req = { header: jest.fn().mockReturnValue("Bearer expired.token") };
+    const req = { cookies: { token: "expired.token" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
@@ -94,7 +101,7 @@ describe("Auth Middleware", () => {
   });
 
   it("should return 401 for invalid token", () => {
-    const req = { header: jest.fn().mockReturnValue("Bearer invalid.token") };
+    const req = { cookies: { token: "invalid.token" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
@@ -113,7 +120,7 @@ describe("Auth Middleware", () => {
   });
 
   it("should return 401 for token with invalid payload format", () => {
-    const req = { header: jest.fn().mockReturnValue("Bearer malformed.token") };
+    const req = { cookies: { token: "malformed.token" } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 

@@ -9,8 +9,17 @@ const config = require("../config/config");
  * @param {function} next - Express next middleware function
  */
 function verifyToken(req, res, next) {
-  // Get token from cookie
-  const token = req.cookies.token;
+  // Try to get token from cookie first
+  let token = req.cookies && req.cookies.token;
+  
+  // If no token in cookies, check Authorization header (for tests and API clients)
+  if (!token) {
+    // Check header for token
+    const authHeader = req.headers && (req.headers.authorization || req.headers.Authorization);
+    if (authHeader && typeof authHeader === 'string' && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+  }
 
   if (!token) {
     return res.status(401).json({ msg: "No token found, authorization denied" });

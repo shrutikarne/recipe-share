@@ -65,10 +65,6 @@ describe("Recipe Model", () => {
         fat: 15
       },
       funFacts: ['Fact 1', 'Fact 2'],
-      storySteps: [
-        { text: 'Story part 1', mediaUrl: 'http://example.com/story1.jpg' },
-        { text: 'Story part 2', mediaUrl: 'http://example.com/story2.jpg' }
-      ],
       stepImages: ['http://example.com/step1.jpg', 'http://example.com/step2.jpg']
     });
 

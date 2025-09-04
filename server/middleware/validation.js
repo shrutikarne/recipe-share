@@ -17,9 +17,11 @@ const isValidObjectId = (id) => {
 /**
  * Validates that required fields are present in the request body
  * @param {Array} requiredFields - Array of field names that must be present
+ * @param {Object} options - Options for validation
+ * @param {string} options.message - Custom error message
  * @returns {Function} Express middleware function
  */
-const validateRequiredFields = (requiredFields) => {
+const validateRequiredFields = (requiredFields, options = {}) => {
   return (req, res, next) => {
     const missingFields = [];
 
@@ -30,8 +32,9 @@ const validateRequiredFields = (requiredFields) => {
     }
 
     if (missingFields.length > 0) {
+      const defaultMessage = `Missing required fields: ${missingFields.join(', ')}`;
       return res.status(400).json({
-        error: "Missing required fields",
+        message: options.message || defaultMessage,
         missingFields
       });
     }

@@ -9,7 +9,8 @@ const {
   validateIdParam,
   sanitizeBody,
   sanitizeString,
-  isValidObjectId
+  isValidObjectId,
+  validateString
 } = require("../middleware/validation");
 
 /**
@@ -49,6 +50,7 @@ router.post("/save/:id",
       await user.save();
       res.json({ saved: true });
     } catch (err) {
+      console.error(err.message);
 
       // Better error handling
       if (err.name === 'ValidationError') {
@@ -58,7 +60,7 @@ router.post("/save/:id",
         });
       }
 
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server error" });
     }
   });
 
@@ -93,8 +95,8 @@ router.post("/unsave/:id",
       await user.save();
       res.json({ saved: false });
     } catch (err) {
-
-      // Better error handling
+      console.error(err.message);
+      
       if (err.name === 'ValidationError') {
         return res.status(400).json({
           error: "Validation failed",
@@ -102,74 +104,82 @@ router.post("/unsave/:id",
         });
       }
 
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server error" });
     }
   });
 
 /**
  * @route   GET /api/user/saved
- * @desc    Get all saved recipes for the user
+ * @desc    Get all recipes saved by the user
  * @access  Private
  */
-router.get("/saved", verifyToken, async (req, res) => {
-  try {
-    if (!req.user || !req.user.id || !isValidObjectId(req.user.id)) {
-      return res.status(401).json({ msg: "Valid user authentication required" });
+router.get("/saved",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id)
+        .populate({
+          path: 'savedRecipes.recipe',
+          select: 'title images category cookTime prepTime'
+        });
+
+      if (!user) return res.status(404).json({ msg: "User not found" });
+
+      res.json(user.savedRecipes);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server error" });
     }
+  });
 
-    const user = await User.findById(req.user.id).populate({
-      path: "savedRecipes.recipe",
-      select: "title imageUrls tags category",
-    });
+/**
+ * @route   GET /api/user/saved/collections
+ * @desc    Get all unique collection names for the user
+ * @access  Private
+ */
+router.get("/saved/collections",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user) return res.status(404).json({ msg: "User not found" });
 
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    // Filter out any null references (in case recipes were deleted)
-    const validSavedRecipes = user.savedRecipes.filter(item => item.recipe);
-
-    res.json(validSavedRecipes);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-});
+      const collections = [...new Set(user.savedRecipes.map(r => r.collection))];
+      res.json(collections);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server error" });
+    }
+  });
 
 /**
  * @route   GET /api/user/profile
  * @desc    Get current user's profile
  * @access  Private
  */
-router.get("/profile", verifyToken, async (req, res) => {
-  try {
-    if (!req.user || !req.user.id || !isValidObjectId(req.user.id)) {
-      return res.status(401).json({ msg: "Valid user authentication required" });
-    }
-
-    const user = await User.findById(req.user.id).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    // Get user's authored recipes count
-    const recipesCount = await Recipe.countDocuments({ author: req.user.id });
-
-    // Get user's saved recipes count
-    const savedCount = user.savedRecipes.length;
-
-    // Return user profile with additional stats
-    res.json({
-      ...user.toJSON(),
-      stats: {
-        recipesCount,
-        savedCount
+router.get("/profile",
+  verifyToken,
+  async (req, res) => {
+    try {
+      // Fetch user without password field
+      const user = await User.findById(req.user.id).select("-password");
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
       }
-    });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-});
+      
+      // Add stats property to the user object
+      const userObject = user.toObject();
+      userObject.stats = {
+        savedRecipes: user.savedRecipes.length,
+        // Add other stats as needed
+      };
+      
+      res.json(userObject);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server error" });
+    }
+  });
 
 /**
  * @route   PUT /api/user/profile
@@ -221,30 +231,28 @@ router.put("/profile",
         });
       }
 
-      res.status(500).send("Server error");
+      res.status(500).json({ msg: "Server error" });
     }
   });
 
 /**
  * @route   GET /api/user/recipes
- * @desc    Get recipes created by the current user
+ * @desc    Get all recipes created by the user
  * @access  Private
  */
-router.get("/recipes", verifyToken, async (req, res) => {
-  try {
-    if (!req.user || !req.user.id || !isValidObjectId(req.user.id)) {
-      return res.status(401).json({ msg: "Valid user authentication required" });
+router.get("/recipes",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const recipes = await Recipe.find({ author: req.user.id })
+        .sort({ createdAt: -1 })
+        .select('title description images category cookTime');
+        
+      res.json(recipes);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server error" });
     }
-
-    const recipes = await Recipe.find({ author: req.user.id })
-      .select("title imageUrls tags category createdAt")
-      .sort({ createdAt: -1 });
-
-    res.json(recipes);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-});
+  });
 
 module.exports = router;
