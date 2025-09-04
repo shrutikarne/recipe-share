@@ -366,7 +366,6 @@ router.post("/refresh-token", async (req, res) => {
       message: "Token refreshed successfully"
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -399,7 +398,6 @@ router.post("/logout", async (req, res) => {
     // Return success
     res.json({ success: true, message: "Logged out successfully" });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });

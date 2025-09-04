@@ -224,7 +224,6 @@ router.get("/:id",
 
       res.json(recipe);
     } catch (err) {
-      console.error(err.message);
       if (err.kind === 'ObjectId') {
         return res.status(400).json({ msg: "Invalid recipe ID" });
       }
@@ -274,7 +273,6 @@ router.post("/",
       const recipe = await newRecipe.save();
       res.status(201).json(recipe);
     } catch (err) {
-      console.error(err.message);
       // Better error handling
       if (err.name === 'ValidationError') {
         return res.status(400).json({
@@ -343,11 +341,10 @@ router.put("/:id",
 
       res.json(recipe);
     } catch (err) {
-      console.error(err.message);
       if (err.kind === 'ObjectId') {
         return res.status(400).json({ msg: "Invalid recipe ID" });
       }
-      
+
       // Better error handling
       if (err.name === 'ValidationError') {
         return res.status(400).json({
@@ -355,7 +352,7 @@ router.put("/:id",
           details: err.message
         });
       }
-      
+
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -385,7 +382,6 @@ router.delete("/:id",
       await Recipe.findByIdAndDelete(req.params.id);
       res.json({ msg: "Recipe removed" });
     } catch (err) {
-      console.error(err.message);
       if (err.kind === 'ObjectId') {
         return res.status(400).json({ msg: "Invalid recipe ID" });
       }
@@ -415,18 +411,18 @@ router.post("/:id/comments",
       if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
       const { text, rating } = req.body;
-      
+
       // Validate rating if provided
       if (rating !== undefined && (rating < 1 || rating > 5)) {
         return res.status(400).json({ message: "Rating must be between 1 and 5" });
       }
-      
+
       // Get user info for the comment
       const user = await User.findById(req.user.id).select("name avatar");
       if (!user) {
         return res.status(404).json({ msg: "User not found" });
       }
-      
+
       // Create comment
       const comment = {
         userId: req.user.id, // For existing code
@@ -435,10 +431,10 @@ router.post("/:id/comments",
         rating,
         createdAt: new Date()
       };
-      
+
       // Add to recipe
       recipe.comments.push(comment);
-      
+
       // Add rating if provided
       if (rating) {
         recipe.ratings.push({
@@ -446,16 +442,16 @@ router.post("/:id/comments",
           value: rating
         });
       }
-      
+
       // Save changes
       await recipe.save();
-      
+
       // Calculate average rating
       let averageRating = 0;
       if (recipe.ratings.length > 0) {
         averageRating = recipe.ratings.reduce((acc, curr) => acc + curr.value, 0) / recipe.ratings.length;
       }
-      
+
       // Add user info to comments before returning
       const commentsWithUsers = recipe.comments.map(c => {
         const commentObj = c.toObject();
@@ -468,14 +464,13 @@ router.post("/:id/comments",
         }
         return commentObj;
       });
-      
+
       // Return updated recipe with comments
       res.status(201).json({
         comments: commentsWithUsers,
         averageRating
       });
     } catch (err) {
-      console.error(err.message);
 
       // Better error handling
       if (err.name === 'ValidationError') {
@@ -494,7 +489,7 @@ router.post("/:id/comments",
  * @desc    Get all comments for a recipe
  * @access  Public
  */
-router.get("/:id/comments", 
+router.get("/:id/comments",
   validateIdParam(),
   async (req, res) => {
     try {
@@ -504,12 +499,12 @@ router.get("/:id/comments",
       // Get users for comments
       const userIds = recipe.comments.map(c => c.userId || c.user).filter(Boolean);
       const users = await User.find({ _id: { $in: userIds } }).select("name avatar");
-      
+
       // Map users to comments
       const commentsWithUser = recipe.comments.map(comment => {
         const commentObj = comment.toObject();
         const userId = comment.userId || comment.user;
-        
+
         if (userId) {
           const user = users.find(u => u && u._id.toString() === userId.toString());
           if (user) {
@@ -526,13 +521,12 @@ router.get("/:id/comments",
             };
           }
         }
-        
+
         return commentObj;
       });
-      
+
       res.json(commentsWithUser);
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -542,7 +536,7 @@ router.get("/:id/comments",
  * @desc    Update a comment on a recipe
  * @access  Private
  */
-router.put("/:id/comments/:commentId", 
+router.put("/:id/comments/:commentId",
   verifyToken,
   validateIdParam(),
   validateRequiredFields(['text']),
@@ -562,27 +556,27 @@ router.put("/:id/comments/:commentId",
       if (!comment) {
         return res.status(404).json({ msg: "Comment not found" });
       }
-      
+
       // Check if the comment belongs to the user
       const commentUserId = comment.userId || comment.user;
       const userId = req.user.id;
-      
+
       if (commentUserId && commentUserId.toString() !== userId && commentUserId !== userId) {
         return res.status(403).json({ msg: "Not authorized to update this comment" });
       }
-      
+
       // Update the comment
       const { text, rating } = req.body;
       comment.text = text;
       comment.updatedAt = new Date();
-      
+
       if (rating) {
         comment.rating = rating;
-        
+
         // Update rating
-        const ratingIndex = recipe.ratings.findIndex(r => 
+        const ratingIndex = recipe.ratings.findIndex(r =>
           (r.userId && r.userId.toString() === userId) || r.userId === userId);
-          
+
         if (ratingIndex > -1) {
           recipe.ratings[ratingIndex].value = rating;
         } else {
@@ -592,21 +586,20 @@ router.put("/:id/comments/:commentId",
           });
         }
       }
-      
+
       await recipe.save();
-      
+
       // Calculate average rating
       let averageRating = 0;
       if (recipe.ratings.length > 0) {
         averageRating = recipe.ratings.reduce((acc, curr) => acc + curr.value, 0) / recipe.ratings.length;
       }
-      
+
       res.json({
         comments: recipe.comments,
         averageRating
       });
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -616,7 +609,7 @@ router.put("/:id/comments/:commentId",
  * @desc    Delete a comment from a recipe
  * @access  Private
  */
-router.delete("/:id/comments/:commentId", 
+router.delete("/:id/comments/:commentId",
   verifyToken,
   validateIdParam(),
   async (req, res) => {
@@ -629,45 +622,44 @@ router.delete("/:id/comments/:commentId",
       if (!comment) {
         return res.status(404).json({ msg: "Comment not found" });
       }
-      
+
       // Check if the comment belongs to the user
       const commentUserId = comment.userId || comment.user;
       const userId = req.user.id;
-      
+
       if (commentUserId && commentUserId.toString() !== userId && commentUserId !== userId) {
         return res.status(403).json({ msg: "Not authorized to delete this comment" });
       }
-      
+
       // Get the rating from the comment to be deleted
       const rating = comment.rating;
-      
+
       // Remove the comment
       recipe.comments.pull(req.params.commentId);
-      
+
       // Remove the rating associated with this comment if it exists
       if (rating) {
-        const ratingIndex = recipe.ratings.findIndex(r => 
+        const ratingIndex = recipe.ratings.findIndex(r =>
           (r.userId && r.userId.toString() === commentUserId.toString()) || r.userId === commentUserId);
-          
+
         if (ratingIndex > -1) {
           recipe.ratings.splice(ratingIndex, 1);
         }
       }
-      
+
       await recipe.save();
-      
+
       // Calculate average rating
       let averageRating = 0;
       if (recipe.ratings && recipe.ratings.length > 0) {
         averageRating = recipe.ratings.reduce((acc, curr) => acc + curr.value, 0) / recipe.ratings.length;
       }
-      
+
       res.json({
         comments: recipe.comments,
         averageRating
       });
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });

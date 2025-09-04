@@ -50,7 +50,6 @@ router.post("/save/:id",
       await user.save();
       res.json({ saved: true });
     } catch (err) {
-      console.error(err.message);
 
       // Better error handling
       if (err.name === 'ValidationError') {
@@ -95,7 +94,6 @@ router.post("/unsave/:id",
       await user.save();
       res.json({ saved: false });
     } catch (err) {
-      console.error(err.message);
       
       if (err.name === 'ValidationError') {
         return res.status(400).json({
@@ -127,7 +125,6 @@ router.get("/saved",
 
       res.json(user.savedRecipes);
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -147,7 +144,6 @@ router.get("/saved/collections",
       const collections = [...new Set(user.savedRecipes.map(r => r.collection))];
       res.json(collections);
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -176,7 +172,6 @@ router.get("/profile",
       
       res.json(userObject);
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });
@@ -222,7 +217,6 @@ router.put("/profile",
 
       res.json(updatedUser);
     } catch (err) {
-      console.error(err.message);
 
       if (err.name === 'ValidationError') {
         return res.status(400).json({
@@ -250,7 +244,6 @@ router.get("/recipes",
         
       res.json(recipes);
     } catch (err) {
-      console.error(err.message);
       res.status(500).json({ msg: "Server error" });
     }
   });

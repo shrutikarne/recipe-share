@@ -107,11 +107,6 @@ export default function RecipeGrid({
             const isHovered = hoveredRecipeId === recipe._id;
 
             const imageSrc = toProxyIfS3(getRecipeImage(recipe));
-            if (process.env.NODE_ENV !== 'production') {
-              // Lightweight debug to verify which image each card uses
-              // eslint-disable-next-line no-console
-              console.debug('RecipeGrid image', { id: recipe._id, imageUrl: recipe.imageUrl, imageUrls: recipe.imageUrls, images: recipe.images, legacyImage: recipe.image, chosen: imageSrc });
-            }
             return (
               <motion.div
                 key={recipe._id}
