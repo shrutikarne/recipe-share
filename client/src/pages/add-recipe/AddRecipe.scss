@@ -1,10 +1,10 @@
 /* AddRecipe.scss - Modern redesign with sleek aesthetics */
 
-// Variables
-$primary-color: #10b981;
-$secondary-color: #f59e0b;
-$text-color: #1f2937;
-$light-text: #6b7280;
+// Variables (legacy; replaced by CSS variables where used)
+$primary-color: var(--accent);
+$secondary-color: var(--secondary);
+$text-color: var(--text);
+$light-text: var(--text-secondary);
 $border-radius: 12px;
 $box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 $transition: all 0.3s ease;
@@ -26,7 +26,7 @@ $transition: all 0.3s ease;
 
 // Modern add recipe form
 .add-recipe-form {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: $border-radius;
   box-shadow: $box-shadow;
   padding: 32px;
@@ -45,7 +45,7 @@ $transition: all 0.3s ease;
   }
 
   &__h2 {
-    color: $text-color;
+    color: var(--text);
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 32px;
@@ -57,7 +57,7 @@ $transition: all 0.3s ease;
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: $text-color;
+    color: var(--text);
     font-size: 14px;
   }
 
@@ -67,17 +67,17 @@ $transition: all 0.3s ease;
     width: 100%;
     padding: 12px 16px;
     margin-bottom: 24px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
-    color: $text-color;
-    background: #fff;
+    color: var(--text);
+    background: var(--input-bg);
     box-sizing: border-box;
     transition: $transition;
 
     &:focus {
-      border-color: $primary-color;
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
       outline: none;
     }
   }
@@ -95,8 +95,8 @@ $transition: all 0.3s ease;
     background-size: 16px;
 
     &--required {
-      border-color: #ef4444;
-      background-color: rgba(239, 68, 68, 0.05);
+      border-color: var(--danger);
+      background-color: var(--danger-bg);
     }
   }
 
@@ -122,7 +122,7 @@ $transition: all 0.3s ease;
     width: 100%;
     height: 160px;
     padding: 20px;
-    border: 2px dashed #e5e7eb;
+    border: 2px dashed var(--border-color);
     border-radius: 8px;
     cursor: pointer;
     transition: $transition;
@@ -142,7 +142,7 @@ $transition: all 0.3s ease;
 
 // Recipe preview card with a modern design
 .recipe-preview-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: $border-radius;
   box-shadow: $box-shadow;
   overflow: hidden;
@@ -153,7 +153,7 @@ $transition: all 0.3s ease;
   &__image {
     width: 100%;
     height: 240px;
-    background: #f3f4f6;
+    background: var(--light-bg);
     overflow: hidden;
     position: relative;
 
@@ -170,7 +170,7 @@ $transition: all 0.3s ease;
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: $light-text;
+    color: var(--text-secondary);
     font-size: 16px;
   }
 
@@ -181,12 +181,12 @@ $transition: all 0.3s ease;
   &__title {
     font-size: 22px;
     font-weight: 700;
-    color: $text-color;
+    color: var(--text);
     margin-bottom: 8px;
   }
 
   &__desc {
-    color: $light-text;
+    color: var(--text-secondary);
     margin-bottom: 16px;
     line-height: 1.6;
   }
@@ -198,12 +198,12 @@ $transition: all 0.3s ease;
     margin-bottom: 20px;
 
     span {
-      background-color: #f9fafb;
+      background-color: var(--light-bg);
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 500;
-      color: $text-color;
+      color: var(--text);
       display: flex;
       align-items: center;
 
@@ -213,7 +213,7 @@ $transition: all 0.3s ease;
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background-color: $primary-color;
+        background-color: var(--accent);
         margin-right: 8px;
       }
     }
@@ -270,20 +270,20 @@ $transition: all 0.3s ease;
       transition: $transition;
 
       &.form-btn--primary {
-        background: $primary-color;
+        background: var(--accent);
         color: white;
 
         &:hover {
-          background: darken($primary-color, 5%);
+          background: var(--accent-dark);
         }
       }
 
       &.form-btn--secondary {
-        background: #f3f4f6;
-        color: $text-color;
+        background: var(--light-bg);
+        color: var(--text);
 
         &:hover {
-          background: #e5e7eb;
+          background: var(--border-color);
         }
       }
     }
@@ -291,7 +291,7 @@ $transition: all 0.3s ease;
 
   &__progress {
     text-align: center;
-    color: $light-text;
+    color: var(--text-secondary);
     font-size: 14px;
   }
 }
@@ -310,7 +310,7 @@ $transition: all 0.3s ease;
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #e5e7eb;
+    background-color: var(--border-color);
     z-index: 0;
   }
 
@@ -326,9 +326,9 @@ $transition: all 0.3s ease;
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background-color: white;
-      border: 2px solid #e5e7eb;
-      color: $light-text;
+      background-color: var(--card-bg);
+      border: 2px solid var(--border-color);
+      color: var(--text-secondary);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -349,33 +349,33 @@ $transition: all 0.3s ease;
     }
 
     &-title {
-      color: $text-color;
+      color: var(--text);
       font-weight: 600;
       font-size: 14px;
       margin-bottom: 2px;
     }
 
     &-description {
-      color: $light-text;
+      color: var(--text-secondary);
       font-size: 12px;
     }
 
     &.active {
       .stepper__step-number {
-        background-color: $primary-color;
-        border-color: $primary-color;
+        background-color: var(--accent);
+        border-color: var(--accent);
         color: white;
       }
 
       .stepper__step-title {
-        color: $primary-color;
+        color: var(--accent);
       }
     }
 
     &.completed {
       .stepper__step-number {
-        background-color: $primary-color;
-        border-color: $primary-color;
+        background-color: var(--accent);
+        border-color: var(--accent);
         color: white;
 
         &::after {
@@ -397,15 +397,15 @@ $transition: all 0.3s ease;
 }
 
 .form-error {
-  background-color: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
-  border-left: 4px solid #ef4444;
+  background-color: var(--danger-bg);
+  color: var(--danger);
+  border-left: 4px solid var(--danger);
 }
 
 .form-success {
-  background-color: rgba(16, 185, 129, 0.08);
-  color: $primary-color;
-  border-left: 4px solid $primary-color;
+  background-color: var(--success-bg);
+  color: var(--success);
+  border-left: 4px solid var(--success);
 }
 
 // Item list (ingredients and steps)
@@ -415,7 +415,7 @@ $transition: all 0.3s ease;
   &__item {
     display: flex;
     align-items: center;
-    background-color: #f9fafb;
+    background-color: var(--light-bg);
     border-radius: 6px;
     padding: 12px 16px;
     margin-bottom: 8px;
@@ -429,13 +429,13 @@ $transition: all 0.3s ease;
     &-remove {
       background: transparent;
       border: none;
-      color: #ef4444;
+      color: var(--danger);
       cursor: pointer;
       padding: 4px;
       border-radius: 4px;
 
       &:hover {
-        background-color: rgba(239, 68, 68, 0.1);
+        background-color: var(--danger-bg);
       }
     }
 
@@ -445,7 +445,7 @@ $transition: all 0.3s ease;
       justify-content: center;
       width: 24px;
       height: 24px;
-      background-color: $primary-color;
+      background-color: var(--accent);
       color: white;
       border-radius: 50%;
       font-size: 12px;

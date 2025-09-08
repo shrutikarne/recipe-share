@@ -142,8 +142,8 @@
 }
 
 .modal-tag {
-  background: #f3f4f6;
-  color: #2563eb;
+  background: var(--light-bg);
+  color: var(--accent);
   border-radius: 8px;
   padding: 2px 10px;
   font-size: 10px;
@@ -152,7 +152,7 @@
 
 .view-full-btn {
   margin-top: 18px;
-  background: #2563eb;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -163,5 +163,5 @@
 }
 
 .view-full-btn:hover {
-  background: #1d4ed8;
+  background: var(--accent-dark);
 }

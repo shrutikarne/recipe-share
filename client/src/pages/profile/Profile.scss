@@ -43,7 +43,7 @@
   h1 {
     margin-top: 0;
     margin-bottom: 8px;
-    color: var(--text-color);
+    color: var(--text);
     font-size: 32px;
   }
 }
@@ -98,7 +98,7 @@
       border: 1px solid var(--border-color);
       border-radius: 4px;
       background-color: var(--input-bg);
-      color: var(--text-color);
+      color: var(--text);
       font-size: 16px;
 
       &:focus {

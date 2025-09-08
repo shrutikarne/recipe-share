@@ -1,9 +1,12 @@
 /* index.scss - SCSS version for global styles */
+@use './styles/theme';
+/* Web fonts: Poppins (headings), Inter (body), Dancing Script (accent) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&family=Dancing+Script:wght@700&display=swap');
 
 body {
-  font-family: 'Roboto';
-  background: #f5f5f5;
-  color: #222;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -15,6 +18,18 @@ body {
     min-width: 0;
     box-sizing: border-box;
   }
+}
+
+/* Global heading typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--heading-color);
+}
+
+/* Utility: accent script for section titles */
+.section-title {
+  font-family: var(--font-accent);
+  color: var(--heading-color);
 }
 
 /* Utility & global helper classes */
@@ -31,9 +46,9 @@ body {
 }
 
 .form-error {
-  color: #dc2626;
-  background: #fee2e2;
-  border: 1px solid #dc2626;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
   border-radius: 4px;
   padding: 6px 10px;
   margin-bottom: 10px;
@@ -41,9 +56,9 @@ body {
 }
 
 .form-success {
-  color: #166534;
-  background: #bbf7d0;
-  border: 1px solid #22c55e;
+  color: var(--success-text);
+  background: var(--success-bg);
+  border: 1px solid var(--success);
   border-radius: 4px;
   padding: 6px 10px;
   margin-bottom: 10px;

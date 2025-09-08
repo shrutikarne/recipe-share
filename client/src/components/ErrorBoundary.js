@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './ErrorBoundary.scss';
+import { TEXT } from '../localization/text';
 
 /**
  * ErrorBoundary component for catching and handling React component errors
@@ -40,14 +41,13 @@ class ErrorBoundary extends Component {
       // Default error UI
       return (
         <div className="error-boundary">
-          <h2>Something went wrong</h2>
+          <h2>{TEXT.errorBoundary.heading}</h2>
           <p>
-            We're sorry, but there was an error loading this component.
-            Please try refreshing the page.
+            {TEXT.errorBoundary.message}
           </p>
           {this.props.showDetails && (
             <details>
-              <summary>Error Details</summary>
+              <summary>{TEXT.errorBoundary.detailsSummary}</summary>
               <p>{this.state.error && this.state.error.toString()}</p>
               <div>
                 {this.state.errorInfo &&
@@ -62,7 +62,7 @@ class ErrorBoundary extends Component {
             className="error-boundary-button"
             onClick={() => window.location.reload()}
           >
-            Refresh Page
+            {TEXT.errorBoundary.refreshButton}
           </button>
         </div>
       );

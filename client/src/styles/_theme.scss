@@ -1,0 +1,127 @@
+// Centralized design tokens for colors and typography
+// - Exposes CSS variables for runtime theming
+// - Provides a single place to adjust palette and type scale
+
+// Base palette (used to set CSS variables below)
+$color-bg: #F5F5F5;   // Soft Gray (background)
+$color-text: #333333; // Dark Gray (text, headings)
+$color-text-secondary: #666666; // neutral secondary text
+$color-heading: #333333;
+$color-card-bg: #ffffff;
+$color-border: #e5e7eb; // gray-200
+$color-muted: #9ca3af; // gray-400
+$color-light-bg: #f3f4f6; // gray-100
+
+$color-primary: #FF7043; // Spice Orange
+$color-primary-dark: #E85C2F; // deeper orange
+$color-primary-rgb: 255, 112, 67;
+
+$color-accent: $color-primary; // alias to primary
+$color-accent-dark: $color-primary-dark;
+
+// Secondary Accent (Fresh Green)
+$color-secondary: #66BB6A;
+
+$color-success: $color-secondary;
+$color-success-bg: #e8f5e9;
+$color-success-strong: #2e7d32;
+
+// Highlight (Heart Red)
+$color-danger: #E53935;
+$color-danger-bg: #fdecea;
+
+$color-info: #0ea5e9;
+$color-warning: #facc15;
+
+// Dark theme palette
+$color-dark-bg: #181a20;
+$color-dark-surface: #1f2937; // gray-800
+$color-dark-border: #374151; // gray-700
+$color-dark-text: #e5e7eb;   // gray-200
+$color-dark-text-secondary: #9ca3af; // gray-400
+
+// Typography families
+$font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+$font-heading: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+$font-accent: 'Dancing Script', "Apple Color Emoji", "Segoe UI Emoji", cursive;
+
+// Typography scale
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-md: 18px;
+$font-size-lg: 24px;
+$font-size-xl: 32px;
+$font-size-2xl: 40px;
+$font-size-3xl: 48px;
+$line-height-base: 1.5;
+
+// Light theme variables
+:root {
+  // Typography
+  --font-body: #{$font-body};
+  --font-heading: #{$font-heading};
+  --font-accent: #{$font-accent};
+  // Back-compat alias
+  --font-sans: var(--font-body);
+  --text-xs: #{$font-size-xs};
+  --text-sm: #{$font-size-sm};
+  --text-base: #{$font-size-base};
+  --text-md: #{$font-size-md};
+  --text-lg: #{$font-size-lg};
+  --text-xl: #{$font-size-xl};
+  --text-2xl: #{$font-size-2xl};
+  --text-3xl: #{$font-size-3xl};
+  --leading-normal: #{$line-height-base};
+
+  // Core colors
+  --bg: #{$color-bg};
+  --text: #{$color-text};
+  --text-secondary: #{$color-text-secondary};
+  --heading-color: #{$color-heading};
+  --card-bg: #{$color-card-bg};
+  --border-color: #{$color-border};
+  --muted: #{$color-muted};
+  --light-bg: #{$color-light-bg};
+
+  // Brand / actions
+  --primary: #{$color-primary};
+  --primary-dark: #{$color-primary-dark};
+  --primary-rgb: #{$color-primary-rgb};
+  --accent: #{$color-accent};
+  --accent-dark: #{$color-accent-dark};
+  --accent-color: var(--primary); // alias used in some components
+  --secondary: #{$color-secondary};
+  --highlight: #{$color-danger};
+
+  // States
+  --success: #{$color-success};
+  --success-text: #{$color-success-strong};
+  --success-bg: #{$color-success-bg};
+  --danger: #{$color-danger};
+  --danger-bg: #{$color-danger-bg};
+  --info: #{$color-info};
+  --warning: #{$color-warning};
+
+  // Inputs
+  --input-bg: #{$color-card-bg};
+}
+
+// Dark theme overrides (applies when `dark` class is on html element)
+.dark {
+  --bg: #{$color-dark-bg};
+  --text: #{$color-dark-text};
+  --text-secondary: #{$color-dark-text-secondary};
+  --heading-color: #{$color-dark-text};
+  --card-bg: #{$color-dark-surface};
+  --border-color: #{$color-dark-border};
+  --muted: #{$color-dark-text-secondary};
+  --light-bg: #2a2f3a; // subtle hover in dark
+
+  // Keep brand colors same; adjust if needed
+  --primary: #{$color-primary-dark};
+  --primary-dark: #{$color-primary};
+
+  // Inputs
+  --input-bg: #{$color-dark-surface};
+}

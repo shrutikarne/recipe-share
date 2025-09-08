@@ -6,6 +6,7 @@ import RecipePreviewCard from "./RecipePreviewCard";
 import { sanitizeString } from "../../utils/sanitize";
 import { motion, AnimatePresence } from "framer-motion";
 import "./AddRecipe.scss";
+import { CloseIcon, UploadIcon } from "../../components/SvgIcons";
 
 /**
  * AddRecipe component
@@ -346,9 +347,7 @@ function AddRecipe() {
                     onClick={() => handleRemoveIngredient(index)}
                     aria-label={`Remove ingredient: ${ingredient}`}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <CloseIcon />
                   </button>
                 </div>
               ))}
@@ -396,9 +395,7 @@ function AddRecipe() {
                     onClick={() => handleRemoveStep(index)}
                     aria-label={`Remove step ${index + 1}`}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <CloseIcon />
                   </button>
                 </div>
               ))}
@@ -443,9 +440,7 @@ function AddRecipe() {
                 onChange={handleImageUpload}
               />
               <label htmlFor="recipe-image" className="add-recipe-form__file-label">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 16V17C7 19.7614 9.23858 22 12 22C14.7614 22 17 19.7614 17 17V16M12 2V12M12 2L8 6M12 2L16 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <UploadIcon />
                 <span>{form.imagePreview || form.imageUrl ? "Change Image" : "Upload Recipe Image"}</span>
               </label>
             </div>

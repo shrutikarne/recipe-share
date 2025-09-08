@@ -2,6 +2,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import "./AddRecipe.scss";
+import { TEXT } from "../../localization/text";
+import { RecipeImagePlaceholderIcon } from "../../components/SvgIcons";
 
 /**
  * RecipePreviewCard component for displaying a preview of the recipe being created.
@@ -18,11 +20,9 @@ export default function RecipePreviewCard({ form, cookHours, cookMinutes }) {
     
     // Format cook time nicely
     const formatCookTime = () => {
-        if (!cookHours && !cookMinutes) return "Cook time not specified";
-        
+        if (!cookHours && !cookMinutes) return TEXT.recipePreview.cookTimeNotSpecified;
         const hours = parseInt(cookHours) || 0;
         const minutes = parseInt(cookMinutes) || 0;
-        
         if (hours > 0 && minutes > 0) {
             return `${hours}h ${minutes}m`;
         } else if (hours > 0) {
@@ -45,22 +45,20 @@ export default function RecipePreviewCard({ form, cookHours, cookMinutes }) {
                 {form.imagePreview || form.imageUrl ? (
                     <motion.img 
                         src={form.imagePreview || form.imageUrl} 
-                        alt={form.title || "Recipe preview"} 
+                        alt={form.title || TEXT.recipePreview.imageAlt} 
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.3 }}
                     />
                 ) : (
                     <div className="recipe-preview-card__placeholder">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 16L8.586 11.414C8.96106 11.0389 9.46967 10.8284 10 10.8284C10.5303 10.8284 11.0389 11.0389 11.414 11.414L16 16M14 14L15.586 12.414C15.9611 12.0389 16.4697 11.8284 17 11.8284C17.5303 11.8284 18.0389 12.0389 18.414 12.414L20 14M14 8H14.01M6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20Z" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span>Image Preview</span>
+                        <RecipeImagePlaceholderIcon />
+                        <span>{TEXT.recipePreview.imagePreview}</span>
                     </div>
                 )}
             </div>
             <div className="recipe-preview-card__content">
-                <h3 className="recipe-preview-card__title">{form.title || "Recipe Title"}</h3>
-                <div className="recipe-preview-card__desc">{form.description || "Recipe description will appear here."}</div>
+                <h3 className="recipe-preview-card__title">{form.title || TEXT.recipePreview.title}</h3>
+                <div className="recipe-preview-card__desc">{form.description || TEXT.recipePreview.description}</div>
                 
                 <div className="recipe-preview-card__meta">
                     {form.category && <span>{form.category}</span>}
@@ -69,20 +67,20 @@ export default function RecipePreviewCard({ form, cookHours, cookMinutes }) {
                 </div>
                 
                 <div className="recipe-preview-card__section">
-                    <strong>Ingredients:</strong>
+                    <strong>{TEXT.recipePreview.ingredientsLabel}</strong>
                     <ul>
                         {(form.ingredients && form.ingredients.length > 0 && form.ingredients[0])
                             ? form.ingredients.map((ing, i) => ing.trim() && <li key={i}>{ing}</li>)
-                            : <li>Ingredients will appear here.</li>}
+                            : <li>{TEXT.recipePreview.ingredientsPlaceholder}</li>}
                     </ul>
                 </div>
                 
                 <div className="recipe-preview-card__section">
-                    <strong>Steps:</strong>
+                    <strong>{TEXT.recipePreview.stepsLabel}</strong>
                     <ol>
                         {(form.steps && form.steps.length > 0 && form.steps[0])
                             ? form.steps.map((step, i) => step.trim() && <li key={i}>{step}</li>)
-                            : <li>Steps will appear here.</li>}
+                            : <li>{TEXT.recipePreview.stepsPlaceholder}</li>}
                     </ol>
                 </div>
             </div>

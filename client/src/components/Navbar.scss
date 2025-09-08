@@ -13,7 +13,7 @@
      background: rgba(255, 255, 255, 0.6);
      box-shadow: 0 2px 16px rgba(132, 204, 22, 0.08);
      backdrop-filter: blur(12px) saturate(1.2);
-     border-bottom: 1.5px solid #e5e7eb;
+    border-bottom: 1.5px solid var(--border-color);
      font-family: inherit;
      transition: background 0.2s;
     /* overflow-x: hidden; removed to allow dropdown to overflow */
@@ -22,7 +22,7 @@
  .navbar-glass__logo {
      font-size: 21px;
      font-weight: 700;
-     color: #84cc16;
+    color: var(--accent);
      cursor: pointer;
      letter-spacing: 1px;
      user-select: none;
@@ -39,7 +39,7 @@
  }
 
  .navbar-glass__links a {
-     color: #374151;
+     color: var(--text-secondary);
      text-decoration: none;
      padding: 4px 8px;
      border-radius: 6px;
@@ -47,8 +47,8 @@
  }
 
  .navbar-glass__links a:hover {
-     background: #f3f4f6;
-     color: #84cc16;
+     background: var(--light-bg);
+     color: var(--accent);
  }
 
  .navbar-glass__profile {
@@ -58,7 +58,7 @@
  }
 
  .navbar-glass__auth a {
-     color: #fb7185;
+     color: var(--accent);
      text-decoration: none;
      margin: 0 4px;
      font-weight: 500;
@@ -76,15 +76,15 @@
      height: 36px;
      border-radius: 50%;
      object-fit: cover;
-     border: 2px solid #84cc16;
+     border: 2px solid var(--accent);
  }
 
  .navbar-glass__avatar--default {
-     background-color: #e5e7eb;
+     background-color: var(--border-color);
      display: flex;
      align-items: center;
      justify-content: center;
-     color: #84cc16;
+     color: var(--accent);
  }
 
  .navbar-glass__avatar--default svg {
@@ -102,7 +102,7 @@
      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); /* More visible shadow */
      padding: 12px 0;
      min-width: 140px;
-     border: 2px solid #84cc16; /* Highlight border */
+     border: 2px solid var(--accent); /* Highlight border */
      display: block !important; /* Force display */
  }
 
@@ -122,7 +122,7 @@
      display: block;
      background: none;
      border: none;
-     color: #fb7185;
+     color: var(--accent);
      font-weight: 600; /* Make text bolder */
      font-size: 16px;
      cursor: pointer;
@@ -135,8 +135,8 @@
 
  .navbar-glass__dropdown button:hover,
  .navbar-glass__dropdown-link:hover {
-     background-color: rgba(132, 204, 22, 0.1);
- }
+     background-color: rgba(var(--primary-rgb), 0.1);
+}
 
  @media (max-width: 900px) {
      .navbar-glass {

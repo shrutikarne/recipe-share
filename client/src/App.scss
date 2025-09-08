@@ -1,8 +1,10 @@
+@use './styles/theme';
+
 .dark,
 .dark body,
 .dark .app-container {
-  background: #181a20 !important;
-  color: #e5e7eb !important;
+  background: var(--bg) !important;
+  color: var(--text) !important;
 
   /* App.scss - SCSS version for app-wide styles */
 
@@ -24,7 +26,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 32px;
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &__right {
@@ -35,14 +37,14 @@
 
   &__link {
     text-decoration: none;
-    color: #4b5563;
+    color: var(--text-secondary);
     padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.2s;
 
     &:hover {
-      background-color: #f3f4f6;
-      color: #1f2937;
+      background-color: var(--light-bg);
+      color: var(--text);
     }
   }
 
@@ -78,7 +80,7 @@
     top: calc(100% + 8px);
     right: 0;
     min-width: 200px;
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     padding: 8px;
@@ -91,7 +93,7 @@
       background: none;
       border: none;
       border-radius: 6px;
-      color: #4b5563;
+      color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
@@ -99,12 +101,12 @@
       gap: 8px;
 
       &:hover {
-        background-color: #f3f4f6;
-        color: #1f2937;
+        background-color: var(--light-bg);
+        color: var(--text);
       }
 
       &:focus {
-        outline: 2px solid #818cf8;
+        outline: 2px solid var(--primary);
         outline-offset: -2px;
       }
     }
@@ -118,7 +120,7 @@
   right: 32px;
   width: 56px;
   height: 56px;
-  background-color: #818cf8;
+  background-color: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -133,7 +135,7 @@
 
   &:hover {
     transform: scale(1.05);
-    background-color: #6366f1;
+    background-color: var(--primary-dark);
   }
 
   &:active {
@@ -141,17 +143,17 @@
   }
 
   &:focus {
-    outline: 2px solid #818cf8;
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
   }
 
   // Dark mode styles
   .dark & {
-    background-color: #6366f1;
+    background-color: var(--primary);
     color: white;
 
     &:hover {
-      background-color: #818cf8;
+      background-color: var(--primary-dark);
     }
   }
 }

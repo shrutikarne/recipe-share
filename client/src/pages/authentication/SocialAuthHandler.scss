@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
 }
 
 .social-auth-handler p {
@@ -15,7 +15,7 @@
 
 .loader {
   border: 4px solid rgba(132, 204, 22, 0.2);
-  border-top: 4px solid #84cc16;
+  border-top: 4px solid var(--accent);
   border-radius: 50%;
   width: 40px;
   height: 40px;

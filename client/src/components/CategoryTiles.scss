@@ -16,7 +16,7 @@
 .category-tiles-title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--heading-color, #222);
+  color: var(--heading-color);
   margin: 0 0 8px 0;
   display: flex;
   align-items: center;
@@ -30,7 +30,7 @@
 
 .section-subtitle {
   font-size: 16px;
-  color: var(--text-light, #666);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -173,11 +173,11 @@
 // Dark mode
 .dark {
   .category-tiles-title {
-    color: white;
+    color: var(--text);
   }
 
   .section-subtitle {
-    color: #d1d5db;
+    color: var(--text-secondary);
   }
 }
 

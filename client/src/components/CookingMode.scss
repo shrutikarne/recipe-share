@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #fff;
+  background: var(--card-bg);
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
   font-size: 20px;
   background: none;
   border: none;
-  color: #888;
+  color: var(--text-secondary);
   cursor: pointer;
   z-index: 2;
 }
@@ -33,7 +33,7 @@
 }
 .cooking-step-num {
   font-size: 12px;
-  color: #2563eb;
+  color: var(--accent);
   margin-bottom: 8px;
 }
 .cooking-img {
@@ -44,7 +44,7 @@
 }
 .cooking-text {
   font-size: 15px;
-  color: #222;
+  color: var(--text);
   text-align: center;
   margin: 12px 0 0 0;
   font-weight: 500;
@@ -55,7 +55,7 @@
   margin-top: 24px;
 }
 .cooking-nav button {
-  background: #2563eb;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -65,10 +65,10 @@
   transition: background 0.2s;
 }
 .cooking-nav button:disabled {
-  background: #d1d5db;
-  color: #888;
+  background: var(--border-color);
+  color: var(--text-secondary);
   cursor: not-allowed;
 }
 .cooking-nav button:not(:disabled):hover {
-  background: #1d4ed8;
+  background: var(--accent-dark);
 }

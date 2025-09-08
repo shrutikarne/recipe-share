@@ -18,6 +18,7 @@
 import React, { useState, useEffect, Suspense, lazy } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { TEXT } from "./localization/text";
 import ConfirmModal from "./components/ConfirmModal";
 import TokenRefreshManager from "./components/TokenRefreshManager";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -67,17 +68,17 @@ function Layout({ loggedIn, showLogoutModal, setShowLogoutModal, confirmSignOut 
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={confirmSignOut}
-        title="Sign Out"
-        message="We'll miss you! 👋 Are you sure you want to sign out?"
-        confirmText="Yes, Sign Out"
-        cancelText="No, Stay"
+        title={TEXT.app.logoutModal.title}
+        message={TEXT.app.logoutModal.message}
+        confirmText={TEXT.app.logoutModal.confirmText}
+        cancelText={TEXT.app.logoutModal.cancelText}
       />
       {loggedIn && isProfilePage && (
         <button
           onClick={handleAddRecipe}
           className="fab"
-          aria-label="Add a new recipe"
-          title="Add new recipe"
+          aria-label={TEXT.app.addRecipeAria}
+          title={TEXT.app.addRecipeTitle}
         >
           <svg
             width="24"

@@ -1,5 +1,7 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./About.scss";
+import { TEXT } from "../../localization/text";
 
 /**
  * About page component.
@@ -13,40 +15,35 @@ import "./About.scss";
 
 
 export default function About() {
+    const navigate = useNavigate();
     // Scroll to the browse section on the Home page
     const handleExploreClick = () => {
-        // If on home, scroll to recipesRef; otherwise, navigate to home and scroll after mount
         if (window.location.pathname === "/") {
             const el = document.getElementById("browse-all-recipes-section");
             if (el) el.scrollIntoView({ behavior: "smooth" });
         } else {
-            window.location.href = "/#browse-all-recipes-section";
+            navigate("/#browse-all-recipes-section");
         }
     };
     return (
         <div className="about-section">
             <h1>
-                <span role="img" aria-label="leaf">🌿</span> About Me
+                <span role="img" aria-label="leaf">🌿</span> {TEXT.about.heading}
             </h1>
-            <p className="about-intro">
-                Cooking, to me, is more than just recipes—it’s about creating memories, celebrating family, and sharing love through food. This space is where flavors meet stories, where quick weeknight meals sit alongside special treats, and where inspiration comes from everyday life and travels.
-            </p>
+            <p className="about-intro">{TEXT.about.intro}</p>
             <div className="about-list">
                 <ul>
-                    <li>🍲 Easy, comforting recipes</li>
-                    <li>🥗 Healthy twists on classics</li>
-                    <li>🍪 Sweet treats for every mood</li>
-                    <li>👩‍👧 Little slices of family life & joy</li>
+                  {TEXT.about.list.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
                 </ul>
             </div>
-            <p className="about-note">
-                ✨ Grab a recipe, try it in your kitchen, and make it your own.
-            </p>
+            <p className="about-note">{TEXT.about.note}</p>
             <button
                 className="about-cta"
                 onClick={handleExploreClick}
             >
-                <span role="img" aria-label="explore">👉</span> Start Exploring Recipes
+                <span role="img" aria-label="explore">👉</span> {TEXT.about.cta}
             </button>
         </div>
     );

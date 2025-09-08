@@ -6,25 +6,25 @@
 .auth-form__input {
   width: 100%;
   padding: 14px 12px 8px 12px;
-  border: 1px solid #1976d2;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
-  color: #374151;
-  background: #f9fafb;
+  color: var(--text);
+  background: var(--input-bg);
   box-sizing: border-box;
   transition: border-color 0.2s;
 }
 
 .auth-form__input:focus {
   outline: none;
-  border-color: #fb7185;
+  border-color: var(--primary);
 }
 
 .auth-form__label {
   position: absolute;
   left: 12px;
   top: 16px;
-  color: #888;
+  color: var(--text-secondary);
   font-size: 16px;
   pointer-events: none;
   background: transparent;
@@ -36,8 +36,8 @@
   top: 2px;
   left: 10px;
   font-size: 13px;
-  color: #1976d2;
-  background: #fff;
+  color: var(--primary);
+  background: var(--card-bg);
   padding: 0 4px;
 }
 
@@ -48,7 +48,7 @@
   height: 18px;
   border: 2.5px solid #fff;
   border-radius: 50%;
-  border-top: 2.5px solid #fb7185;
+  border-top: 2.5px solid var(--accent);
   animation: spin 0.7s linear infinite;
   vertical-align: middle;
   margin-left: 6px;
@@ -68,7 +68,7 @@
 .auth-page {
   display: flex;
   min-height: 100vh;
-  background: #fafbfc;
+  background: var(--bg);
 
   &__left {
     flex: 1.2;
@@ -86,7 +86,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
+    background: var(--card-bg);
     min-width: 0;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
     border-top-right-radius: 16px;
@@ -112,7 +112,7 @@
   width: 100%;
   max-width: 380px;
   padding: 36px 32px 32px 32px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(25, 118, 210, 0.10);
   display: flex;
@@ -155,7 +155,7 @@
   &__button {
     width: 100%;
     padding: 12px;
-    background: #1976d2;
+    background: var(--accent);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -166,7 +166,7 @@
     margin-top: 12px;
 
     &:hover {
-      background: #fb7185;
+      background: var(--accent-dark);
       color: #fff;
     }
   }
@@ -182,8 +182,8 @@
 .auth-page__tab {
   flex: 1;
   padding: 10px 0;
-  background: #f3f4f6;
-  color: #333;
+  background: var(--light-bg);
+  color: var(--text);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -192,7 +192,7 @@
   transition: background 0.2s, color 0.2s;
 
   &--active {
-    background: #1976d2;
+    background: var(--accent);
     color: #fff;
   }
 }
@@ -209,13 +209,13 @@
     display: flex;
     align-items: center;
     text-align: center;
-    color: #b0b0b0;
+    color: var(--text-secondary);
     font-size: 15px;
     margin-bottom: 8px;
     margin-top: 8px;
 
     span {
-      background: #fff;
+      background: var(--card-bg);
       padding: 0 16px;
       z-index: 1;
     }
@@ -224,7 +224,7 @@
     &::after {
       content: '';
       flex: 1;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--border-color);
       margin: 0 4px;
     }
   }
@@ -240,8 +240,8 @@
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    background: #f3f4f6;
-    color: #222;
+    background: var(--light-bg);
+    color: var(--text);
     transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
@@ -250,9 +250,9 @@
     }
 
     &--google {
-      border: 1px solid #e0e0e0;
-      background: #fff;
-      color: #222;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text);
     }
 
     &--facebook {

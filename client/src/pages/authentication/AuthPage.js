@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import API from "../../api/api";
 import { sanitizeFormData } from "../../utils/sanitize";
 import "./AuthPage.scss";
+import { TEXT } from "../../localization/text";
 
 /**
  * AuthPage component
@@ -106,7 +107,7 @@ function AuthPage() {
               id="login-tab"
               tabIndex={tab === "login" ? 0 : -1}
             >
-              Login
+              {TEXT.auth.loginTab}
             </button>
             <button
               className={`auth-page__tab${tab === "register" ? " auth-page__tab--active" : ""}`}
@@ -117,7 +118,7 @@ function AuthPage() {
               id="register-tab"
               tabIndex={tab === "register" ? 0 : -1}
             >
-              Register
+              {TEXT.auth.registerTab}
             </button>
           </div>
           {tab === "login" ? (
@@ -130,7 +131,7 @@ function AuthPage() {
                 role="tabpanel"
                 tabIndex={0}
               >
-                <h2 className="auth-form__title">Login</h2>
+                <h2 className="auth-form__title">{TEXT.auth.loginTitle}</h2>
                 <div className={`auth-form__group${loginForm.email ? " auth-form__group--filled" : ""}`}>
                   <input
                     className="auth-form__input"
@@ -142,7 +143,7 @@ function AuthPage() {
                     autoComplete="username"
                     required
                   />
-                  <label className="auth-form__label" htmlFor="login-email">Email</label>
+                  <label className="auth-form__label" htmlFor="login-email">{TEXT.auth.emailLabel}</label>
                 </div>
                 <div className={`auth-form__group${loginForm.password ? " auth-form__group--filled" : ""}`}>
                   <input
@@ -156,15 +157,15 @@ function AuthPage() {
                     autoComplete="current-password"
                     required
                   />
-                  <label className="auth-form__label" htmlFor="login-password">Password</label>
+                  <label className="auth-form__label" htmlFor="login-password">{TEXT.auth.passwordLabel}</label>
                 </div>
-                <button className="auth-form__button" type="submit" aria-label="Login" disabled={loading}>
-                  Login
+                <button className="auth-form__button" type="submit" aria-label={TEXT.auth.loginTab} disabled={loading}>
+                  {TEXT.auth.loginTab}
                   {loading && <span className="auth-form__spinner" />}
                 </button>
               </form>
               <div className="auth-social">
-                <div className="auth-social__divider"><span>or</span></div>
+                <div className="auth-social__divider"><span>{TEXT.auth.or}</span></div>
                 <button
                   className="auth-social__button auth-social__button--google"
                   type="button"
@@ -173,7 +174,7 @@ function AuthPage() {
                   }}
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="auth-social__icon" />
-                  Continue with Google
+                  {TEXT.auth.continueWithGoogle}
                 </button>
                 <button
                   className="auth-social__button auth-social__button--facebook"
@@ -183,7 +184,7 @@ function AuthPage() {
                   }}
                 >
                   <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook" className="auth-social__icon" />
-                  Continue with Facebook
+                  {TEXT.auth.continueWithFacebook}
                 </button>
               </div>
             </>
@@ -197,7 +198,7 @@ function AuthPage() {
                 role="tabpanel"
                 tabIndex={0}
               >
-                <h2 className="auth-form__title">Register</h2>
+                <h2 className="auth-form__title">{TEXT.auth.registerTitle}</h2>
                 <div className={`auth-form__group${registerForm.name ? " auth-form__group--filled" : ""}`}>
                   <input
                     className="auth-form__input"
@@ -209,7 +210,7 @@ function AuthPage() {
                     autoComplete="name"
                     required
                   />
-                  <label className="auth-form__label" htmlFor="register-name">Name</label>
+                  <label className="auth-form__label" htmlFor="register-name">{TEXT.auth.nameLabel}</label>
                 </div>
                 <div className={`auth-form__group${registerForm.email ? " auth-form__group--filled" : ""}`}>
                   <input
@@ -222,7 +223,7 @@ function AuthPage() {
                     autoComplete="email"
                     required
                   />
-                  <label className="auth-form__label" htmlFor="register-email">Email</label>
+                  <label className="auth-form__label" htmlFor="register-email">{TEXT.auth.emailLabel}</label>
                 </div>
                 <div className={`auth-form__group${registerForm.password ? " auth-form__group--filled" : ""}`}>
                   <input
@@ -236,22 +237,22 @@ function AuthPage() {
                     autoComplete="new-password"
                     required
                   />
-                  <label className="auth-form__label" htmlFor="register-password">Password</label>
+                  <label className="auth-form__label" htmlFor="register-password">{TEXT.auth.passwordLabel}</label>
                 </div>
-                <button className="auth-form__button" type="submit" aria-label="Register" disabled={loading}>
-                  Register
+                <button className="auth-form__button" type="submit" aria-label={TEXT.auth.registerTab} disabled={loading}>
+                  {TEXT.auth.registerTab}
                   {loading && <span className="auth-form__spinner" />}
                 </button>
               </form>
               <div className="auth-social">
-                <div className="auth-social__divider"><span>or</span></div>
-                <button className="auth-social__button auth-social__button--google" onClick={() => alert('Google login coming soon!')}>
+                <div className="auth-social__divider"><span>{TEXT.auth.or}</span></div>
+                <button className="auth-social__button auth-social__button--google" onClick={() => alert(TEXT.auth.googleComingSoon)}>
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="auth-social__icon" />
-                  Continue with Google
+                  {TEXT.auth.continueWithGoogle}
                 </button>
-                <button className="auth-social__button auth-social__button--facebook" onClick={() => alert('Facebook login coming soon!')}>
+                <button className="auth-social__button auth-social__button--facebook" onClick={() => alert(TEXT.auth.facebookComingSoon)}>
                   <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook" className="auth-social__icon" />
-                  Continue with Facebook
+                  {TEXT.auth.continueWithFacebook}
                 </button>
               </div>
             </>
