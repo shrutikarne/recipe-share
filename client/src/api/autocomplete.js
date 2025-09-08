@@ -1,6 +1,6 @@
 // Autocomplete API endpoint for recipe titles
 // GET /api/recipes/autocomplete?query=... returns [{_id, title}]
-import API from "../api/api";
+import { apiGetWithRetry } from "./apiWrapper";
 
 /**
  * Fetches recipe title suggestions for autocomplete based on a query string.
@@ -9,6 +9,6 @@ import API from "../api/api";
  */
 export async function fetchRecipeAutocomplete(query) {
   if (!query || query.length < 2) return [];
-  const res = await API.get("/recipes/autocomplete", { params: { query } });
-  return res.data.map(recipe => recipe.title); // Map to get just the titles as strings
+  const data = await apiGetWithRetry("/recipes/autocomplete", { params: { query } }, 2, 200);
+  return data.map(recipe => recipe.title);
 }

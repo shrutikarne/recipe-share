@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import API from "../../api/api";
 import { sanitizeFormData } from "../../utils/sanitize";
@@ -11,6 +12,7 @@ import "./AuthPage.scss";
  * @returns {JSX.Element}
  */
 function AuthPage() {
+  const navigate = useNavigate();
   // --- State ---
   const [tab, setTab] = useState("login"); // 'login' or 'register'
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
@@ -54,7 +56,7 @@ function AuthPage() {
         setAuthenticated(res.data.userId, res.data.expiresIn);
         toast.success("Login successful! 🎉");
         setTimeout(() => {
-          window.location.href = "/";
+          navigate("/", { replace: true });
         }, 1200);
       });
     } catch (err) {

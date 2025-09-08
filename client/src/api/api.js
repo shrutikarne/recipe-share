@@ -12,8 +12,10 @@ import {
 /**
  * Axios instance with base URL set to backend API
  */
+const base = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${base}/api`,
   // Important for cookie handling
   withCredentials: true
 });
@@ -39,7 +41,7 @@ const refreshToken = async () => {
   try {
     // Make the refresh request
     await axios.post(
-      "http://localhost:5000/api/auth/refresh",
+      `${base}/api/auth/refresh`,
       {},
       { withCredentials: true }
     );

@@ -1,5 +1,6 @@
 // CategoryTiles.js - stylish category/mood cards for explore section
 import React from "react";
+import "./CategoryTiles.scss";
 import { motion } from "framer-motion";
 
 const categories = [

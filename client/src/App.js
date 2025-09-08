@@ -1,4 +1,3 @@
-import About from "./pages/about/About";
 /**
  * App component
  * Sets up the main routes and navigation for the Recipe Share frontend
@@ -16,7 +15,7 @@ import About from "./pages/about/About";
  * - Token refresh mechanism for persistent login
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmModal from "./components/ConfirmModal";
@@ -25,7 +24,6 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { showSuccessToast, toastContainerConfig } from "./utils/ToastConfig";
 import API from "./api/api";
 import {
-  BrowserRouter,
   Routes,
   Route,
   useLocation,
@@ -33,14 +31,15 @@ import {
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import "./App.scss";
-import Home from "./pages/home/Home";
-import AuthPage from "./pages/authentication/AuthPage";
-import AddRecipe from "./pages/add-recipe/AddRecipe";
-import RecipeDetail from "./pages/recipe-details/RecipeDetail";
-import Profile from "./pages/profile/Profile";
 import PrivateRoute from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import "./components/Navbar.scss";
+const Home = lazy(() => import("./pages/home/Home"));
+const AuthPage = lazy(() => import("./pages/authentication/AuthPage"));
+const AddRecipe = lazy(() => import("./pages/add-recipe/AddRecipe"));
+const RecipeDetail = lazy(() => import("./pages/recipe-details/RecipeDetail"));
+const Profile = lazy(() => import("./pages/profile/Profile"));
+const About = lazy(() => import("./pages/about/About"));
 
 /**
  * Layout component for the main app shell, including navbar, modals, and floating action button.
@@ -193,13 +192,14 @@ function AnimatedRoutes() {
  * @returns {JSX.Element}
  */
 function App() {
+  const navigate = useNavigate();
   // State hooks
   const [loggedIn, setLoggedIn] = useState(() => {
     // Check if authenticated in session storage
     return sessionStorage.getItem("isAuthenticated") === "true";
   });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [dark, setDark] = useState(() => {
+  const [dark] = useState(() => {
     const saved = localStorage.getItem("darkMode");
     return saved ? saved === "true" : window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
@@ -208,6 +208,7 @@ function App() {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("darkMode", dark);
   }, [dark]);
+
 
   // Sign out functions
   const handleSignOut = () => {
@@ -224,7 +225,7 @@ function App() {
           setLoggedIn(false);
           setShowLogoutModal(false);
           showSuccessToast("👋 We'll miss you! Come back soon for more recipes.");
-          window.location.href = "/";
+          navigate("/", { replace: true });
         });
       })
       .catch((error) => {
@@ -233,7 +234,7 @@ function App() {
           setLoggedOut();
           setLoggedIn(false);
           setShowLogoutModal(false);
-          window.location.href = "/";
+          navigate("/", { replace: true });
         });
       });
   };
@@ -279,27 +280,25 @@ function App() {
 
   return (
     <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-      <BrowserRouter>
-        {/* TokenRefreshManager handles token refresh in the background */}
-        {loggedIn && <TokenRefreshManager />}
-        <Navbar user={user} onLogout={handleLogout} />
-        <div className={`app ${dark ? "dark" : ""}`}>
-          <ToastContainer
-            {...toastContainerConfig}
-            theme={dark ? "dark" : "light"}
-          />
-          <Layout
-            dark={dark}
-            setDark={setDark}
-            loggedIn={loggedIn}
-            handleSignOut={handleSignOut}
-            showLogoutModal={showLogoutModal}
-            setShowLogoutModal={setShowLogoutModal}
-            confirmSignOut={confirmSignOut}
-          />
+      {/* TokenRefreshManager handles token refresh in the background */}
+      {loggedIn && <TokenRefreshManager />}
+      <Navbar user={user} onLogout={handleLogout} />
+      <div className={`app ${dark ? "dark" : ""}`}>
+        <ToastContainer
+          {...toastContainerConfig}
+          theme={dark ? "dark" : "light"}
+        />
+        <Layout
+          loggedIn={loggedIn}
+          handleSignOut={handleSignOut}
+          showLogoutModal={showLogoutModal}
+          setShowLogoutModal={setShowLogoutModal}
+          confirmSignOut={confirmSignOut}
+        />
+        <Suspense fallback={<div />}> 
           <AnimatedRoutes />
-        </div>
-      </BrowserRouter>
+        </Suspense>
+      </div>
     </ErrorBoundary>
   );
 }

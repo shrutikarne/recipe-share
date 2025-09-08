@@ -24,6 +24,23 @@ export const apiGet = async (url, config = {}, errorMessage = null) => {
 };
 
 /**
+ * Wrapper for GET with simple retry/backoff
+ */
+export const apiGetWithRetry = async (url, config = {}, retries = 2, backoffMs = 300, errorMessage = null) => {
+  try {
+    const response = await API.get(url, config);
+    return response.data;
+  } catch (error) {
+    if (retries > 0 && (!error.response || (error.response && error.response.status >= 500))) {
+      await new Promise(r => setTimeout(r, backoffMs));
+      return apiGetWithRetry(url, config, retries - 1, backoffMs * 2, errorMessage);
+    }
+    handleApiError(error, errorMessage);
+    throw error;
+  }
+};
+
+/**
  * Wrapper for POST requests with standardized error handling
  * @param {string} url - API endpoint
  * @param {Object} data - Request payload

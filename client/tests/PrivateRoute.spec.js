@@ -5,8 +5,8 @@ test.describe('PrivateRoute Component', () => {
   test('should redirect unauthenticated users', async ({ page }) => {
     // Go to a protected route
     await page.goto('/profile'); // Adjust to a protected route
-    // Check for redirect (e.g., to login page)
-    await expect(page).toHaveURL(/login/);
+    // Check for redirect (e.g., to auth page)
+    await expect(page).toHaveURL(/\/auth/);
   });
 
   test('should allow access for authenticated users', async ({ page, request }) => {

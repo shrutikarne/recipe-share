@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import FeaturedCarousel from "../../components/FeaturedCarousel";
 import CategoryTiles from "../../components/CategoryTiles";
 import RecipeGrid from "../../components/RecipeGrid";
-import "../../components/CategoryTiles.scss";
-import "../../components/FeaturedCarousel.scss";
-import "../../components/RecipeGrid.scss";
 import HeroBanner from "../../components/HeroBanner";
-import "../../components/HeroBanner.scss";
 import { fetchRecipeAutocomplete } from "../../api/autocomplete";
 import API from "../../api/api";
 import "./Home.scss";
@@ -77,7 +73,7 @@ function Home() {
   };
   // Upload button navigates to add page
   const handleUpload = () => {
-    window.location.href = "/add-recipe";
+    navigate("/add-recipe");
   };
   // State for saved recipes handling
   const [saveLoading, setSaveLoading] = useState({});
@@ -97,6 +93,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [autocomplete, setAutocomplete] = useState([]);
+  const autocompleteCacheRef = React.useRef(new Map());
   const searchInputRef = React.useRef(null);
   const [diet, setDiet] = useState("");
   // New filter state
@@ -112,15 +109,32 @@ function Home() {
       setAutocomplete([]);
       return;
     }
-    fetchRecipeAutocomplete(search).then((results) => {
-      if (active) setAutocomplete(results);
-    });
-    return () => { active = false; };
+    const cached = autocompleteCacheRef.current.get(search);
+    if (cached) {
+      setAutocomplete(cached);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetchRecipeAutocomplete(search).then((results) => {
+        if (!active) return;
+        autocompleteCacheRef.current.set(search, results);
+        setAutocomplete(results);
+      });
+    }, 250);
+    return () => { active = false; clearTimeout(t); };
   }, [search]);
 
   // Fetch recipes from backend
-  const fetchRecipes = (reset = false) => {
+  const requestControllerRef = React.useRef(null);
+
+  const fetchRecipes = useCallback((reset = false) => {
     setLoading(true);
+    if (requestControllerRef.current) {
+      requestControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    requestControllerRef.current = controller;
+
     const params = { skip: reset ? 0 : page * 9, limit: 9 };
     if (search) params.search = search;
     if (category) params.category = category;
@@ -135,13 +149,14 @@ function Home() {
     API.get("/recipes/count", {
       params: {
         search, category, ingredient, diet, cuisine, prepTime, vegetarian, difficulty
-      }
+      },
+      signal: controller.signal
     })
       .then((countRes) => {
         setTotalRecipes(countRes.data.count);
 
         // Then fetch the recipes for the current page
-        return API.get("/recipes", { params });
+        return API.get("/recipes", { params, signal: controller.signal });
       })
       .then((res) => {
         if (reset) {
@@ -152,8 +167,11 @@ function Home() {
         }
         setHasMore(res.data.length === 9);
       })
+      .catch((err) => {
+        if (err && (err.name === 'CanceledError' || err.code === 'ERR_CANCELED' || err.name === 'AbortError')) return;
+      })
       .finally(() => setLoading(false));
-  };
+  }, [page, search, category, ingredient, diet, cuisine, prepTime, vegetarian, difficulty]);
 
   useEffect(() => {
     fetchRecipes(true);
@@ -172,21 +190,24 @@ function Home() {
       }
     });
 
-    // Attach scroll listener for infinite scrolling
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 300 &&
-        hasMore &&
-        !loading
-      ) {
-        fetchRecipes();
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Infinite scrolling with IntersectionObserver
+  const sentinelRef = React.useRef(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry.isIntersecting && hasMore && !loading) {
+        fetchRecipes();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loading, fetchRecipes]);
 
   // Recipe card click handler
   const handleCardClick = (r) => {
@@ -203,7 +224,7 @@ function Home() {
 
   const handleLike = (recipeId) => {
     if (!userId) {
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
     setLikeLoading((prev) => ({ ...prev, [recipeId]: true }));
@@ -224,7 +245,7 @@ function Home() {
 
   const handleSave = (recipeId) => {
     if (!userId) {
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
     setSaveLoading((prev) => ({ ...prev, [recipeId]: true }));
@@ -244,7 +265,7 @@ function Home() {
 
   const handleRate = (recipeId, rating) => {
     if (!userId) {
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
     API.post(`/recipes/${recipeId}/rate`, { rating })
@@ -457,7 +478,6 @@ function Home() {
         className="recipe-preview-modal browse-modal"
         overlayClassName="recipe-preview-overlay"
         contentLabel="Browse Recipes Filters"
-        ariaHideApp={false}
         shouldCloseOnOverlayClick={true}
       >
         <div className="recipe-modal-content">
@@ -489,7 +509,7 @@ function Home() {
             cardWidth={300}
             onViewRecipe={(recipe) => {
               if (recipe && recipe._id) {
-                window.location.href = `/recipe/${recipe._id}`;
+                navigate(`/recipe/${recipe._id}`);
               }
             }}
           />
@@ -556,7 +576,6 @@ function Home() {
           className="recipe-preview-modal recipe-details-modal"
           overlayClassName="recipe-preview-overlay"
           contentLabel="Recipe Full Details"
-          ariaHideApp={false}
           shouldCloseOnOverlayClick={true}
         >
           <div className="recipe-modal-content">
@@ -575,6 +594,7 @@ function Home() {
       )}
 
       <Footer />
+      <div ref={sentinelRef} />
     </>
   );
 }

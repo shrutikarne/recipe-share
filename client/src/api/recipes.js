@@ -1,4 +1,4 @@
-import API from './api';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiWrapper';
 
 /**
  * Fetch a single recipe by its ID
@@ -6,12 +6,7 @@ import API from './api';
  * @returns {Promise<Object>} - The recipe object
  */
 export const fetchRecipe = async (id) => {
-    try {
-        const response = await API.get(`/recipes/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiGet(`/recipes/${id}`);
 };
 
 /**
@@ -22,18 +17,9 @@ export const fetchRecipe = async (id) => {
  * @returns {Promise<{recipes: Array, totalCount: number, pages: number}>} - Recipes data
  */
 export const fetchRecipes = async (page = 1, limit = 10, filters = {}) => {
-    try {
-        const response = await API.get('/recipes', {
-            params: {
-                page,
-                limit,
-                ...filters
-            }
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiGet('/recipes', {
+        params: { page, limit, ...filters }
+    });
 };
 
 /**
@@ -42,12 +28,7 @@ export const fetchRecipes = async (page = 1, limit = 10, filters = {}) => {
  * @returns {Promise<Object>} - The created recipe
  */
 export const createRecipe = async (recipeData) => {
-    try {
-        const response = await API.post('/recipes', recipeData);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiPost('/recipes', recipeData);
 };
 
 /**
@@ -57,12 +38,7 @@ export const createRecipe = async (recipeData) => {
  * @returns {Promise<Object>} - The updated recipe
  */
 export const updateRecipe = async (id, recipeData) => {
-    try {
-        const response = await API.put(`/recipes/${id}`, recipeData);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiPut(`/recipes/${id}`, recipeData);
 };
 
 /**
@@ -71,12 +47,7 @@ export const updateRecipe = async (id, recipeData) => {
  * @returns {Promise<Object>} - Response data
  */
 export const deleteRecipe = async (id) => {
-    try {
-        const response = await API.delete(`/recipes/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiDelete(`/recipes/${id}`);
 };
 
 /**
@@ -86,10 +57,5 @@ export const deleteRecipe = async (id) => {
  * @returns {Promise<Object>} - Updated recipe with new comment
  */
 export const addComment = async (recipeId, comment) => {
-    try {
-        const response = await API.post(`/recipes/${recipeId}/comments`, { text: comment });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    return await apiPost(`/recipes/${recipeId}/comments`, { text: comment });
 };

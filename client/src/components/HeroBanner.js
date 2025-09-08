@@ -1,5 +1,6 @@
 // HeroBanner.js - modern full-width hero with video/image, overlay, search, and CTAs
 import React, { useState, useEffect } from "react";
+import "./HeroBanner.scss";
 import { motion } from "framer-motion";
 
 export default function HeroBanner({ onSearch, search, setSearch, onBrowse, onUpload }) {
