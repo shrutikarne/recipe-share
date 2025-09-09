@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./RecipeDetails.scss";
 import { fetchRecipe } from "../../api/recipes";
+import { ShareIcon, SaveIcon, PrintIcon } from "../../components/SvgIcons";
 
 /**
  * RecipeDetail page component
@@ -15,11 +16,10 @@ function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isSticky, setIsSticky] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState({});
   const [newComment, setNewComment] = useState("");
   const [baseServings, setBaseServings] = useState(1);
+  const [isSaved, setIsSaved] = useState(false);
   const [servings, setServings] = useState(1);
   const stepsRef = useRef(null);
 
@@ -43,11 +43,6 @@ function RecipeDetail() {
           setRecipe(getMockRecipe(id));
         }
 
-        // Get current user info from local storage or context if needed
-        const userData = localStorage.getItem('user') ?
-          JSON.parse(localStorage.getItem('user')) : null;
-        setCurrentUser(userData);
-
         setLoading(false);
       } catch (err) {
         setError("Failed to load the recipe. Please try again.");
@@ -66,6 +61,16 @@ function RecipeDetail() {
     } else {
       setBaseServings(1);
       setServings(1);
+    }
+  }, [recipe]);
+
+  // Check if recipe is already saved
+  useEffect(() => {
+    if (recipe) {
+      // Get saved recipes from localStorage
+      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+      // Check if current recipe is in saved recipes
+      setIsSaved(savedRecipes.some(savedRecipe => savedRecipe.id === recipe.id));
     }
   }, [recipe]);
 
@@ -172,25 +177,6 @@ function RecipeDetail() {
     }));
   };
 
-  // Scroll to steps when "Start Cooking" is clicked
-  /**
-   * Scrolls to the steps section when called.
-   */
-  const scrollToSteps = () => {
-    stepsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Check if action bar should be sticky
-  useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setIsSticky(offset > 300);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   // Format for cook time display
   /**
    * Formats time in minutes to a human-readable string.
@@ -250,17 +236,54 @@ function RecipeDetail() {
     recipe?.imageUrl || (Array.isArray(recipe?.imageUrls) && recipe.imageUrls[0]) || recipe?.image || "/hero-food.jpg";
 
   return (
-    <div className="recipe-details">
-      {/* --- Hero Section --- */}
-      <div className="recipe-hero">
-        <img src={heroImageSrc} alt={recipe?.title} className="recipe-img" />
-        <div className="recipe-hero-overlay">
-          <div className="hero-content-card">
+    <div>
+
+      {/* --- Main Content Layout --- */}
+      <div className="recipe-content">
+        <div className="content-left">
+          {/* Recipe Image */}
+          <div>
+            <img src={heroImageSrc} alt={recipe?.title} className="recipe-img" />
+          </div>
+
+          {/* Recipe Information Card - moved below the image */}
+          <div className="recipe-info-wrapper">
             <div className="recipe-meta">
               {recipe?.category && <span className="recipe-category">{recipe.category}</span>}
               {recipe?.cuisine && <span className="recipe-cuisine">{recipe.cuisine}</span>}
             </div>
-            <h1>{recipe?.title}</h1>
+            <div className="title-and-actions">
+              <div>
+                <h1>{recipe?.title}</h1>
+              </div>
+              <div>
+                <SaveIcon
+                  className={`icon-button ${isSaved ? 'saved' : ''}`}
+                  role="button"
+                  tabIndex="0"
+                  aria-label={isSaved ? "Remove from saved recipes" : "Save recipe"}
+                  onClick={() => handleSaveRecipe(recipe, isSaved, setIsSaved)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSaveRecipe(recipe, isSaved, setIsSaved)}
+                  fill={isSaved ? "currentColor" : "none"}
+                />
+                <ShareIcon
+                  className="icon-button"
+                  role="button"
+                  tabIndex="0"
+                  aria-label="Share recipe"
+                  onClick={() => handleShare(recipe)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleShare(recipe)}
+                />
+                <PrintIcon
+                  className="icon-button"
+                  role="button"
+                  tabIndex="0"
+                  aria-label="Print recipe"
+                  onClick={() => window.print()}
+                  onKeyPress={(e) => e.key === 'Enter' && window.print()}
+                />
+              </div>
+            </div>
             <p className="recipe-tagline">
               {recipe?.tagline || "Delicious, Homemade & Perfect for Any Occasion"}
             </p>
@@ -269,138 +292,8 @@ function RecipeDetail() {
               <span>👥 {recipe?.servings || 0} servings</span>
               <span>⭐ {getDifficulty()}</span>
             </div>
-            <button className="start-btn" onClick={scrollToSteps} aria-label="Start Cooking">▶ Start Cooking</button>
-          </div>
-        </div>
-      </div>
 
-      {/* --- Sticky Action Bar --- */}
-      <div className={`action-bar ${isSticky ? 'sticky' : ''}`}>
-        <div className="action-bar-content">
-          <div className="recipe-mini-info">
-          <img src={heroImageSrc} alt={recipe?.title} className="mini-img" />
-            <span className="mini-title">{recipe?.title}</span>
-          </div>
-          <div className="action-buttons">
-            <button className="save-btn">❤️ Save</button>
-            <button className="comment-btn">💬 Comment</button>
-            <button className="share-btn" onClick={() => handleShare(recipe)} aria-label="Share recipe">📤 Share</button>
-            <button className="print-btn" onClick={() => window.print()} aria-label="Print recipe">🖨️ Print</button>
-            {currentUser && currentUser.id === recipe?.authorId && (
-              <>
-                <button className="edit-btn">✏️ Edit</button>
-                <button className="delete-btn">🗑️ Delete</button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* --- Main Content Layout --- */}
-      <div className="recipe-content">
-        <div className="content-main">
-          <section className="recipe-description">
-            <h2>About This Recipe</h2>
-            <p>{recipe?.description}</p>
-            {recipe?.author && (
-              <div className="recipe-author">
-                <img src={recipe.author?.avatar || "/default-avatar.png"} alt={recipe.author?.name} />
-                <p>By <strong>{recipe.author?.name}</strong></p>
-              </div>
-            )}
-          </section>
-
-          <section className="recipe-ingredients" id="ingredients">
-            <h2>Ingredients</h2>
-            <div className="ingredients-card">
-              <div className="servings-adjuster">
-                <span>Servings:</span>
-                <button
-                  aria-label="Decrease servings"
-                  title="Decrease servings"
-                  onClick={() => setServings((s) => Math.max(1, s - 1))}
-                >
-                  -
-                </button>
-                <span aria-live="polite">{servings}</span>
-                <button
-                  aria-label="Increase servings"
-                  title="Increase servings"
-                  onClick={() => setServings((s) => Math.min(20, s + 1))}
-                >
-                  +
-                </button>
-              </div>
-              <ul className="ingredients-list">
-                {recipe?.ingredients?.map((ingredient, index) => (
-                  <li key={index} className={checkedIngredients[index] ? 'checked' : ''}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={!!checkedIngredients[index]}
-                        onChange={() => toggleIngredient(index)}
-                      />
-                      <span>{scaleIngredient(ingredient, servings, baseServings)}</span>
-                    </label>
-                  </li>
-                )) || <li>No ingredients available</li>}
-              </ul>
-            </div>
-          </section>
-
-          <section className="recipe-steps" ref={stepsRef} id="steps">
-            <h2>Instructions</h2>
-            <div className="steps-container">
-              {recipe?.steps?.map((step, index) => (
-                <div key={index} className="step-card">
-                  <div className="step-number">{index + 1}</div>
-                  <div className="step-content">
-                    {recipe?.stepImages && recipe.stepImages[index] && (
-                      <img src={recipe.stepImages[index]} alt={`Step ${index + 1}`} className="step-image" />
-                    )}
-                    <p>{step}</p>
-                  </div>
-                </div>
-              )) || <p>No instructions available</p>}
-            </div>
-          </section>
-
-          <section className="recipe-comments">
-            <h2>Comments</h2>
-            <div className="comment-box">
-              <textarea
-                placeholder="Write a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <button>Post</button>
-            </div>
-            <div className="comment-list">
-              {recipe?.comments?.length > 0 ? (
-                recipe.comments.map((comment, index) => (
-                  <div key={index} className={`comment ${comment.isAuthor ? 'author-comment' : ''}`}>
-                    <div className="comment-user">
-                      <img src={comment?.avatar || "/default-avatar.png"} alt={comment?.user} />
-                      <strong>{comment?.user}</strong>
-                      {comment?.isAuthor && <span className="author-badge">Author</span>}
-                    </div>
-                    <p>{comment?.text}</p>
-                    <div className="comment-meta">
-                      <span>{comment?.date || "Just now"}</span>
-                      <button className="reply-btn">Reply</button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="no-comments">No comments yet. Be the first to comment!</p>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <div className="content-sidebar">
-          <div className="sidebar-card recipe-info-card">
-            <h3>Recipe Details</h3>
+            {/* Recipe Info Card */}
             <div className="info-grid">
               <div className="info-item">
                 <h4>⏱ Prep Time</h4>
@@ -410,18 +303,6 @@ function RecipeDetail() {
                 <h4>🍳 Cook Time</h4>
                 <p>{formatTime(recipe?.cookTime || 0)}</p>
               </div>
-              <div className="info-item">
-                <h4>⏲ Total Time</h4>
-                <p>{formatTime(totalTime)}</p>
-              </div>
-              <div className="info-item">
-                <h4>👥 Servings</h4>
-                <p>{recipe?.servings || 0}</p>
-              </div>
-              <div className="info-item">
-                <h4>🔥 Difficulty</h4>
-                <p>{getDifficulty()}</p>
-              </div>
               {recipe?.calories && (
                 <div className="info-item">
                   <h4>🍽 Calories</h4>
@@ -430,33 +311,137 @@ function RecipeDetail() {
               )}
             </div>
           </div>
+        </div>
 
-          {recipe?.tips && recipe.tips.length > 0 && (
-            <div className="sidebar-card tips-card">
-              <h3>Chef's Tips</h3>
-              <ul>
-                {recipe.tips.map((tip, index) => (
-                  <li key={index}>{tip}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="sidebar-card related-recipes">
-            <h3>You Might Also Like</h3>
-            {recipe?.relatedRecipes?.length > 0 ? (
-              recipe.relatedRecipes.map((relatedRecipe, index) => (
-                <div key={index} className="related-recipe-item">
-                  <img src={relatedRecipe?.image} alt={relatedRecipe?.title} />
-                  <div>
-                    <h4>{relatedRecipe?.title}</h4>
-                    <p>{formatTime(relatedRecipe?.totalTime || 0)} • {relatedRecipe?.difficulty || 'Easy'}</p>
-                  </div>
+        <div className="content-right">
+          <div className="content-main">
+            <section className="recipe-description">
+              <h2>About This Recipe</h2>
+              <p>{recipe?.description}</p>
+              {recipe?.author && (
+                <div className="recipe-author">
+                  <img src={recipe.author?.avatar || "/default-avatar.png"} alt={recipe.author?.name} />
+                  <p>By <strong>{recipe.author?.name}</strong></p>
                 </div>
-              ))
-            ) : (
-              <p>No related recipes available</p>
+              )}
+            </section>
+
+            <section className="recipe-ingredients" id="ingredients">
+              <h2>Ingredients</h2>
+              <div className="ingredients-card">
+                <div className="servings-adjuster">
+                  <span>Servings:</span>
+                  <button
+                    aria-label="Decrease servings"
+                    title="Decrease servings"
+                    onClick={() => setServings((s) => Math.max(1, s - 1))}
+                  >
+                    -
+                  </button>
+                  <span aria-live="polite">{servings}</span>
+                  <button
+                    aria-label="Increase servings"
+                    title="Increase servings"
+                    onClick={() => setServings((s) => Math.min(20, s + 1))}
+                  >
+                    +
+                  </button>
+                </div>
+                <ul className="ingredients-list">
+                  {recipe?.ingredients?.map((ingredient, index) => (
+                    <li key={index} className={checkedIngredients[index] ? 'checked' : ''}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={!!checkedIngredients[index]}
+                          onChange={() => toggleIngredient(index)}
+                        />
+                        <span>{scaleIngredient(ingredient, servings, baseServings)}</span>
+                      </label>
+                    </li>
+                  )) || <li>No ingredients available</li>}
+                </ul>
+              </div>
+            </section>
+
+            <section className="recipe-steps" ref={stepsRef} id="steps">
+              <h2>Instructions</h2>
+              <div className="steps-container">
+                {recipe?.steps?.map((step, index) => (
+                  <div key={index} className="step-card">
+                    <div className="step-number">{index + 1}</div>
+                    <div className="step-content">
+                      {recipe?.stepImages && recipe.stepImages[index] && (
+                        <img src={recipe.stepImages[index]} alt={`Step ${index + 1}`} className="step-image" />
+                      )}
+                      <p>{step}</p>
+                    </div>
+                  </div>
+                )) || <p>No instructions available</p>}
+              </div>
+            </section>
+          </div>
+
+          <div className="content-sidebar">
+            {recipe?.tips && recipe.tips.length > 0 && (
+              <div className="sidebar-card tips-card">
+                <h3>Chef's Tips</h3>
+                <ul>
+                  {recipe.tips.map((tip, index) => (
+                    <li key={index}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
             )}
+
+            <div className="sidebar-card related-recipes">
+              <h3>You Might Also Like</h3>
+              {recipe?.relatedRecipes?.length > 0 ? (
+                recipe.relatedRecipes.map((relatedRecipe, index) => (
+                  <div key={index} className="related-recipe-item">
+                    <img src={relatedRecipe?.image} alt={relatedRecipe?.title} />
+                    <div>
+                      <h4>{relatedRecipe?.title}</h4>
+                      <p>{formatTime(relatedRecipe?.totalTime || 0)} • {relatedRecipe?.difficulty || 'Easy'}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No related recipes available</p>
+              )}
+            </div>
+
+            <section className="recipe-comments">
+              <h2>Comments</h2>
+              <div className="comment-box">
+                <textarea
+                  placeholder="Write a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button>Post</button>
+              </div>
+              <div className="comment-list">
+                {recipe?.comments?.length > 0 ? (
+                  recipe.comments.map((comment, index) => (
+                    <div key={index} className={`comment ${comment.isAuthor ? 'author-comment' : ''}`}>
+                      <div className="comment-user">
+                        <img src={comment?.avatar || "/default-avatar.png"} alt={comment?.user} />
+                        <strong>{comment?.user}</strong>
+                        {comment?.isAuthor && <span className="author-badge">Author</span>}
+                      </div>
+                      <p>{comment?.text}</p>
+                      <div className="comment-meta">
+                        <span>{comment?.date || "Just now"}</span>
+                        <button className="reply-btn">Reply</button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-comments">No comments yet. Be the first to comment!</p>
+                )}
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -474,7 +459,7 @@ function handleShare(recipe) {
     url: typeof window !== 'undefined' ? window.location.href : undefined,
   };
   if (navigator.share) {
-    navigator.share(shareData).catch(() => {});
+    navigator.share(shareData).catch(() => { });
   } else if (navigator.clipboard && shareData.url) {
     navigator.clipboard.writeText(shareData.url).then(() => {
       alert('Link copied to clipboard');
@@ -529,4 +514,39 @@ function formatQuantity(value) {
   if (best.n > 0) parts.push(`${best.n}/${best.d}`);
   if (parts.length === 0) return value.toFixed(1);
   return parts.join(' ');
+}
+
+function handleSaveRecipe(recipe, isSaved, setIsSaved) {
+  // Get current saved recipes from localStorage
+  const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+  
+  if (isSaved) {
+    // Remove this recipe from saved recipes
+    const updatedRecipes = savedRecipes.filter(savedRecipe => savedRecipe.id !== recipe.id);
+    localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+    setIsSaved(false);
+    
+    // Show feedback to user
+    alert('Recipe removed from your saved collection');
+  } else {
+    // Add this recipe to saved recipes (saving only essential details)
+    const recipeToSave = {
+      id: recipe.id,
+      title: recipe.title,
+      image: recipe.imageUrl || recipe.image,
+      prepTime: recipe.prepTime,
+      cookTime: recipe.cookTime,
+      difficulty: recipe.difficulty || 'Easy',
+      category: recipe.category,
+      cuisine: recipe.cuisine,
+      savedAt: new Date().toISOString()
+    };
+    
+    savedRecipes.push(recipeToSave);
+    localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+    setIsSaved(true);
+    
+    // Show feedback to user
+    alert('Recipe saved to your collection');
+  }
 }

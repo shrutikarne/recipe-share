@@ -1,6 +1,6 @@
 .auth-form__group {
   position: relative;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .auth-form__input {
@@ -9,7 +9,8 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
-  color: var(--text);
+  font-size: var(--text-base);
+  font-family: var(--font-body);
   background: var(--input-bg);
   box-sizing: border-box;
   transition: border-color 0.2s;
@@ -17,29 +18,54 @@
 
 .auth-form__input:focus {
   outline: none;
+  font-size: var(--text-base);
+  font-family: var(--font-body);
   border-color: var(--primary);
 }
 
 .auth-form__label {
   position: absolute;
   left: 12px;
-  top: 16px;
+  top: 12px;
   color: var(--text-secondary);
   font-size: 16px;
   pointer-events: none;
   background: transparent;
   transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: var(--text-sm);
 }
 
 .auth-form__input:focus+.auth-form__label,
 .auth-form__group--filled .auth-form__label {
-  top: 2px;
+  top: -8px;
   left: 10px;
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--primary);
   background: var(--card-bg);
   padding: 0 4px;
 }
+
+/* Float label when the browser autofills the input */
+.auth-form__input:-webkit-autofill + .auth-form__label,
+.auth-form__input:autofill + .auth-form__label {
+  top: -8px;
+  left: 10px;
+  font-size: var(--text-xs);
+  color: var(--primary);
+  background: var(--card-bg);
+  padding: 0 4px;
+}
+
+/* Firefox autofill */
+.auth-form__input:-moz-autofill + .auth-form__label {
+  top: -8px;
+  left: 10px;
+  font-size: var(--text-xs);
+  color: var(--primary);
+  background: var(--card-bg);
+  padding: 0 4px;
+}
+
 
 // Spinner for loading state
 .auth-form__spinner {
@@ -48,7 +74,7 @@
   height: 18px;
   border: 2.5px solid #fff;
   border-radius: 50%;
-  border-top: 2.5px solid var(--accent);
+  border-top: 2.5px solid var(--primary);
   animation: spin 0.7s linear infinite;
   vertical-align: middle;
   margin-left: 6px;
@@ -67,18 +93,14 @@
 // --- Modern split-screen layout ---
 .auth-page {
   display: flex;
-  min-height: 100vh;
   background: var(--bg);
 
   &__left {
-    flex: 1.2;
+    flex: 1;
     background: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80') center center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-    min-width: 0;
   }
 
   &__right {
@@ -89,8 +111,8 @@
     background: var(--card-bg);
     min-width: 0;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
+    border-radius: 16px;
+    padding: 16px;
   }
 
   @media (max-width: 900px) {
@@ -110,11 +132,10 @@
 
 .auth-card {
   width: 100%;
-  max-width: 380px;
-  padding: 36px 32px 32px 32px;
+  padding: 24px;
   background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.10);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -123,51 +144,46 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 
   &__title {
     text-align: center;
-    margin-bottom: 18px;
-    color: #1976d2;
-    font-weight: 700;
-    letter-spacing: 1px;
+    color: var(--info);
+    font-weight: 500;
+    font-family: var(--font-heading);
   }
 
   &__label {
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #374151;
-    margin-top: 12px;
+    font-weight: 400;
+    color: var(--text);
   }
 
   &__input {
     width: 100%;
     padding: 10px 12px;
     margin-bottom: 0;
-    border: 1px solid #1976d2;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    font-size: 16px;
-    color: #374151;
-    background: #f9fafb;
+    font-size: var(--text-base);
+    color: var(--text);
+    background: var(--input-bg);
     box-sizing: border-box;
   }
 
   &__button {
     width: 100%;
-    padding: 12px;
-    background: var(--accent);
-    color: #fff;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
     border: none;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: var(--text-base);
+    font-family: var(--font-body);
     cursor: pointer;
-    transition: background 0.2s;
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
-    margin-top: 12px;
 
     &:hover {
-      background: var(--accent-dark);
-      color: #fff;
+      background: var(--primary-dark);
+      color: white;
     }
   }
 }
@@ -175,7 +191,6 @@
 .auth-page__tabs {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
   gap: 8px;
 }
 
@@ -187,13 +202,14 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--text-base);
+  font-family: var(--font-body);
   font-weight: 500;
   transition: background 0.2s, color 0.2s;
 
   &--active {
-    background: var(--accent);
-    color: #fff;
+    background: var(--primary);
+    color: white;
   }
 }
 
@@ -203,16 +219,14 @@
   flex-direction: column;
   align-items: stretch;
   margin-top: 24px;
-  gap: 12px;
+  gap: 8px;
 
   &__divider {
     display: flex;
     align-items: center;
     text-align: center;
     color: var(--text-secondary);
-    font-size: 15px;
-    margin-bottom: 8px;
-    margin-top: 8px;
+    font-size: var(--text-base);
 
     span {
       background: var(--card-bg);
@@ -237,7 +251,8 @@
     padding: 12px;
     border: none;
     border-radius: 6px;
-    font-size: 16px;
+    font-size: var(--text-base);
+    font-family: var(--font-body);
     font-weight: 500;
     cursor: pointer;
     background: var(--light-bg);
@@ -246,7 +261,7 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
     &:hover {
-      background: #e3e7ef;
+      background: var(--border-color);
     }
 
     &--google {
@@ -256,9 +271,9 @@
     }
 
     &--facebook {
-      border: 1px solid #e0e0e0;
-      background: #1877f3;
-      color: #fff;
+      border: 1px solid var(--border-color);
+      background: var(--primary);
+      color: white;
     }
   }
 
