@@ -12,7 +12,6 @@ Recipe Share is a modern, full-stack web application for discovering, creating, 
 - [Project Status & Roadmap](#-project-status--roadmap)
 - [Contributing](#-contributing)
 - [License](#-license)
-- [Acknowledgments](#-acknowledgments)
 
 ---
 
