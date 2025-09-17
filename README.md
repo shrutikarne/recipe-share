@@ -1,286 +1,148 @@
 # Recipe Share
 
-Recipe Share is a modern, full-stack web application for discovering, creating, and sharing recipes. This platform enables users to explore, create, save, and share culinary creations with a vibrant community of food enthusiasts. With an intuitive interface and robust feature set, Recipe Share makes cooking and meal planning a delightful experience.
+Recipe Share is a full-stack MERN application for discovering, creating, and managing recipes. The React frontend delivers a polished browsing experience with search, filtering, and rich detail views, while the Express/MongoDB backend powers authentication, recipe CRUD, comments, ratings, and media uploads.
 
-## 📑 Table of Contents
+## Highlights
+- Browse recipes with full-text search, category and diet filters, and infinite scrolling.
+- View rich recipe detail pages with nutrition highlights, comments, ratings, and image galleries.
+- Authenticated users can create recipes via a guided multi-step form with client-side validation and image uploads (local disk or S3).
+- Save recipes into personal collections, manage your profile, and keep sessions alive with refresh tokens stored in HTTP-only cookies.
+- Hardened backend with input sanitisation, structured validation, rate limiting, and security headers.
 
-- [Features](#-features-as-of-september-2025)
-- [Tech Stack](#️-tech-stack)
-- [Testing](#-testing)
-- [Getting Started](#-getting-started)
-- [Folder Structure](#-folder-structure-as-of-august-2025)
-- [Project Status & Roadmap](#-project-status--roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+## Architecture at a Glance
+| Layer    | Location | Overview |
+|----------|----------|----------|
+| Frontend | `client/` | React 19 application (CRA) with React Router v7, Framer Motion animations, SCSS modules, and a token-aware Axios client. |
+| Backend  | `server/` | Express 5 API with MongoDB/Mongoose models, JWT cookie authentication + refresh tokens, recipe/comment/user routes, and optional S3 media pipeline. |
 
----
+## Tech Stack
+- **Frontend:** React 19, React Router, React Testing Library, Playwright, Sass, Framer Motion, Axios
+- **Backend:** Node.js 18+, Express 5, Mongoose, JWT, bcrypt, Multer, express-rate-limit, Helmet
+- **Data & Storage:** MongoDB, optional AWS S3 (toggle via env `USE_S3_UPLOAD=true`)
+- **Tooling:** Jest + Supertest, Playwright, ESLint (CRA defaults)
 
-## 🚀 Features (as of September 2025)
+## Prerequisites
+- Node.js 18 or newer (check with `node -v`)
+- npm 9+ or yarn
+- Running MongoDB instance (local or connection string)
+- (Optional) AWS account & credentials if you plan to push recipe images to S3
 
-- **User Experience:**
-  - Intuitive, responsive UI design optimized for all device sizes
-  - Accessibility-compliant interface (WCAG 2.1 AA standard)
-
-- **User Management:**
-  - Secure authentication (register, login, password reset)
-  - JWT-based authorization with token refresh
-  - Customizable user profiles with avatars and favorite recipes
-  - Social authentication options (Google, Facebook)
-
-- **Recipe Management:**
-  - Comprehensive CRUD operations (create, read, update, delete)
-  - Rich text recipe editor with image uploads
-  - Ingredient management with automatic unit conversion
-  - Cooking time and difficulty indicators
-
-- **Discovery & Organization:**
-  - Smart search with autocomplete and filters
-  - Category browsing with visual tiles
-  - Featured recipes carousel and editor's picks
-  - Recipe collections and favorites
-
-- **Social Features:**
-  - Recipe ratings and reviews
-  - Recipe sharing via social media
-  - User following and activity feed
-
-- **Quality Assurance:**
-  - Comprehensive E2E tests with Playwright (frontend)
-  - API and model tests with Jest (backend)
-  - CI/CD pipeline integration
-
-- **Developer Experience:**
-  - Modular, well-documented codebase
-  - Consistent error handling and user feedback
-  - Environment-based configuration
-  - Component-scoped styling with SCSS modules
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Framework:** React 18 with functional components and hooks
-- **State Management:** Context API, React Query for remote state
-- **Styling:** SCSS modules, responsive design principles
-- **Testing:** Playwright for E2E testing, React Testing Library for component tests
-- **Build Tools:** Webpack 5, Babel, PostCSS
-
-### Backend
-- **Runtime:** Node.js 18+
-- **Framework:** Express.js
-- **Authentication:** JWT, Passport.js
-- **Validation:** Express-validator, Joi
-- **Testing:** Jest, Supertest for API testing
-
-### Database
-- **Primary Database:** MongoDB with Mongoose ODM
-- **Media Storage:** AWS S3 for image uploads
-- **Caching:** Redis (for session storage and API caching)
-
-### DevOps
-- **Version Control:** Git, GitHub
-- **CI/CD:** GitHub Actions
-- **Deployment:** Docker containers, AWS
-
----
-
-## 🧪 Testing
-
-Recipe Share includes comprehensive testing at multiple levels to ensure reliability and stability.
-
-### Frontend Testing
-
-- **End-to-End Tests:** 
-  - Located in `client/tests/`
-  - Powered by Playwright for cross-browser testing
-  - Tests all major user workflows including authentication, recipe creation, and browsing
-  - Run tests with:
-    ```bash
-    cd client
-    npx playwright test
-    ```
-  - Generate visual test report:
-    ```bash
-    npx playwright show-report
-    ```
-
-### Backend Testing
-
-- **Unit & Integration Tests:**
-  - Located in `server/tests/`
-  - Powered by Jest and Supertest
-  - Tests API endpoints, models, middleware, and authentication flows
-  - Run tests with:
-    ```bash
-    cd server
-    npm test
-    ```
-  - Run with coverage report:
-    ```bash
-    npm test -- --coverage
-    ```
-
-### CI Pipeline
-
-Tests run automatically on pull requests through GitHub Actions. See `.github/workflows` for configuration details.
-
----
-
-## 🏁 Getting Started
-
-### Prerequisites
-- Node.js (v18+ recommended)
-- npm (v8+) or yarn (v1.22+)
-- MongoDB (v5+, local installation or MongoDB Atlas)
-- AWS account (for S3 image storage)
-- Redis (optional, for enhanced caching)
-
-### Installation
-
-1. **Clone the repository:**
+## Setup
+1. **Install dependencies**
    ```bash
-   git clone https://github.com/shrutikarne/recipe-share.git
-   cd recipe-share
-   ```
-
-2. **Install dependencies:**
-   
-   Using npm:
-   ```bash
-   # Install frontend dependencies
+   # Frontend
    cd client
    npm install
-   
-   # Install backend dependencies
+
+   # Backend
    cd ../server
    npm install
    ```
-   
-   Or using yarn:
-   ```bash
-   # Install frontend dependencies
-   cd client
-   yarn install
-   
-   # Install backend dependencies
-   cd ../server
-   yarn install
-   ```
 
-3. **Configure environment variables:**
-   
-   Create a `.env` file in the `server/` directory with the following variables:
-   ```
-   # Server Configuration
-   PORT=5000
-   NODE_ENV=development
-   
-   # MongoDB Connection
-   MONGODB_URI=mongodb://localhost:27017/recipe-share
-   
-   # Authentication
-   JWT_SECRET=your_jwt_secret_key
-   JWT_EXPIRATION=1d
-   REFRESH_TOKEN_SECRET=your_refresh_token_secret
-   REFRESH_TOKEN_EXPIRATION=7d
-   
-   # AWS S3 Configuration
-   AWS_ACCESS_KEY_ID=your_aws_access_key
-   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-   AWS_BUCKET_NAME=recipe-share-uploads
-   AWS_REGION=us-east-1
-   
-   # Optional: Redis Configuration
-   REDIS_URL=redis://localhost:6379
-   ```
-   
-   Create a `.env` file in the `client/` directory with:
-   ```
-   REACT_APP_API_URL=http://localhost:5000/api
-   ```
+2. **Configure environment variables**
+   - Create `server/.env`:
+     ```ini
+     PORT=5000
+     NODE_ENV=development
+     MONGO_URI=mongodb://localhost:27017/recipe-share
 
-4. **Initialize the database:**
-   ```bash
-   cd server
-   npm run seed  # Populates the database with sample data
-   ```
+     JWT_SECRET=dev-jwt-secret-change-me
+     REFRESH_TOKEN_SECRET=dev-refresh-secret-change-me
+     SESSION_SECRET=dev-session-secret-change-me
 
-5. **Run the application:**
-   
-   Development mode:
-   ```bash
-   # Terminal 1 - Start the backend
-   cd server
-   npm run dev
-   
-   # Terminal 2 - Start the frontend
-   cd client
-   npm start
-   ```
-   
-   The application will be available at:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000/api
+     CLIENT_URL=http://localhost:3000
+     CORS_ORIGIN=http://localhost:3000
 
----
+     # Optional upload settings (set USE_S3_UPLOAD=true to enable S3)
+     USE_S3_UPLOAD=false
+     AWS_ACCESS_KEY_ID=
+     AWS_SECRET_ACCESS_KEY=
+     AWS_REGION=us-east-1
+     S3_BUCKET_NAME=
+     ```
+   - Create `client/.env`:
+     ```ini
+     REACT_APP_API_URL=http://localhost:5000
+     ```
 
-## 📁 Folder Structure (as of September 2025)
+3. **(Optional)** populate MongoDB with sample data or create accounts via the UI.
 
+## Running Locally
+Open two terminals so the backend and frontend keep running:
+```bash
+# Terminal 1 - API
+cd server
+npm run dev          # same as npm start; runs Express on :5000
+
+# Terminal 2 - Web app
+cd client
+npm start            # CRA dev server on :3000 with proxy to :5000
+```
+
+The frontend proxies API calls to the backend (see `client/package.json` -> `proxy`). Sign up via `/auth` to unlock protected routes like `/add-recipe` and `/profile`.
+
+## Testing
+Refer to `TESTING.md` for the full matrix. Common commands:
+```bash
+# Backend (Jest + Supertest)
+cd server
+npm test             # run suite
+npm run test:coverage
+
+# Frontend (React Testing Library)
+cd client
+npm test
+npm run test:coverage
+
+# End-to-end (Playwright)
+cd client
+npm run test:e2e
+```
+Playwright expects the dev servers running or a deployed URL (configure via `PLAYWRIGHT_BASE_URL`).
+
+## Useful Scripts
+| Location | Command | Purpose |
+|----------|---------|---------|
+| `server` | `npm start` | Start Express API on configured port. |
+| `server` | `npm run dev` | Alias for `npm start` (use nodemon if you prefer hot reload). |
+| `server` | `npm test` | Run server-side Jest suite. |
+| `client` | `npm start` | Launch CRA dev server with React fast refresh. |
+| `client` | `npm run build` | Create production build in `client/build`. |
+| `client` | `npm run test:e2e` | Execute Playwright tests in `client/tests`. |
+
+## Project Structure
 ```
 recipe-share/
-├── client/         # React frontend (UI, pages, API calls, Playwright tests)
-│   ├── public/     # Static assets (HTML, icons, manifest)
+├── client/                 # React app (components, pages, API helpers, tests)
 │   ├── src/
-│   │   ├── api/    # API helpers (api.js, autocomplete.js)
-│   │   ├── components/ # Reusable UI components (tiles, carousels, modals, etc.)
-│   │   ├── pages/  # Page components (add-recipe, home, authentication, recipe-details)
-│   │   └── ...     # Other React files (App.js, index.js, styles)
-│   └── tests/      # Playwright E2E tests
-├── server/         # Node.js/Express backend (API, models, routes, middleware, Jest tests)
-│   ├── config/     # Database config
-│   ├── middleware/ # Auth middleware
-│   ├── models/     # Mongoose models (User, Recipe)
-│   ├── routes/     # API routes (auth, recipes, user)
-│   ├── tests/      # Jest tests (auth, recipes, models, middleware)
-│   └── ...         # Other backend files (server.js, package.json)
+│   │   ├── api/            # Axios instance, upload helpers, autocomplete client
+│   │   ├── components/     # Navbar, recipe grid, modals, token manager, etc.
+│   │   ├── pages/          # Home, Auth, Add Recipe, Recipe Detail, Profile, About
+│   │   └── utils/          # Token helpers, sanitizers, toast config
+│   └── tests/              # Playwright specs + helpers
+├── server/                 # Express API
+│   ├── config/             # Env wrapper, DB connection, Passport stubs
+│   ├── middleware/         # Auth, validation, sanitisation, security helpers
+│   ├── models/             # Mongoose models for User and Recipe
+│   ├── routes/             # Auth, recipes, user, uploads, image proxy
+│   ├── tests/              # Jest + Supertest suites with MongoDB memory server
+│   └── utils/              # S3 upload helper
+├── assets/                 # Shared assets (images, icons)
+└── TESTING.md              # Detailed testing reference
 ```
 
-## 🚧 Project Status & Roadmap
+## API Overview
+- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout` – email/password auth with refresh token rotation.
+- `GET /api/recipes` + query params for search/filter/pagination; `POST /api/recipes` (auth), `PUT/DELETE /api/recipes/:id` for owner-managed CRUD.
+- `GET /api/recipes/:id/comments` and `POST/PUT/DELETE /api/recipes/:id/comments/:commentId` for comment & rating lifecycle.
+- `POST /api/user/save/:id`, `POST /api/user/unsave/:id`, `GET /api/user/saved` for personal collections.
+- `POST /api/uploads/recipe-image` handles multipart uploads (to local `/uploads/recipes` or S3, depending on env). Use `USE_S3_UPLOAD=true` to opt into S3.
 
-### Current Status (September 2025)
-- ✅ Core platform functionality complete and stable
-- ✅ Comprehensive test suite with >85% coverage
-- ✅ Mobile-responsive design implemented
-- ✅ Recipe management and discovery features operational
-- ✅ User authentication and profile system deployed
+## Configuration Notes
+- Authentication tokens are stored in HTTP-only cookies; frontend helpers in `client/src/utils/tokenManager.js` track expiry to trigger refresh.
+- Server-side validation lives in `server/middleware/validation.js` and `recipeValidation.js`. Adjust these when the data model changes.
+- If enabling Google/Facebook login, update credentials in the env file and re-enable the strategies in `server/config/passport.js`.
+- Security middleware (Helmet, sanitisation, rate limiting) is wired in `server/server.js`; tweak policies there if you integrate additional clients.
 
-### Upcoming Features (Q4 2025)
-- 🔄 Advanced recipe search with nutritional filters
-- 🔄 Recipe API integration with popular third-party services
-- 🔄 Mobile app versions (iOS/Android) using React Native
-- 🔄 Enhanced analytics and user recommendations
-
-### Future Vision (2026)
-- 📝 AI-powered recipe suggestions based on user preferences and pantry inventory
-- 📝 Social cooking features with live video integration
-- 📝 Premium subscription model with exclusive content
-- 📝 Restaurant partnership program
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
-
-### Contribution Guidelines
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add some amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a pull request
-
-Please make sure to update tests as appropriate and adhere to the coding standards established in the project.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
+Need more detail on endpoints or deployment? Check the source tree or open an issue.
