@@ -48,28 +48,53 @@ const upload = multer({
  * @desc    Upload a recipe image
  * @access  Private
  */
-router.post('/recipe-image', verifyToken, upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ msg: 'No file uploaded' });
+router.post('/recipe-image', verifyToken, (req, res) => {
+  upload.single('image')(req, res, async (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        console.error('Multer error during image upload:', err);
+        return res.status(400).json({
+          msg: 'Upload failed',
+          details: err.message
+        });
+      }
+
+      console.error('Unexpected error during image upload:', err);
+      return res.status(500).json({
+        msg: 'Unexpected error during upload',
+        details: err.message
+      });
     }
 
-    let imageUrl;
-    if (useS3) {
-      // Upload to S3
-      imageUrl = await uploadImageToS3(req.file);
-    } else {
-      // Local upload
-      imageUrl = `/uploads/recipes/${req.file.filename}`;
-    }
+    try {
+      if (!req.file) {
+        return res.status(400).json({ msg: 'No file uploaded' });
+      }
 
-    res.json({
-      success: true,
-      imageUrl
-    });
-  } catch (err) {
-    res.status(500).json({ msg: 'Server error during upload' });
-  }
+      let imageUrl;
+      let imageKey;
+      if (useS3) {
+        const result = await uploadImageToS3(req.file);
+        imageUrl = result?.url;
+        imageKey = result?.key;
+      } else {
+        imageUrl = `/uploads/recipes/${req.file.filename}`;
+        imageKey = `recipes/${req.file.filename}`;
+      }
+
+      res.json({
+        success: true,
+        imageUrl,
+        imageKey
+      });
+    } catch (error) {
+      console.error('Error uploading recipe image:', error);
+      res.status(500).json({
+        msg: 'Server error during upload',
+        details: error.message
+      });
+    }
+  });
 });
 
 module.exports = router;

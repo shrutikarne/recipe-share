@@ -18,6 +18,7 @@ const RecipeSchema = new mongoose.Schema(
     ingredients: [String], // List of ingredients
     steps: [String], // List of preparation steps
     category: String, // Recipe category
+    prepTime: Number, // Preparation time in minutes
     cookTime: Number, // Cooking time in minutes
     imageUrls: [String], // Multiple image URLs
     imageUrl: String, // Main image URL (for backwards compatibility)

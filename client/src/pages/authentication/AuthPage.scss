@@ -1,6 +1,37 @@
 .auth-form__group {
   position: relative;
   margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.auth-form__group--with-toggle .auth-form__input {
+  padding-right: 44px;
+}
+
+.auth-form__toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+}
+
+.auth-form__toggle-icon {
+  fill: currentColor;
+  pointer-events: none;
 }
 
 .auth-form__input {
@@ -145,6 +176,16 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  &__row {
+    display: flex;
+    gap: 12px;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
 
   &__title {
     text-align: center;

@@ -84,30 +84,46 @@ const User = require("../models/User");
  */
 router.post("/register",
   registerLimiter,
-  validateRequiredFields(['name', 'email', 'password']),
+  validateRequiredFields(['firstName', 'lastName', 'email', 'password']),
   validateFields({
-    name: validateName,
+    firstName: (value) => {
+      const result = validateName(value);
+      return result === true ? true : result.replace('Name', 'First name');
+    },
+    lastName: (value) => {
+      const result = validateName(value);
+      return result === true ? true : result.replace('Name', 'Last name');
+    },
     email: validateEmail,
     password: validatePassword
   }),
   sanitizeBody({
-    name: sanitizeString,
+    firstName: sanitizeString,
+    lastName: sanitizeString,
     email: sanitizeEmail
   }),
   async (req, res) => {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     try {
       // Check if user already exists
       let user = await User.findOne({ email });
       if (user) return res.status(400).json({ msg: "User already exists" });
 
-      // Hash the password before saving
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      const displayName = [firstName, lastName]
+        .filter(Boolean)
+        .join(' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
 
-      // Create and save the new user
-      user = new User({ name, email, password: hashedPassword });
+      // Create and save the new user (model hook handles hashing)
+      user = new User({
+        firstName,
+        lastName,
+        name: displayName || firstName || lastName,
+        email,
+        password
+      });
       await user.save();
 
       // Create JWT payload and sign token
@@ -436,8 +452,8 @@ if (config.NODE_ENV !== 'production') {
           return res.status(400).json({ msg: pwdValidation });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(newPassword, salt);
+        // Assign raw password and let model hook handle hashing once
+        user.password = newPassword;
         await user.save();
 
         return res.json({ success: true, msg: 'Password reset. Please login.' });
@@ -449,4 +465,3 @@ if (config.NODE_ENV !== 'production') {
 }
 
 module.exports = router;
-

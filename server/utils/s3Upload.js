@@ -32,12 +32,18 @@ const uploadImageToS3 = async (file) => {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        // Ensure the uploaded object is readable publicly when serving directly from S3
-        ACL: 'public-read',
     };
 
+    const objectAcl = process.env.S3_OBJECT_ACL;
+    if (objectAcl && objectAcl.trim()) {
+        params.ACL = objectAcl.trim();
+    }
+
     await s3.upload(params).promise();
-    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return {
+        url: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+        key
+    };
 };
 
 module.exports = { uploadImageToS3 };

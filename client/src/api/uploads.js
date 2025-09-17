@@ -26,8 +26,8 @@ export const uploadRecipeImage = async (imageFile) => {
     
     const response = await API.post('/uploads/recipe-image', formData, uploadConfig);
     
-    if (response.data && response.data.success && response.data.imageUrl) {
-      return response.data.imageUrl;
+    if (response.data && response.data.success && (response.data.imageUrl || response.data.imageKey)) {
+      return response.data;
     } else {
       throw new Error('Invalid response from server');
     }

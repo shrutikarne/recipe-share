@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import "./RecipeDetails.scss";
 import { fetchRecipe } from "../../api/recipes";
 import { ShareIcon, SaveIcon, PrintIcon } from "../../components/SvgIcons";
+import resolveImageUrl from "../../utils/resolveImageUrl";
 
 /**
  * RecipeDetail page component
  * Fetches and displays a single recipe with all details, comments, and related recipes.
- * Handles loading, error, and mock data fallback.
+ * Handles loading and error states.
  *
  * @returns {JSX.Element}
  */
@@ -21,31 +22,37 @@ function RecipeDetail() {
   const [baseServings, setBaseServings] = useState(1);
   const [isSaved, setIsSaved] = useState(false);
   const [servings, setServings] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const stepsRef = useRef(null);
+
+  const galleryImages = useMemo(() => {
+    if (!recipe || !Array.isArray(recipe.imageUrls)) return [];
+    return recipe.imageUrls
+      .map((url) => resolveImageUrl(url))
+      .filter((url) => typeof url === 'string' && url.trim().length > 0);
+  }, [recipe]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [recipe?.id, galleryImages.length]);
 
   // Fetch recipe data when component mounts
   useEffect(() => {
     const getRecipeData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-
-        // Try to fetch from API
-        try {
-          const recipeData = await fetchRecipe(id);
-          if (recipeData) {
-            setRecipe(recipeData);
-          } else {
-            // If API returns null/undefined, use mock data for testing
-            setRecipe(getMockRecipe(id));
-          }
-        } catch (apiError) {
-          // Use mock data if API fails
-          setRecipe(getMockRecipe(id));
+        const recipeData = await fetchRecipe(id);
+        if (recipeData) {
+          setRecipe(recipeData);
+          setError(null);
+        } else {
+          setRecipe(null);
+          setError('Recipe not found.');
         }
-
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load the recipe. Please try again.");
+      } catch (fetchError) {
+        setRecipe(null);
+        setError('Failed to load the recipe. Please try again.');
+      } finally {
         setLoading(false);
       }
     };
@@ -74,97 +81,6 @@ function RecipeDetail() {
     }
   }, [recipe]);
 
-  // Mock recipe data for testing - remove in production
-  /**
-   * Returns mock recipe data for testing (used if API fails).
-   * @param {string} recipeId
-   * @returns {Object}
-   */
-  const getMockRecipe = (recipeId) => {
-    return {
-      id: recipeId,
-      title: "Creamy Garlic Parmesan Pasta",
-      tagline: "Creamy, Comforting & Perfect for Weeknights",
-      description: "This creamy garlic parmesan pasta is the ultimate comfort food that's ready in just 20 minutes. Made with simple ingredients you probably already have in your pantry, it's perfect for busy weeknights when you need something delicious and satisfying with minimal effort.",
-      image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80",
-      prepTime: 10,
-      cookTime: 15,
-      servings: 4,
-      cuisine: "Italian",
-      category: "Pasta",
-      difficulty: "Easy",
-      author: {
-        name: "Jamie Oliver",
-        avatar: "https://randomuser.me/api/portraits/men/32.jpg"
-      },
-      ingredients: [
-        "8 oz pasta of your choice",
-        "2 tablespoons olive oil",
-        "4 cloves garlic, minced",
-        "1 cup heavy cream",
-        "1 cup freshly grated Parmesan cheese",
-        "Salt and black pepper to taste",
-        "Red pepper flakes (optional)",
-        "Fresh parsley for garnish"
-      ],
-      steps: [
-        "Bring a large pot of salted water to a boil. Add pasta and cook according to package directions until al dente.",
-        "While pasta cooks, heat olive oil in a large skillet over medium heat. Add minced garlic and sauté until fragrant, about 1-2 minutes.",
-        "Pour in the heavy cream and bring to a simmer. Cook for 3-4 minutes until it starts to thicken slightly.",
-        "Reduce heat to low and gradually stir in the Parmesan cheese until smooth and creamy.",
-        "Season with salt, pepper, and red pepper flakes if using.",
-        "Drain pasta, reserving 1/2 cup of pasta water. Add pasta directly to the sauce.",
-        "Toss to coat, adding a splash of reserved pasta water if needed to thin the sauce.",
-        "Garnish with fresh parsley and additional Parmesan cheese before serving."
-      ],
-      tips: [
-        "For extra protein, add grilled chicken or sautéed shrimp.",
-        "Use freshly grated Parmesan cheese rather than pre-grated for the best texture.",
-        "If the sauce thickens too much, add a splash of pasta water to thin it out.",
-        "Add a handful of baby spinach at the end for color and nutrition."
-      ],
-      comments: [
-        {
-          user: "Sophie W.",
-          avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-          text: "Made this last night and it was amazing! So creamy and flavorful. I added some grilled chicken and it was perfect!",
-          date: "2 days ago",
-          isAuthor: false
-        },
-        {
-          user: "Jamie Oliver",
-          avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-          text: "So glad you enjoyed it, Sophie! Grilled chicken is a great addition.",
-          date: "Yesterday",
-          isAuthor: true
-        },
-        {
-          user: "Mark R.",
-          avatar: "https://randomuser.me/api/portraits/men/76.jpg",
-          text: "Super easy and delicious. My kids loved it too!",
-          date: "4 hours ago",
-          isAuthor: false
-        }
-      ],
-      relatedRecipes: [
-        {
-          id: "123",
-          title: "Spaghetti Carbonara",
-          image: "https://images.unsplash.com/photo-1600803907087-f56d462fd26b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
-          difficulty: "Medium",
-          totalTime: 25
-        },
-        {
-          id: "124",
-          title: "Fettuccine Alfredo",
-          image: "https://images.unsplash.com/photo-1579684947550-22e945225d9a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
-          difficulty: "Easy",
-          totalTime: 20
-        }
-      ]
-    };
-  };
-
   // Handle ingredient checkbox toggle
   /**
    * Toggles the checked state of an ingredient.
@@ -190,8 +106,12 @@ function RecipeDetail() {
     return `${hrs} hr${hrs > 1 ? 's' : ''} ${mins > 0 ? `${mins} min${mins > 1 ? 's' : ''}` : ''}`;
   };
 
-  // Calculate total time - with proper null checks
-  const totalTime = (recipe?.prepTime || 0) + (recipe?.cookTime || 0);
+  // Normalize time values in minutes for consistent calculations
+  const rawPrepTime = Number(recipe?.prepTime);
+  const rawCookTime = Number(recipe?.cookTime);
+  const prepTimeMinutes = Number.isFinite(rawPrepTime) ? rawPrepTime : 0;
+  const cookTimeMinutes = Number.isFinite(rawCookTime) ? rawCookTime : 0;
+  const totalTime = prepTimeMinutes + cookTimeMinutes;
 
   // Get difficulty level based on time and steps
   const getDifficulty = () => {
@@ -231,9 +151,22 @@ function RecipeDetail() {
     );
   }
 
-  // Prefer backend fields (imageUrl/imageUrls); fall back to mock field
-  const heroImageSrc =
-    recipe?.imageUrl || (Array.isArray(recipe?.imageUrls) && recipe.imageUrls[0]) || recipe?.image || "/hero-food.jpg";
+  const fallbackHero = resolveImageUrl(recipe?.imageUrl || recipe?.image);
+  const heroImageSrc = galleryImages[activeImageIndex] || fallbackHero || '/hero-food.jpg';
+
+  const handlePrevImage = () => {
+    setActiveImageIndex((prev) => {
+      if (!galleryImages.length) return prev;
+      return prev === 0 ? galleryImages.length - 1 : prev - 1;
+    });
+  };
+
+  const handleNextImage = () => {
+    setActiveImageIndex((prev) => {
+      if (!galleryImages.length) return prev;
+      return (prev + 1) % galleryImages.length;
+    });
+  };
 
   return (
     <div>
@@ -242,16 +175,38 @@ function RecipeDetail() {
       <div className="recipe-content">
         <div className="content-left">
           {/* Recipe Image */}
-          <div>
+          <div className="recipe-image-hero">
             <img src={heroImageSrc} alt={recipe?.title} className="recipe-img" />
+            {galleryImages.length > 1 && (
+              <div className="recipe-image-hero__controls">
+                <button type="button" aria-label="Previous recipe image" onClick={handlePrevImage}>
+                  ‹
+                </button>
+                <button type="button" aria-label="Next recipe image" onClick={handleNextImage}>
+                  ›
+                </button>
+              </div>
+            )}
           </div>
+          {galleryImages.length > 1 && (
+            <div className="recipe-image-thumbs" role="list">
+              {galleryImages.map((imgSrc, idx) => (
+                <button
+                  type="button"
+                  key={`${imgSrc}-${idx}`}
+                  role="listitem"
+                  aria-label={`Show recipe image ${idx + 1}`}
+                  className={`recipe-image-thumb ${idx === activeImageIndex ? 'active' : ''}`}
+                  onClick={() => setActiveImageIndex(idx)}
+                >
+                  <img src={imgSrc} alt={`Recipe view ${idx + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Recipe Information Card - moved below the image */}
           <div className="recipe-info-wrapper">
-            <div className="recipe-meta">
-              {recipe?.category && <span className="recipe-category">{recipe.category}</span>}
-              {recipe?.cuisine && <span className="recipe-cuisine">{recipe.cuisine}</span>}
-            </div>
             <div className="title-and-actions">
               <div>
                 <h1>{recipe?.title}</h1>
@@ -263,7 +218,12 @@ function RecipeDetail() {
                   tabIndex="0"
                   aria-label={isSaved ? "Remove from saved recipes" : "Save recipe"}
                   onClick={() => handleSaveRecipe(recipe, isSaved, setIsSaved)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSaveRecipe(recipe, isSaved, setIsSaved)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveRecipe(recipe, isSaved, setIsSaved);
+                    }
+                  }}
                   fill={isSaved ? "currentColor" : "none"}
                 />
                 <ShareIcon
@@ -272,7 +232,12 @@ function RecipeDetail() {
                   tabIndex="0"
                   aria-label="Share recipe"
                   onClick={() => handleShare(recipe)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleShare(recipe)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleShare(recipe);
+                    }
+                  }}
                 />
                 <PrintIcon
                   className="icon-button"
@@ -280,7 +245,12 @@ function RecipeDetail() {
                   tabIndex="0"
                   aria-label="Print recipe"
                   onClick={() => window.print()}
-                  onKeyPress={(e) => e.key === 'Enter' && window.print()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      window.print();
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -291,17 +261,19 @@ function RecipeDetail() {
               <span>⏱ {formatTime(totalTime)}</span>
               <span>👥 {recipe?.servings || 0} servings</span>
               <span>⭐ {getDifficulty()}</span>
+              {recipe?.category && <span>🏷 {recipe.category}</span>}
+              {recipe?.cuisine && <span>🍽 {recipe.cuisine}</span>}
             </div>
 
             {/* Recipe Info Card */}
             <div className="info-grid">
               <div className="info-item">
                 <h4>⏱ Prep Time</h4>
-                <p>{formatTime(recipe?.prepTime || 0)}</p>
+                <p>{formatTime(prepTimeMinutes)}</p>
               </div>
               <div className="info-item">
                 <h4>🍳 Cook Time</h4>
-                <p>{formatTime(recipe?.cookTime || 0)}</p>
+                <p>{formatTime(cookTimeMinutes)}</p>
               </div>
               {recipe?.calories && (
                 <div className="info-item">
@@ -372,7 +344,7 @@ function RecipeDetail() {
                     <div className="step-number">{index + 1}</div>
                     <div className="step-content">
                       {recipe?.stepImages && recipe.stepImages[index] && (
-                        <img src={recipe.stepImages[index]} alt={`Step ${index + 1}`} className="step-image" />
+                        <img src={resolveImageUrl(recipe.stepImages[index])} alt={`Step ${index + 1}`} className="step-image" />
                       )}
                       <p>{step}</p>
                     </div>
@@ -399,7 +371,7 @@ function RecipeDetail() {
               {recipe?.relatedRecipes?.length > 0 ? (
                 recipe.relatedRecipes.map((relatedRecipe, index) => (
                   <div key={index} className="related-recipe-item">
-                    <img src={relatedRecipe?.image} alt={relatedRecipe?.title} />
+                    <img src={resolveImageUrl(relatedRecipe?.image)} alt={relatedRecipe?.title} />
                     <div>
                       <h4>{relatedRecipe?.title}</h4>
                       <p>{formatTime(relatedRecipe?.totalTime || 0)} • {relatedRecipe?.difficulty || 'Easy'}</p>

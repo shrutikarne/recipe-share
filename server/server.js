@@ -56,6 +56,20 @@ app.use(express.json());
 // Add cookie parser middleware
 app.use(cookieParser());
 
+const imgSrcDirectives = [
+  "'self'",
+  "data:",
+  "https://storage.googleapis.com",
+  "https://*.googleusercontent.com"
+];
+
+if (process.env.S3_BUCKET_NAME) {
+  const bucketRegion = process.env.AWS_REGION || 'us-east-1';
+  imgSrcDirectives.push(`https://${process.env.S3_BUCKET_NAME}.s3.${bucketRegion}.amazonaws.com`);
+  imgSrcDirectives.push(`https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com`);
+  imgSrcDirectives.push('https://*.amazonaws.com');
+}
+
 // Apply security headers with helmet
 app.use(helmet({
   contentSecurityPolicy: {
@@ -63,7 +77,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https://storage.googleapis.com", "https://*.googleusercontent.com"],
+      imgSrc: imgSrcDirectives,
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       connectSrc: ["'self'", "https://api.example.com"]
     }

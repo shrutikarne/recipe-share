@@ -1,12 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
 import { uploadRecipeImage } from "../../api/uploads";
 import RecipePreviewCard from "./RecipePreviewCard";
+import ImageAdjustModal from "./ImageAdjustModal";
 import { sanitizeString } from "../../utils/sanitize";
 import { motion, AnimatePresence } from "framer-motion";
 import "./AddRecipe.scss";
-import { CloseIcon, UploadIcon } from "../../components/SvgIcons";
+import { AddCircleIcon, DeleteIcon } from "../../components/SvgIcons";
+import { ReactComponent as UploadIcon } from "../../assets/icons/upload_recipe.svg";
+import { ReactComponent as EditImageIcon } from "../../assets/icons/edit_image.svg";
+import resolveImageUrl from "../../utils/resolveImageUrl";
+
+const MAX_IMAGE_COUNT = 10;
 
 /**
  * AddRecipe component
@@ -14,7 +20,6 @@ import { CloseIcon, UploadIcon } from "../../components/SvgIcons";
  * @component
  */
 function AddRecipe() {
-  // --- Stepper State ---
   const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
     title: "",
@@ -22,46 +27,75 @@ function AddRecipe() {
     ingredients: [],
     steps: [],
     category: "",
-    imageUrl: "", // Will store the server URL after upload
-    imagePreview: "", // For local preview
-    imageFile: null, // Stores the actual file object
     diet: "",
   });
+  const [images, setImages] = useState([]);
+  const [editingImageIndex, setEditingImageIndex] = useState(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const imagesRef = useRef(images);
   const [ingredientInput, setIngredientInput] = useState("");
   const [stepInput, setStepInput] = useState("");
   const [cookHours, setCookHours] = useState("");
   const [cookMinutes, setCookMinutes] = useState("");
+  const [prepHours, setPrepHours] = useState("");
+  const [prepMinutes, setPrepMinutes] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
-  // Step definitions with icons - ensure all required fields are covered
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach((image) => {
+        if (image?.type === 'local') {
+          if (image.url && image.url.startsWith('blob:')) {
+            URL.revokeObjectURL(image.url);
+          }
+          if (image.originalUrl && image.originalUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(image.originalUrl);
+          }
+        }
+      });
+    };
+  }, []);
+
+  const cookTimeMinutes = useMemo(() => {
+    const hours = Number(cookHours) || 0;
+    const minutes = Number(cookMinutes) || 0;
+    return hours * 60 + minutes;
+  }, [cookHours, cookMinutes]);
+  const prepTimeMinutes = useMemo(() => {
+    const hours = Number(prepHours) || 0;
+    const minutes = Number(prepMinutes) || 0;
+    return hours * 60 + minutes;
+  }, [prepHours, prepMinutes]);
+  const isCookTimeValid = cookTimeMinutes > 0;
+  const isCategoryValid = form.category.trim().length >= 2;
+
   const steps = [
     {
       title: "Basic Info",
       description: "Add title and description",
-      icon: "📝",
       fields: ["title", "description"]
     },
     {
       title: "Ingredients",
       description: "List your ingredients",
-      icon: "🥕",
       fields: ["ingredients"]
     },
     {
       title: "Steps",
       description: "Explain how to make it",
-      icon: "👨‍🍳",
       fields: ["steps"]
     },
     {
       title: "Details",
       description: "Add final details",
-      icon: "🏷️",
-      fields: ["category", "diet", "cookHours", "cookMinutes", "imageUrl"]
+      fields: ["category"]
     }
   ];
 
@@ -69,11 +103,10 @@ function AddRecipe() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Apply minimal sanitization for all inputs to allow most special characters
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   // Only sanitize on form submission, not during input
@@ -113,79 +146,292 @@ function AddRecipe() {
   };
 
   const handleAddIngredient = () => {
-    if (ingredientInput.trim()) {
-      // Don't sanitize during input to preserve user's text as-is
-      setForm({
-        ...form,
-        ingredients: [...form.ingredients, ingredientInput.trim()]
-      });
-      setIngredientInput("");
-    }
+    const trimmed = ingredientInput.trim();
+    if (!trimmed) return;
+
+    setForm((prev) => ({
+      ...prev,
+      ingredients: [...prev.ingredients, trimmed]
+    }));
+    setIngredientInput("");
   };
 
   const handleRemoveIngredient = (index) => {
-    const updatedIngredients = [...form.ingredients];
-    updatedIngredients.splice(index, 1);
-    setForm({ ...form, ingredients: updatedIngredients });
+    setForm((prev) => {
+      const updatedIngredients = prev.ingredients.filter((_, idx) => idx !== index);
+      return { ...prev, ingredients: updatedIngredients };
+    });
   };
 
   const handleAddStep = () => {
-    if (stepInput.trim()) {
-      // Don't sanitize during input to preserve user's text as-is
-      setForm({
-        ...form,
-        steps: [...form.steps, stepInput.trim()]
-      });
-      setStepInput("");
-    }
+    const trimmed = stepInput.trim();
+    if (!trimmed) return;
+
+    setForm((prev) => ({
+      ...prev,
+      steps: [...prev.steps, trimmed]
+    }));
+    setStepInput("");
   };
 
   const handleRemoveStep = (index) => {
-    const updatedSteps = [...form.steps];
-    updatedSteps.splice(index, 1);
-    setForm({ ...form, steps: updatedSteps });
+    setForm((prev) => {
+      const updatedSteps = prev.steps.filter((_, idx) => idx !== index);
+      return { ...prev, steps: updatedSteps };
+    });
   };
 
-  // Handle file input for image
+  /**
+   * Creates the local image state entry used for previews and adjustments.
+   * @param {File} file - Raw image file from the input element.
+   * @returns {Promise<Object>} Promise resolving to the structured image item.
+   */
+  const createImageItem = (file) => new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      resolve({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        type: 'local',
+        url: objectUrl,
+        originalUrl: objectUrl,
+        file,
+        originalFile: file,
+        adjustments: {
+          zoom: 1,
+          offsetX: 0,
+          offsetY: 0,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight
+        }
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Failed to load image.'));
+    };
+
+    img.src = objectUrl;
+  });
+
+  // Handle file input for images (up to MAX_IMAGE_COUNT)
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        // Show loading state
-        setIsSubmitting(true);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-        // For preview purposes, create a local object URL
-        const localPreviewUrl = URL.createObjectURL(file);
-        setForm({ ...form, imagePreview: localPreviewUrl, imageFile: file });
+    const limitMessage = `You can upload up to ${MAX_IMAGE_COUNT} images.`;
+    const currentCount = images.length;
+    const remainingSlots = Math.max(0, MAX_IMAGE_COUNT - currentCount);
 
-        // No need to upload immediately, we'll do it on form submission
-        setIsSubmitting(false);
-      } catch (err) {
-        setError('Failed to process image. Please try again.');
-        setIsSubmitting(false);
+    if (!remainingSlots) {
+      setError((prev) => prev || limitMessage);
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      const selectedFiles = files.slice(0, remainingSlots);
+      const imageItems = await Promise.all(selectedFiles.map((file) => createImageItem(file)));
+
+      setImages((prev) => [...prev, ...imageItems]);
+
+      if (files.length > selectedFiles.length) {
+        setError((prev) => prev || limitMessage);
+      } else if (error === limitMessage) {
+        setError("");
       }
+    } catch (err) {
+      setError('Failed to process images. Please try again.');
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const limitMessage = `You can upload up to ${MAX_IMAGE_COUNT} images.`;
+    setImages((prev) => {
+      if (index < 0 || index >= prev.length) return prev;
+
+      const image = prev[index];
+      if (image?.type === 'local') {
+        if (image.url && image.url.startsWith('blob:') && image.url !== image.originalUrl) {
+          URL.revokeObjectURL(image.url);
+        }
+        if (image.originalUrl && image.originalUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(image.originalUrl);
+        }
+      }
+
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
+
+    if (error === limitMessage) {
+      setError("");
+    }
+
+    if (editingImageIndex !== null) {
+      setEditingImageIndex(null);
+    }
+  };
+
+  /**
+   * Generates a cropped square canvas based on the saved adjustments.
+   * @param {Object} imageItem - Target image descriptor from local state.
+   * @param {{zoom:number, offsetX:number, offsetY:number}} adjustments - Applied transform values.
+   * @returns {Promise<{file: File, previewUrl: string}>}
+   */
+  const cropImageWithAdjustments = (imageItem, adjustments) => new Promise((resolve, reject) => {
+    if (!imageItem?.originalUrl || !imageItem?.originalFile) {
+      reject(new Error('Missing image data.'));
+      return;
+    }
+
+    const { naturalWidth, naturalHeight } = imageItem.adjustments || {};
+    if (!naturalWidth || !naturalHeight) {
+      reject(new Error('Image dimensions unavailable.'));
+      return;
+    }
+
+    const img = new Image();
+
+    img.onload = () => {
+      const minDimension = Math.min(naturalWidth, naturalHeight);
+      const zoom = Math.max(1, adjustments.zoom || 1);
+      const visibleSize = minDimension / zoom;
+      const maxOffsetX = (naturalWidth - visibleSize) / 2;
+      const maxOffsetY = (naturalHeight - visibleSize) / 2;
+
+      const normalizedOffsetX = Math.max(-1, Math.min(1, adjustments.offsetX || 0));
+      const normalizedOffsetY = Math.max(-1, Math.min(1, adjustments.offsetY || 0));
+
+      const centerX = naturalWidth / 2 + normalizedOffsetX * maxOffsetX;
+      const centerY = naturalHeight / 2 + normalizedOffsetY * maxOffsetY;
+
+      const cropX = centerX - visibleSize / 2;
+      const cropY = centerY - visibleSize / 2;
+
+      const outputSize = Math.min(visibleSize, 1080);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(outputSize);
+      canvas.height = Math.round(outputSize);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Canvas not supported.'));
+        return;
+      }
+
+      ctx.drawImage(
+        img,
+        cropX,
+        cropY,
+        visibleSize,
+        visibleSize,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Failed to generate image blob.'));
+          return;
+        }
+
+        const fileName = imageItem.originalFile?.name || `recipe-image-${Date.now()}.jpg`;
+        const fileType = imageItem.originalFile?.type || 'image/jpeg';
+        const croppedFile = new File([blob], fileName, { type: fileType });
+        const previewUrl = URL.createObjectURL(blob);
+        resolve({ file: croppedFile, previewUrl });
+      }, imageItem.originalFile?.type || 'image/jpeg', 0.92);
+    };
+
+    img.onerror = () => {
+      reject(new Error('Failed to process image.'));
+    };
+
+    if (!imageItem.originalUrl.startsWith('blob:')) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    img.src = imageItem.originalUrl;
+  });
+
+  /**
+   * Persists the crop adjustments for a queued upload and refreshes the preview.
+   * @param {number} index - Index of the image within the local array.
+   * @param {{zoom:number, offsetX:number, offsetY:number}} adjustments - Updated crop data from the modal.
+   * @returns {Promise<void>}
+   */
+  const handleAdjustSave = async (index, adjustments) => {
+    if (index === null || index === undefined) return;
+    const targetImage = images[index];
+    if (!targetImage || targetImage.type !== 'local') {
+      setEditingImageIndex(null);
+      return;
+    }
+
+    try {
+      setIsProcessingImage(true);
+      const result = await cropImageWithAdjustments(targetImage, adjustments);
+
+      setImages((prev) => {
+        const next = [...prev];
+        const existing = next[index];
+        if (!existing) {
+          return prev;
+        }
+
+        next[index] = {
+          ...existing,
+          url: result.previewUrl,
+          file: result.file,
+          adjustments: {
+            ...existing.adjustments,
+            zoom: Math.max(1, adjustments.zoom || 1),
+            offsetX: Math.max(-1, Math.min(1, adjustments.offsetX || 0)),
+            offsetY: Math.max(-1, Math.min(1, adjustments.offsetY || 0))
+          }
+        };
+
+        return next;
+      });
+      setError("");
+    } catch (err) {
+      setError(err.message || 'Failed to adjust image. Please try again.');
+    } finally {
+      setIsProcessingImage(false);
+      setEditingImageIndex(null);
     }
   };
 
   // Step validation
   const validateStep = () => {
     const currentFields = steps[activeStep].fields;
-    for (let field of currentFields) {
-      if (field === "ingredients" || field === "steps") {
-        if (!form[field] || form[field].length === 0) {
+    for (const field of currentFields) {
+      const value = form[field];
+
+      if (Array.isArray(value)) {
+        if (!value.length) {
           setError(`Please add at least one ${field === "ingredients" ? "ingredient" : "step"}`);
           return false;
         }
-      } else if (field === "cookHours" || field === "cookMinutes" || field === "imageUrl" || field === "diet") {
-        // These fields are optional
         continue;
-      } else if (field === "category" && activeStep === steps.length - 1) {
-        // Only validate category on the final step if user is trying to submit
-        if (!form[field] || form[field].length < 2) {
+      }
+
+      if (field === "category") {
+        if (!isCategoryValid) {
           setError("Please select a valid category");
           return false;
         }
-      } else if (!form[field] || !form[field].trim()) {
+        continue;
+      }
+
+      if (!value || !value.trim()) {
         setError(`Please fill in the ${field} field`);
         return false;
       }
@@ -227,51 +473,105 @@ function AddRecipe() {
     }
 
     // Validate category (must be at least 2 characters)
-    if (!form.category || form.category.trim().length < 2) {
+    if (!isCategoryValid) {
       setError("Please select a valid category");
       return;
     }
 
-    // Calculate cookTime in minutes
-    const cookTime =
-      (parseInt(cookHours || 0) * 60) + parseInt(cookMinutes || 0);
-
     // Prevent submission if cookTime is 0
-    if (cookTime <= 0) {
+    if (!isCookTimeValid) {
       setError("Please set a valid cook time");
       return;
     }
 
     setIsSubmitting(true);
     setError("");
+    setSuccess("");
 
     try {
-      // First, handle image upload if we have a new image file
-      let finalImageUrl = form.imageUrl; // Start with existing URL if any
+      const existingImageUrls = images
+        .filter((img) => img.type === 'remote' && (typeof img.url === 'string' || typeof img.remoteUrl === 'string'))
+        .map((img) => img.remoteUrl || img.url);
 
-      if (form.imageFile) {
-        // Upload the image and get its URL
-        finalImageUrl = await uploadRecipeImage(form.imageFile);
+      const localImages = images.filter((img) => img.type === 'local');
+
+      const uploadedImageResults = [];
+
+      for (const image of localImages) {
+        if (!image.file) continue;
+        const uploadResult = await uploadRecipeImage(image.file);
+        if (uploadResult && uploadResult.imageUrl) {
+          uploadedImageResults.push(uploadResult);
+        }
       }
 
-      // Ensure the image URL is absolute (required by backend)
-      // If using S3, the URL will be absolute. No need to prefix with localhost.
+      const imageUrls = [...existingImageUrls, ...uploadedImageResults.map((item) => item.imageUrl)];
 
-      // Apply sanitization to the form data
-      const sanitizedForm = prepareForSubmission({
-        ...form,
-        imageUrl: finalImageUrl // Use the URL from the uploaded image
-      });
+      if (uploadedImageResults.length) {
+        const urlsToRevoke = [];
+        setImages((prev) => {
+          const next = [];
+          let uploadedIndex = 0;
+          for (const item of prev) {
+            if (item.type === 'local') {
+              const uploadedMeta = uploadedImageResults[uploadedIndex];
+              uploadedIndex += 1;
+              if (uploadedMeta && uploadedMeta.imageUrl) {
+                if (item.originalUrl && item.originalUrl.startsWith('blob:')) {
+                  urlsToRevoke.push(item.originalUrl);
+                }
+                if (item.url && item.url.startsWith('blob:')) {
+                  urlsToRevoke.push(item.url);
+                }
 
-      // Convert imageUrl to imageUrls array for consistency with schema
-      const imageUrls = finalImageUrl ? [finalImageUrl] : [];
+                next.push({
+                  ...item,
+                  type: 'remote',
+                  url: resolveImageUrl(uploadedMeta.imageUrl) || uploadedMeta.imageUrl,
+                  remoteUrl: uploadedMeta.imageUrl,
+                  imageKey: uploadedMeta.imageKey,
+                  originalUrl: uploadedMeta.imageUrl,
+                  originalFile: undefined,
+                  file: undefined
+                });
+              } else {
+                next.push(item);
+              }
+            } else {
+              next.push(item);
+            }
+          }
+          return next;
+        });
 
+        if (urlsToRevoke.length) {
+          const revoke = () => {
+            urlsToRevoke.forEach((url) => {
+              try {
+                URL.revokeObjectURL(url);
+              } catch (revokeError) {
+                console.warn('Failed to revoke object URL', revokeError);
+              }
+            });
+          };
 
+          if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(revoke);
+          } else {
+            setTimeout(revoke, 0);
+          }
+        }
+      }
 
+      const sanitizedForm = prepareForSubmission(form);
+
+      // Submit the sanitized form data to the backend
       await API.post("/recipes", {
         ...sanitizedForm,
-        cookTime,
-        imageUrls
+        cookTime: cookTimeMinutes,
+        prepTime: prepTimeMinutes,
+        imageUrls,
+        imageUrl: imageUrls[0] || ""
       });
 
       setSuccess("Recipe added!");
@@ -287,6 +587,7 @@ function AddRecipe() {
       } else {
         setError(err.response?.data?.msg || "Error adding recipe");
       }
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -347,28 +648,33 @@ function AddRecipe() {
                     onClick={() => handleRemoveIngredient(index)}
                     aria-label={`Remove ingredient: ${ingredient}`}
                   >
-                    <CloseIcon />
+                    <DeleteIcon className="item-list__item-remove-icon" aria-hidden="true" />
                   </button>
                 </div>
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input
                 className="add-recipe-form__input"
                 value={ingredientInput}
                 onChange={e => setIngredientInput(e.target.value)}
-                onKeyPress={e => e.key === "Enter" && handleAddIngredient()}
+                onKeyDown={e => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddIngredient();
+                  }
+                }}
                 placeholder="Type an ingredient and press Enter"
                 style={{ flex: 1 }}
               />
               <button
                 type="button"
                 onClick={handleAddIngredient}
-                className="form-btn form-btn--primary"
-                style={{ padding: "0 16px" }}
+                className="item-list__item-add"
+                aria-label="Add ingredient"
               >
-                Add
+                <AddCircleIcon className="item-list__item-add-icon" aria-hidden="true" />
               </button>
             </div>
           </motion.div>
@@ -395,13 +701,13 @@ function AddRecipe() {
                     onClick={() => handleRemoveStep(index)}
                     aria-label={`Remove step ${index + 1}`}
                   >
-                    <CloseIcon />
+                    <DeleteIcon className="item-list__item-remove-icon" aria-hidden="true" />
                   </button>
                 </div>
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <textarea
                 className="add-recipe-form__textarea"
                 value={stepInput}
@@ -413,16 +719,18 @@ function AddRecipe() {
               <button
                 type="button"
                 onClick={handleAddStep}
-                className="form-btn form-btn--primary"
-                style={{ padding: "0 16px", alignSelf: "flex-start" }}
+                className="item-list__item-add"
+                aria-label="Add preparation step"
               >
-                Add
+                <AddCircleIcon className="item-list__item-add-icon" aria-hidden="true" />
               </button>
             </div>
           </motion.div>
         );
 
-      case 3:
+      case 3: {
+        const selectedImageCount = images.length;
+        const hasImages = selectedImageCount > 0;
         return (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -432,18 +740,55 @@ function AddRecipe() {
           >
             <div className="add-recipe-form__file-input-container">
               <input
-                ref={fileInputRef}
                 type="file"
                 className="add-recipe-form__file-input"
                 id="recipe-image"
                 accept="image/*"
+                multiple
                 onChange={handleImageUpload}
               />
               <label htmlFor="recipe-image" className="add-recipe-form__file-label">
-                <UploadIcon />
-                <span>{form.imagePreview || form.imageUrl ? "Change Image" : "Upload Recipe Image"}</span>
+                <UploadIcon aria-hidden="true" />
+                <span className="add-recipe-form__file-label-text">
+                  {hasImages ? "Add More Images" : "Upload Recipe Images"}
+                </span>
+                <span className="add-recipe-form__file-label-helper">
+                  Select up to {MAX_IMAGE_COUNT} images (PNG, JPG, GIF).
+                </span>
               </label>
+              <div className="add-recipe-form__file-count" aria-live="polite">
+                {selectedImageCount} / {MAX_IMAGE_COUNT} images selected
+              </div>
             </div>
+
+            {hasImages && (
+              <div className="add-recipe-form__image-preview-grid">
+                {images.map((image, idx) => (
+                  <div key={image.id ?? `${image.url}-${idx}`} className="add-recipe-form__image-preview-item">
+                    <img src={image.url} alt={`Recipe preview ${idx + 1}`} />
+                    {image.type === 'local' && (
+                      <button
+                        type="button"
+                        className="add-recipe-form__image-edit"
+                        onClick={() => setEditingImageIndex(idx)}
+                        disabled={isProcessingImage}
+                        aria-label={`Adjust recipe image ${idx + 1}`}
+                      >
+                        <EditImageIcon aria-hidden="true" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="add-recipe-form__image-remove"
+                      onClick={() => handleRemoveImage(idx)}
+                      aria-label={`Remove recipe image ${idx + 1}`}
+                    >
+                      <DeleteIcon aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="add-recipe-form__grid">
               <div>
@@ -465,7 +810,7 @@ function AddRecipe() {
                   <option value="Beverage">Beverage</option>
                   <option value="Other">Other</option>
                 </select>
-                {!form.category && (
+                {!isCategoryValid && (
                   <div style={{ color: '#ef4444', fontSize: '0.85em', marginTop: -12, marginBottom: 12 }}>
                     Please select a category
                   </div>
@@ -485,6 +830,42 @@ function AddRecipe() {
                   <option value="omnivore">Omnivore</option>
                   <option value="other">Other</option>
                 </select>
+              </div>
+            </div>
+
+            <label className="add-recipe-form__label">Prep Time <span style={{ color: '#666', fontSize: '0.85em' }}>(optional)</span></label>
+            <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+              <div style={{ flex: 1 }}>
+                <input
+                  className="add-recipe-form__input"
+                  type="number"
+                  min="0"
+                  value={prepHours}
+                  onChange={e => setPrepHours(e.target.value)}
+                  placeholder="Hours"
+                  id="prep-hours"
+                  aria-label="Prep time hours"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <input
+                  className="add-recipe-form__input"
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={prepMinutes}
+                  onChange={e => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!Number.isNaN(val) && val >= 0 && val <= 59) {
+                      setPrepMinutes(val);
+                    } else if (e.target.value === '') {
+                      setPrepMinutes('');
+                    }
+                  }}
+                  placeholder="Minutes"
+                  id="prep-minutes"
+                  aria-label="Prep time minutes"
+                />
               </div>
             </div>
 
@@ -524,14 +905,14 @@ function AddRecipe() {
                 />
               </div>
             </div>
-            {(cookHours === '0' || cookHours === 0 || cookHours === '') &&
-              (cookMinutes === '0' || cookMinutes === 0 || cookMinutes === '') && (
+            {!isCookTimeValid && (
                 <div style={{ color: '#ef4444', fontSize: '0.85em', marginTop: -16, marginBottom: 16 }}>
                   Please set cook time to at least 1 minute
                 </div>
               )}
           </motion.div>
         );
+      }
 
       default:
         return null;
@@ -626,8 +1007,7 @@ function AddRecipe() {
               <motion.button
                 type="submit"
                 className="form-btn form-btn--primary"
-                disabled={isSubmitting || !!error || !form.category || ((cookHours === '0' || cookHours === 0 || cookHours === '') &&
-                  (cookMinutes === '0' || cookMinutes === 0 || cookMinutes === ''))}
+                disabled={isSubmitting || !!error || !isCategoryValid || !isCookTimeValid}
                 whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                 whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
               >
@@ -651,7 +1031,22 @@ function AddRecipe() {
         </div>
       </motion.form>
 
-      <RecipePreviewCard form={form} cookHours={cookHours} cookMinutes={cookMinutes} />
+      <RecipePreviewCard
+        form={form}
+        cookHours={cookHours}
+        cookMinutes={cookMinutes}
+        prepHours={prepHours}
+        prepMinutes={prepMinutes}
+        images={images}
+      />
+
+      <ImageAdjustModal
+        isOpen={editingImageIndex !== null}
+        image={editingImageIndex !== null ? images[editingImageIndex] : null}
+        onClose={() => setEditingImageIndex(null)}
+        onSave={(adjustments) => handleAdjustSave(editingImageIndex, adjustments)}
+        isProcessing={isProcessingImage}
+      />
     </div>
   );
 }

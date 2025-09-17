@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
+  firstName: { type: String, default: "", trim: true },
+  lastName: { type: String, default: "", trim: true },
   name: { type: String, required: true }, // User's display name
   email: { 
     type: String, 
@@ -25,6 +27,23 @@ const UserSchema = new mongoose.Schema({
     },
   ],
 }, { timestamps: true }); // Add createdAt and updatedAt fields
+
+// Derive display name from first/last names when provided
+UserSchema.pre('save', function(next) {
+  if (this.isModified('firstName') || this.isModified('lastName')) {
+    const fullName = [this.firstName, this.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
+    if (fullName) {
+      this.name = fullName;
+    }
+  }
+
+  next();
+});
 
 // Hash password before saving
 UserSchema.pre('save', async function(next) {

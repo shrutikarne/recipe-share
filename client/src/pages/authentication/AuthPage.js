@@ -5,6 +5,7 @@ import API from "../../api/api";
 import { sanitizeFormData } from "../../utils/sanitize";
 import "./AuthPage.scss";
 import { TEXT } from "../../localization/text";
+import { VisibilityIcon, VisibilityOffIcon } from "../../components/SvgIcons";
 
 /**
  * AuthPage component
@@ -18,11 +19,14 @@ function AuthPage() {
   const [tab, setTab] = useState("login"); // 'login' or 'register'
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
   // --- Handlers (in order of user flow) ---
 
@@ -145,12 +149,12 @@ function AuthPage() {
                   />
                   <label className="auth-form__label" htmlFor="login-email">{TEXT.auth.emailLabel}</label>
                 </div>
-                <div className={`auth-form__group${loginForm.password ? " auth-form__group--filled" : ""}`}>
+                <div className={`auth-form__group auth-form__group--with-toggle${loginForm.password ? " auth-form__group--filled" : ""}`}>
                   <input
                     className="auth-form__input"
                     id="login-password"
                     name="password"
-                    type="password"
+                    type={showLoginPassword ? "text" : "password"}
                     value={loginForm.password}
                     onChange={handleLoginChange}
                     aria-required="true"
@@ -158,6 +162,19 @@ function AuthPage() {
                     required
                   />
                   <label className="auth-form__label" htmlFor="login-password">{TEXT.auth.passwordLabel}</label>
+                  <button
+                    type="button"
+                    className="auth-form__toggle"
+                    onClick={() => setShowLoginPassword(prev => !prev)}
+                    aria-label={showLoginPassword ? TEXT.auth.hidePassword : TEXT.auth.showPassword}
+                    aria-pressed={showLoginPassword}
+                  >
+                    {showLoginPassword ? (
+                      <VisibilityOffIcon className="auth-form__toggle-icon" aria-hidden="true" />
+                    ) : (
+                      <VisibilityIcon className="auth-form__toggle-icon" aria-hidden="true" />
+                    )}
+                  </button>
                 </div>
                 <button className="auth-form__button" type="submit" aria-label={TEXT.auth.loginTab} disabled={loading}>
                   {TEXT.auth.loginTab}
@@ -199,18 +216,33 @@ function AuthPage() {
                 tabIndex={0}
               >
                 <h2 className="auth-form__title">{TEXT.auth.registerTitle}</h2>
-                <div className={`auth-form__group${registerForm.name ? " auth-form__group--filled" : ""}`}>
-                  <input
-                    className="auth-form__input"
-                    id="register-name"
-                    name="name"
-                    value={registerForm.name}
-                    onChange={handleRegisterChange}
-                    aria-required="true"
-                    autoComplete="name"
-                    required
-                  />
-                  <label className="auth-form__label" htmlFor="register-name">{TEXT.auth.nameLabel}</label>
+                <div className="auth-form__row">
+                  <div className={`auth-form__group${registerForm.firstName ? " auth-form__group--filled" : ""}`}>
+                    <input
+                      className="auth-form__input"
+                      id="register-first-name"
+                      name="firstName"
+                      value={registerForm.firstName}
+                      onChange={handleRegisterChange}
+                      aria-required="true"
+                      autoComplete="given-name"
+                      required
+                    />
+                    <label className="auth-form__label" htmlFor="register-first-name">{TEXT.auth.firstNameLabel}</label>
+                  </div>
+                  <div className={`auth-form__group${registerForm.lastName ? " auth-form__group--filled" : ""}`}>
+                    <input
+                      className="auth-form__input"
+                      id="register-last-name"
+                      name="lastName"
+                      value={registerForm.lastName}
+                      onChange={handleRegisterChange}
+                      aria-required="true"
+                      autoComplete="family-name"
+                      required
+                    />
+                    <label className="auth-form__label" htmlFor="register-last-name">{TEXT.auth.lastNameLabel}</label>
+                  </div>
                 </div>
                 <div className={`auth-form__group${registerForm.email ? " auth-form__group--filled" : ""}`}>
                   <input
@@ -225,12 +257,12 @@ function AuthPage() {
                   />
                   <label className="auth-form__label" htmlFor="register-email">{TEXT.auth.emailLabel}</label>
                 </div>
-                <div className={`auth-form__group${registerForm.password ? " auth-form__group--filled" : ""}`}>
+                <div className={`auth-form__group auth-form__group--with-toggle${registerForm.password ? " auth-form__group--filled" : ""}`}>
                   <input
                     className="auth-form__input"
                     id="register-password"
                     name="password"
-                    type="password"
+                    type={showRegisterPassword ? "text" : "password"}
                     value={registerForm.password}
                     onChange={handleRegisterChange}
                     aria-required="true"
@@ -238,6 +270,19 @@ function AuthPage() {
                     required
                   />
                   <label className="auth-form__label" htmlFor="register-password">{TEXT.auth.passwordLabel}</label>
+                  <button
+                    type="button"
+                    className="auth-form__toggle"
+                    onClick={() => setShowRegisterPassword(prev => !prev)}
+                    aria-label={showRegisterPassword ? TEXT.auth.hidePassword : TEXT.auth.showPassword}
+                    aria-pressed={showRegisterPassword}
+                  >
+                    {showRegisterPassword ? (
+                      <VisibilityOffIcon className="auth-form__toggle-icon" aria-hidden="true" />
+                    ) : (
+                      <VisibilityIcon className="auth-form__toggle-icon" aria-hidden="true" />
+                    )}
+                  </button>
                 </div>
                 <button className="auth-form__button" type="submit" aria-label={TEXT.auth.registerTab} disabled={loading}>
                   {TEXT.auth.registerTab}

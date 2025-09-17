@@ -89,7 +89,8 @@ describe("Auth API", () => {
       const res = await request(app)
         .post("/api/auth/register")
         .send({
-          name: "New User",
+          firstName: "New",
+          lastName: "User",
           email: "new@example.com",
           password: "password123"
         });
@@ -100,6 +101,8 @@ describe("Auth API", () => {
       // Verify user was created in database
       const user = await User.findOne({ email: "new@example.com" });
       expect(user).toBeDefined();
+      expect(user.firstName).toBe("New");
+      expect(user.lastName).toBe("User");
       expect(user.name).toBe("New User");
 
       // Password should be hashed
@@ -118,7 +121,8 @@ describe("Auth API", () => {
       const res = await request(app)
         .post("/api/auth/register")
         .send({
-          name: "Duplicate User",
+          firstName: "Duplicate",
+          lastName: "User",
           email: "duplicate@example.com",
           password: "password123"
         });
