@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "./About.scss";
 import { TEXT } from "../../localization/text";
 
@@ -15,14 +14,13 @@ import { TEXT } from "../../localization/text";
 
 
 export default function About() {
-    const navigate = useNavigate();
     // Scroll to the browse section on the Home page
     const handleExploreClick = () => {
         if (window.location.pathname === "/") {
             const el = document.getElementById("browse-all-recipes-section");
             if (el) el.scrollIntoView({ behavior: "smooth" });
         } else {
-            navigate("/#browse-all-recipes-section");
+            window.location.assign("/#browse-all-recipes-section");
         }
     };
     return (

@@ -6,9 +6,11 @@
 import { toast } from 'react-toastify';
 
 /**
- * Error types for categorizing different kinds of errors
+ * Maps HTTP status codes to error types
+ * @param {number} statusCode - HTTP status code
+ * @returns {string} Error type
  */
-export const ERROR_TYPES = {
+const ERROR_TYPES = {
   NETWORK: 'network',
   AUTHENTICATION: 'authentication',
   VALIDATION: 'validation',
@@ -18,12 +20,7 @@ export const ERROR_TYPES = {
   UNKNOWN: 'unknown'
 };
 
-/**
- * Maps HTTP status codes to error types
- * @param {number} statusCode - HTTP status code
- * @returns {string} Error type
- */
-export const getErrorTypeFromStatus = (statusCode) => {
+const getErrorTypeFromStatus = (statusCode) => {
   if (!statusCode) return ERROR_TYPES.NETWORK;
 
   switch (statusCode) {
@@ -95,31 +92,5 @@ export const handleApiError = (error, customMessage = null) => {
   return {
     type: errorType,
     message: errorMessage
-  };
-};
-
-/**
- * Handle form validation errors
- * @param {Object} errors - Validation errors object
- */
-export const handleFormErrors = (errors) => {
-  // Display first error message
-  if (errors && Object.keys(errors).length > 0) {
-    const firstError = Object.values(errors)[0];
-    toast.error(firstError);
-  }
-};
-
-/**
- * Create a standard error response object
- * @param {string} message - Error message
- * @param {string} type - Error type from ERROR_TYPES
- * @returns {Object} Standard error object
- */
-export const createErrorResponse = (message, type = ERROR_TYPES.UNKNOWN) => {
-  return {
-    error: true,
-    type,
-    message
   };
 };

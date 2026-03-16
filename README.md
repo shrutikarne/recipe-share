@@ -1,31 +1,29 @@
 # Recipe Share
 
-Recipe Share is a full-stack MERN application for discovering, creating, and managing recipes. The React frontend delivers a polished browsing experience with search, filtering, and rich detail views, while the Express/MongoDB backend powers authentication, recipe CRUD, comments, ratings, and media uploads.
+Recipe Share is a lean MERN application for publishing your personal recipes. Visitors can browse everything publicly, and only you (the site owner) can log in with a single admin password to add, update, or delete recipes.
 
 ## Highlights
-- Browse recipes with full-text search, category and diet filters, and infinite scrolling.
-- View rich recipe detail pages with nutrition highlights, comments, ratings, and image galleries.
-- Authenticated users can create recipes via a guided multi-step form with client-side validation and image uploads (local disk or S3).
-- Save recipes into personal collections, manage your profile, and keep sessions alive with refresh tokens stored in HTTP-only cookies.
+- Browse recipes with search plus category/diet filters.
+- View rich recipe detail pages with ingredient scaling, cook/prep times, and image galleries.
+- A single password-protected admin panel lets you manage recipes; everyone else only reads.
 - Hardened backend with input sanitisation, structured validation, rate limiting, and security headers.
 
 ## Architecture at a Glance
 | Layer    | Location | Overview |
 |----------|----------|----------|
 | Frontend | `client/` | React 19 application (CRA) with React Router v7, Framer Motion animations, SCSS modules, and a token-aware Axios client. |
-| Backend  | `server/` | Express 5 API with MongoDB/Mongoose models, JWT cookie authentication + refresh tokens, recipe/comment/user routes, and optional S3 media pipeline. |
+| Backend  | `server/` | Express 5 API with MongoDB/Mongoose models, JWT admin authentication, recipe routes, and URL-based media links. |
 
 ## Tech Stack
 - **Frontend:** React 19, React Router, React Testing Library, Playwright, Sass, Framer Motion, Axios
-- **Backend:** Node.js 18+, Express 5, Mongoose, JWT, bcrypt, Multer, express-rate-limit, Helmet
-- **Data & Storage:** MongoDB, optional AWS S3 (toggle via env `USE_S3_UPLOAD=true`)
+- **Backend:** Node.js 18+, Express 5, Mongoose, JWT, express-rate-limit, Helmet
+- **Data & Storage:** MongoDB (recipe data + remote image URLs)
 - **Tooling:** Jest + Supertest, Playwright, ESLint (CRA defaults)
 
 ## Prerequisites
 - Node.js 18 or newer (check with `node -v`)
 - npm 9+ or yarn
 - Running MongoDB instance (local or connection string)
-- (Optional) AWS account & credentials if you plan to push recipe images to S3
 
 ## Setup
 1. **Install dependencies**
@@ -47,18 +45,12 @@ Recipe Share is a full-stack MERN application for discovering, creating, and man
      MONGO_URI=mongodb://localhost:27017/recipe-share
 
      JWT_SECRET=dev-jwt-secret-change-me
-     REFRESH_TOKEN_SECRET=dev-refresh-secret-change-me
-     SESSION_SECRET=dev-session-secret-change-me
+     ADMIN_PASSWORD=super-secret-change-me
 
      CLIENT_URL=http://localhost:3000
      CORS_ORIGIN=http://localhost:3000
 
-     # Optional upload settings (set USE_S3_UPLOAD=true to enable S3)
-     USE_S3_UPLOAD=false
-     AWS_ACCESS_KEY_ID=
-     AWS_SECRET_ACCESS_KEY=
-     AWS_REGION=us-east-1
-     S3_BUCKET_NAME=
+     # Uploaded recipe images are saved under server/uploads/recipes
      ```
    - Create `client/.env`:
      ```ini
@@ -79,7 +71,7 @@ cd client
 npm start            # CRA dev server on :3000 with proxy to :5000
 ```
 
-The frontend proxies API calls to the backend (see `client/package.json` -> `proxy`). Sign up via `/auth` to unlock protected routes like `/add-recipe` and `/profile`.
+The frontend proxies API calls to the backend (see `client/package.json` -> `proxy`).
 
 ## Testing
 Refer to `TESTING.md` for the full matrix. Common commands:
@@ -108,40 +100,33 @@ Playwright expects the dev servers running or a deployed URL (configure via `PLA
 | `server` | `npm test` | Run server-side Jest suite. |
 | `client` | `npm start` | Launch CRA dev server with React fast refresh. |
 | `client` | `npm run build` | Create production build in `client/build`. |
-| `client` | `npm run test:e2e` | Execute Playwright tests in `client/tests`. |
 
 ## Project Structure
 ```
 recipe-share/
-├── client/                 # React app (components, pages, API helpers, tests)
+├── client/                 # React app (components, pages, API helpers)
 │   ├── src/
-│   │   ├── api/            # Axios instance, upload helpers, autocomplete client
-│   │   ├── components/     # Navbar, recipe grid, modals, token manager, etc.
-│   │   ├── pages/          # Home, Auth, Add Recipe, Recipe Detail, Profile, About
-│   │   └── utils/          # Token helpers, sanitizers, toast config
-│   └── tests/              # Playwright specs + helpers
+│   │   ├── api/            # Axios instance + recipe/autocomplete clients
+│   │   ├── components/     # Navbar, recipe grid, shared UI
+│   │   ├── pages/          # Home, Admin, Add Recipe, Recipe Detail, About
+│   │   └── utils/          # Sanitizers, toast config, image helpers
 ├── server/                 # Express API
-│   ├── config/             # Env wrapper, DB connection, Passport stubs
-│   ├── middleware/         # Auth, validation, sanitisation, security helpers
-│   ├── models/             # Mongoose models for User and Recipe
-│   ├── routes/             # Auth, recipes, user, uploads, image proxy
-│   ├── tests/              # Jest + Supertest suites with MongoDB memory server
-│   └── utils/              # S3 upload helper
+│   ├── config/             # Env wrapper, DB connection
+│   ├── middleware/         # Validation, sanitisation, security helpers
+│   ├── models/             # Mongoose models for Recipe
+│   └── routes/             # Admin auth + recipes
 ├── assets/                 # Shared assets (images, icons)
 └── TESTING.md              # Detailed testing reference
 ```
 
 ## API Overview
-- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout` – email/password auth with refresh token rotation.
-- `GET /api/recipes` + query params for search/filter/pagination; `POST /api/recipes` (auth), `PUT/DELETE /api/recipes/:id` for owner-managed CRUD.
-- `GET /api/recipes/:id/comments` and `POST/PUT/DELETE /api/recipes/:id/comments/:commentId` for comment & rating lifecycle.
-- `POST /api/user/save/:id`, `POST /api/user/unsave/:id`, `GET /api/user/saved` for personal collections.
-- `POST /api/uploads/recipe-image` handles multipart uploads (to local `/uploads/recipes` or S3, depending on env). Use `USE_S3_UPLOAD=true` to opt into S3.
+- `POST /api/admin/login`, `POST /api/admin/logout`, `GET /api/admin/verify` – password-only admin login for the owner.
+- `GET /api/recipes` + query params for search/filter/pagination; `POST /api/recipes` (admin), `PUT/DELETE /api/recipes/:id` for owner-managed CRUD.
+- `GET /api/recipes/:id` for recipe details (public).
 
 ## Configuration Notes
-- Authentication tokens are stored in HTTP-only cookies; frontend helpers in `client/src/utils/tokenManager.js` track expiry to trigger refresh.
-- Server-side validation lives in `server/middleware/validation.js` and `recipeValidation.js`. Adjust these when the data model changes.
-- If enabling Google/Facebook login, update credentials in the env file and re-enable the strategies in `server/config/passport.js`.
+- Admin JWTs are stored in `localStorage` as `adminToken` and automatically attached to requests in `client/src/api/api.js`.
+- Server-side validation lives in `server/middleware/validation.js` and `server/middleware/recipeValidation.js`. Adjust these when the data model changes.
 - Security middleware (Helmet, sanitisation, rate limiting) is wired in `server/server.js`; tweak policies there if you integrate additional clients.
 
 ---

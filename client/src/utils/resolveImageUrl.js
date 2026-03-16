@@ -10,16 +10,9 @@ const getNormalizedApiBase = () => {
   }
 };
 
-export const resolveImageUrl = (url) => {
+const resolveImageUrl = (url) => {
   if (!url || typeof url !== 'string') return url;
   if (url === '/hero-food.jpg') return url;
-
-  const s3Match = url.match(/^https?:\/\/[^.]+\.s3[.-][^/]+\.amazonaws\.com\/(.+)$/i);
-  if (s3Match && s3Match[1]) {
-    const base = getNormalizedApiBase();
-    const qs = new URLSearchParams({ key: s3Match[1] }).toString();
-    return `${base}/api/images?${qs}`;
-  }
 
   if (/^(https?:|data:|blob:)/i.test(url)) {
     return url;

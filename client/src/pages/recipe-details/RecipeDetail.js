@@ -236,7 +236,6 @@ function RecipeDetail() {
             <div className="hero-meta">
               <span>⏱ {formatTime(totalTime)}</span>
               <span>👥 {recipe?.servings || 0} servings</span>
-              <span>⭐ {getDifficulty()}</span>
               {recipe?.category && <span>🏷 {recipe.category}</span>}
               {recipe?.cuisine && <span>🍽 {recipe.cuisine}</span>}
             </div>
@@ -342,22 +341,6 @@ function RecipeDetail() {
               </div>
             )}
 
-            <div className="sidebar-card related-recipes">
-              <h3>You Might Also Like</h3>
-              {recipe?.relatedRecipes?.length > 0 ? (
-                recipe.relatedRecipes.map((relatedRecipe, index) => (
-                  <div key={index} className="related-recipe-item">
-                    <img src={resolveImageUrl(relatedRecipe?.image)} alt={relatedRecipe?.title} />
-                    <div>
-                      <h4>{relatedRecipe?.title}</h4>
-                      <p>{formatTime(relatedRecipe?.totalTime || 0)} • {relatedRecipe?.difficulty || 'Easy'}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No related recipes available</p>
-              )}
-            </div>
           </div>
         </div>
       </div>

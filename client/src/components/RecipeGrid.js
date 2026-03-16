@@ -1,8 +1,8 @@
 // RecipeGrid.js - Paginated recipe grid component
-import React, { useState } from 'react';
-import API from '../api/api';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaBookmark, FaRegBookmark, FaClock, FaUtensils } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaClock, FaUtensils } from 'react-icons/fa';
+import resolveImageUrl from '../utils/resolveImageUrl';
 import './RecipeGrid.scss';
 
 /**
@@ -11,45 +11,33 @@ import './RecipeGrid.scss';
  * @param {Object} props
  * @param {Array<Object>} props.recipes - Array of recipe objects to display.
  * @param {function} props.onViewRecipe - Function to call when a recipe is clicked.
- * @param {function} props.onLike - Function to call when a recipe is liked.
- * @param {function} props.onSave - Function to call when a recipe is saved.
- * @param {string} props.userId - Current user's ID.
- * @param {Array<string>} [props.savedRecipes] - IDs of recipes saved by the user.
- * @param {Object} [props.likeLoading] - Loading state for like actions by recipe ID.
- * @param {Object} [props.saveLoading] - Loading state for save actions by recipe ID.
+ * @param {function} [props.onQuickView] - Optional function to show a quick preview without navigation.
  * @param {boolean} [props.loading] - Whether recipes are loading.
- * @param {boolean} [props.hasMore] - Whether there are more recipes to load from the server.
- * @param {function} [props.onLoadMore] - Function to call to load more recipes from the server.
  * @param {number} [props.itemsPerPage] - Number of recipes to show per page (default 8).
  * @returns {JSX.Element}
  */
 export default function RecipeGrid({
   recipes,
   onViewRecipe,
-  onLike,
-  onSave,
-  userId,
-  savedRecipes = [],
-  likeLoading = {},
-  saveLoading = {},
+  onQuickView,
   loading = false,
-  hasMore = false,
-  onLoadMore,
   itemsPerPage = 8 // 4 per row, 2 rows
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRecipeId, setHoveredRecipeId] = useState(null);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [recipes]);
+
   // Calculate pagination
-  const totalPages = Math.ceil(recipes.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(recipes.length / itemsPerPage));
   const paginatedRecipes = recipes.slice(0, currentPage * itemsPerPage);
-  const showingAllRecipes = currentPage * itemsPerPage >= recipes.length;
+  const showingAllRecipes = paginatedRecipes.length >= recipes.length;
 
   const loadMore = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-    } else if (hasMore && onLoadMore) {
-      onLoadMore();
     }
   };
 
@@ -78,21 +66,6 @@ export default function RecipeGrid({
     "/hero-food.jpg"
   );
 
-  // Get API base URL
-  const apiBase = (API && API.defaults && API.defaults.baseURL) || '';
-  const apiOrigin = apiBase.replace(/\/api\/?$/, '');
-
-  // Get S3 proxy URL
-  const toProxyIfS3 = (url) => {
-    if (typeof url !== 'string') return url;
-    const idx = url.indexOf('.amazonaws.com/');
-    if (idx !== -1) {
-      const key = url.substring(idx + '.amazonaws.com/'.length);
-      return `${apiOrigin}/api/images?key=${encodeURIComponent(key)}`;
-    }
-    return url;
-  };
-
   return (
     <div className="recipe-grid-container">
       <div className="recipe-grid">
@@ -106,7 +79,7 @@ export default function RecipeGrid({
 
             const isHovered = hoveredRecipeId === recipe._id;
 
-            const imageSrc = toProxyIfS3(getRecipeImage(recipe));
+            const imageSrc = resolveImageUrl(getRecipeImage(recipe));
             return (
               <motion.div
                 key={recipe._id}
@@ -142,7 +115,19 @@ export default function RecipeGrid({
                     )}
 
                     <div className={`recipe-overlay ${isHovered ? 'visible' : ''}`}>
-                      <button className="view-recipe-btn">View Recipe</button>
+                      <button
+                        className="view-recipe-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onQuickView) {
+                            onQuickView(recipe);
+                          } else if (onViewRecipe) {
+                            onViewRecipe(recipe);
+                          }
+                        }}
+                      >
+                        View Recipe
+                      </button>
                     </div>
                   </div>
 
@@ -187,38 +172,6 @@ export default function RecipeGrid({
                       </p>
                     )}
 
-                    <div className="recipe-actions">
-                      <button
-                        className="action-btn like-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onLike && onLike(e, recipe._id);
-                        }}
-                        disabled={likeLoading[recipe._id]}
-                      >
-                        {recipe.likes && userId && recipe.likes.includes(userId) ? (
-                          <FaHeart className="liked" />
-                        ) : (
-                          <FaRegHeart />
-                        )}
-                        <span>{recipe.likes ? recipe.likes.length : 0}</span>
-                      </button>
-
-                      <button
-                        className="action-btn save-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSave && onSave(e, recipe._id);
-                        }}
-                        disabled={saveLoading[recipe._id]}
-                      >
-                        {savedRecipes.includes(recipe._id) ? (
-                          <FaBookmark className="saved" />
-                        ) : (
-                          <FaRegBookmark />
-                        )}
-                      </button>
-                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -227,7 +180,7 @@ export default function RecipeGrid({
         </AnimatePresence>
       </div>
 
-      {(currentPage < totalPages || hasMore) && (
+      {currentPage < totalPages && (
         <div className="load-more-container">
           <button
             className="load-more-btn"
@@ -239,7 +192,7 @@ export default function RecipeGrid({
         </div>
       )}
 
-      {!hasMore && showingAllRecipes && recipes.length > itemsPerPage && (
+      {showingAllRecipes && recipes.length > itemsPerPage && (
         <div className="end-message">
           You've reached the end of the recipes
         </div>

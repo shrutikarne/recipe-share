@@ -40,18 +40,9 @@ router.post("/login", adminLoginLimiter, (req, res) => {
       return res.status(401).json({ msg: "Invalid credentials" });
     }
 
-    // Create JWT token
     const payload = { admin: true };
     const token = jwt.sign(payload, config.JWT_SECRET, {
       expiresIn: config.JWT.EXPIRATION,
-    });
-
-    // Set the token as HTTP-only cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: config.COOKIE.SECURE,
-      sameSite: 'strict',
-      maxAge: config.COOKIE.MAX_AGE
     });
 
     res.json({
@@ -70,7 +61,7 @@ router.post("/login", adminLoginLimiter, (req, res) => {
  * @access  Private
  */
 router.post("/logout", (req, res) => {
-  res.clearCookie('token');
+  // Stateless tokens: client simply discards the token.
   res.json({ success: true, message: "Logged out successfully" });
 });
 
@@ -80,7 +71,10 @@ router.post("/logout", (req, res) => {
  * @access  Private
  */
 router.get("/verify", (req, res) => {
-  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.toLowerCase().startsWith("bearer ")
+    ? authHeader.slice(7)
+    : null;
 
   if (!token) {
     return res.status(401).json({ msg: "No token provided" });

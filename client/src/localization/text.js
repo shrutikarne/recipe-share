@@ -3,7 +3,7 @@ export const TEXT = {
   about: {
     heading: "About Me",
     intro:
-      "Cooking, to me, is more than just recipes—it’s about creating memories, celebrating family, and sharing love through food. This space is where flavors meet stories, where quick weeknight meals sit alongside special treats, and where inspiration comes from everyday life and travels.",
+      "Hello! I'm Shruti Karne, a passionate home cook and recipe creator. Cooking, to me, is more than just recipes—it’s about creating memories, celebrating family, and sharing love through food. This space is where flavors meet stories, where quick weeknight meals sit alongside special treats, and where inspiration comes from everyday life and travels.",
     list: [
       "🍲 Easy, comforting recipes",
       "🥗 Healthy twists on classics",

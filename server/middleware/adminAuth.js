@@ -5,9 +5,16 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 
+const getTokenFromHeader = (req) => {
+  const authHeader = req.headers.authorization || "";
+  if (authHeader.toLowerCase().startsWith("bearer ")) {
+    return authHeader.slice(7);
+  }
+  return null;
+};
+
 const verifyAdmin = (req, res, next) => {
-  // Get token from cookies or Authorization header
-  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+  const token = getTokenFromHeader(req);
 
   if (!token) {
     return res.status(401).json({ msg: "No token provided, admin access required" });

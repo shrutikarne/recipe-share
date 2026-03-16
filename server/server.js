@@ -4,13 +4,10 @@
  */
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const path = require("path");
 const config = require("./config/config"); // Import central config
 const connectDB = require("./config/db"); // Import DB connection
-const passport = require("./config/passport");
-const session = require("express-session");
 const { sanitizeRequests } = require("./middleware/sanitization");
 const {
   secureHeaders,
@@ -39,22 +36,8 @@ app.use(cors({
   credentials: true,
 }));
 
-// Session middleware (required for passport, even if not using sessions for JWT)
-app.use(session({
-  secret: config.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: config.COOKIE.SECURE,
-    maxAge: config.COOKIE.MAX_AGE
-  },
-}));
-
 // Parse incoming JSON requests
 app.use(express.json());
-
-// Add cookie parser middleware
-app.use(cookieParser());
 
 const imgSrcDirectives = [
   "'self'",
@@ -62,13 +45,6 @@ const imgSrcDirectives = [
   "https://storage.googleapis.com",
   "https://*.googleusercontent.com"
 ];
-
-if (process.env.S3_BUCKET_NAME) {
-  const bucketRegion = process.env.AWS_REGION || 'us-east-1';
-  imgSrcDirectives.push(`https://${process.env.S3_BUCKET_NAME}.s3.${bucketRegion}.amazonaws.com`);
-  imgSrcDirectives.push(`https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com`);
-  imgSrcDirectives.push('https://*.amazonaws.com');
-}
 
 // Apply security headers with helmet
 app.use(helmet({
@@ -95,15 +71,10 @@ app.use(secureHeaders);
 app.use(preventParamPollution);
 app.use(limitJsonPayload('2mb'));  // Limit payload size to 2MB
 
-// Initialize passport
-app.use(passport.initialize());
-app.use(passport.session());
-
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register admin authentication and recipe routes
-// Note: User and upload routes are removed as this is now a personal recipe sharing site
 app.use("/api/admin", require("./routes/admin-auth"));
 app.use("/api/recipes", require("./routes/recipes"));
 

@@ -8,9 +8,10 @@ import { showErrorToast, showSuccessToast } from "../../utils/ToastConfig";
 import API from "../../api/api";
 import "./AdminPanel.scss";
 
+const notifyAdminChange = () => window.dispatchEvent(new Event("admin-auth-changed"));
+
 function AdminPanel() {
   const navigate = useNavigate();
-  const [isLoginView, setIsLoginView] = useState(true);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const isAdmin = localStorage.getItem("adminToken") !== null;
@@ -20,31 +21,21 @@ function AdminPanel() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
-      });
+      const { data } = await API.post("/admin/login", { password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        showErrorToast(data.msg || "Login failed");
+      if (!data?.token) {
+        showErrorToast("Login failed");
         return;
       }
 
-      // Store the token
       localStorage.setItem("adminToken", data.token);
+      notifyAdminChange();
+      setPassword("");
       showSuccessToast("Admin login successful!");
-      
-      // Update parent component
-      window.dispatchEvent(new Event("storagechange"));
-      
       navigate("/add-recipe");
     } catch (error) {
-      showErrorToast("Login error: " + error.message);
+      const message = error.response?.data?.msg || error.message || "Login failed";
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -63,7 +54,7 @@ function AdminPanel() {
             <button 
               onClick={() => {
                 localStorage.removeItem("adminToken");
-                window.dispatchEvent(new Event("storagechange"));
+                notifyAdminChange();
                 navigate("/");
               }} 
               className="btn btn-secondary"

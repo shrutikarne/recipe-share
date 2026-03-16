@@ -3,13 +3,10 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
 
 import RecipePreviewCard from "./RecipePreviewCard";
-import ImageAdjustModal from "./ImageAdjustModal";
 import { sanitizeString } from "../../utils/sanitize";
 import { motion, AnimatePresence } from "framer-motion";
 import "./AddRecipe.scss";
 import { AddCircleIcon, DeleteIcon } from "../../components/SvgIcons";
-import { ReactComponent as UploadIcon } from "../../assets/icons/upload_recipe.svg";
-import { ReactComponent as EditImageIcon } from "../../assets/icons/edit_image.svg";
 
 const MAX_IMAGE_COUNT = 10;
 
@@ -20,15 +17,21 @@ const MAX_IMAGE_COUNT = 10;
  */
 function AddRecipe() {
   const navigate = useNavigate();
-  
-  // Check if admin is logged in
-  const isAdmin = localStorage.getItem("adminToken") !== null;
-  
+  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem("adminToken") !== null);
+
   useEffect(() => {
-    if (!isAdmin) {
-      navigate("/admin");
-    }
-  }, [isAdmin, navigate]);
+    const handleAdminChange = () => {
+      const authed = localStorage.getItem("adminToken") !== null;
+      setIsAdmin(authed);
+      if (!authed) {
+        navigate("/admin");
+      }
+    };
+
+    handleAdminChange();
+    window.addEventListener("admin-auth-changed", handleAdminChange);
+    return () => window.removeEventListener("admin-auth-changed", handleAdminChange);
+  }, [navigate]);
 
   const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
@@ -40,8 +43,6 @@ function AddRecipe() {
     diet: "",
   });
   const [images, setImages] = useState([]);
-  const [editingImageIndex, setEditingImageIndex] = useState(null);
-  const [isProcessingImage, setIsProcessingImage] = useState(false);
   const imagesRef = useRef(images);
   const [ingredientInput, setIngredientInput] = useState("");
   const [stepInput, setStepInput] = useState("");
@@ -186,72 +187,22 @@ function AddRecipe() {
     });
   };
 
-  /**
-   * Creates the local image state entry used for previews and adjustments.
-   * @param {File} file - Raw image file from the input element.
-   * @returns {Promise<Object>} Promise resolving to the structured image item.
-   */
-  const createImageItem = (file) => new Promise((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(file);
-    const img = new Image();
 
-    img.onload = () => {
-      resolve({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        type: 'local',
-        url: objectUrl,
-        originalUrl: objectUrl,
-        file,
-        originalFile: file,
-        adjustments: {
-          zoom: 1,
-          offsetX: 0,
-          offsetY: 0,
-          naturalWidth: img.naturalWidth,
-          naturalHeight: img.naturalHeight
-        }
-      });
-    };
+  const [imageUrlInput, setImageUrlInput] = useState("");
 
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error('Failed to load image.'));
-    };
-
-    img.src = objectUrl;
-  });
-
-  // Handle file input for images (up to MAX_IMAGE_COUNT)
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    const limitMessage = `You can upload up to ${MAX_IMAGE_COUNT} images.`;
-    const currentCount = images.length;
-    const remainingSlots = Math.max(0, MAX_IMAGE_COUNT - currentCount);
-
-    if (!remainingSlots) {
-      setError((prev) => prev || limitMessage);
-      e.target.value = "";
+  // Add image URL helper
+  const handleAddImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    
+    if (images.length >= MAX_IMAGE_COUNT) {
+      setError(`You can upload up to ${MAX_IMAGE_COUNT} images.`);
       return;
     }
 
-    try {
-      const selectedFiles = files.slice(0, remainingSlots);
-      const imageItems = await Promise.all(selectedFiles.map((file) => createImageItem(file)));
-
-      setImages((prev) => [...prev, ...imageItems]);
-
-      if (files.length > selectedFiles.length) {
-        setError((prev) => prev || limitMessage);
-      } else if (error === limitMessage) {
-        setError("");
-      }
-    } catch (err) {
-      setError('Failed to process images. Please try again.');
-    } finally {
-      e.target.value = "";
-    }
+    setImages((prev) => [...prev, { url }]);
+    setImageUrlInput("");
+    setError("");
   };
 
   const handleRemoveImage = (index) => {
@@ -272,10 +223,6 @@ function AddRecipe() {
     if (error === limitMessage) {
       setError("");
     }
-
-    if (editingImageIndex !== null) {
-      setEditingImageIndex(null);
-    }
   };
 
   /**
@@ -284,130 +231,6 @@ function AddRecipe() {
    * @param {{zoom:number, offsetX:number, offsetY:number}} adjustments - Applied transform values.
    * @returns {Promise<{file: File, previewUrl: string}>}
    */
-  const cropImageWithAdjustments = (imageItem, adjustments) => new Promise((resolve, reject) => {
-    if (!imageItem?.originalUrl || !imageItem?.originalFile) {
-      reject(new Error('Missing image data.'));
-      return;
-    }
-
-    const { naturalWidth, naturalHeight } = imageItem.adjustments || {};
-    if (!naturalWidth || !naturalHeight) {
-      reject(new Error('Image dimensions unavailable.'));
-      return;
-    }
-
-    const img = new Image();
-
-    img.onload = () => {
-      const minDimension = Math.min(naturalWidth, naturalHeight);
-      const zoom = Math.max(1, adjustments.zoom || 1);
-      const visibleSize = minDimension / zoom;
-      const maxOffsetX = (naturalWidth - visibleSize) / 2;
-      const maxOffsetY = (naturalHeight - visibleSize) / 2;
-
-      const normalizedOffsetX = Math.max(-1, Math.min(1, adjustments.offsetX || 0));
-      const normalizedOffsetY = Math.max(-1, Math.min(1, adjustments.offsetY || 0));
-
-      const centerX = naturalWidth / 2 + normalizedOffsetX * maxOffsetX;
-      const centerY = naturalHeight / 2 + normalizedOffsetY * maxOffsetY;
-
-      const cropX = centerX - visibleSize / 2;
-      const cropY = centerY - visibleSize / 2;
-
-      const outputSize = Math.min(visibleSize, 1080);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(outputSize);
-      canvas.height = Math.round(outputSize);
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Canvas not supported.'));
-        return;
-      }
-
-      ctx.drawImage(
-        img,
-        cropX,
-        cropY,
-        visibleSize,
-        visibleSize,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error('Failed to generate image blob.'));
-          return;
-        }
-
-        const fileName = imageItem.originalFile?.name || `recipe-image-${Date.now()}.jpg`;
-        const fileType = imageItem.originalFile?.type || 'image/jpeg';
-        const croppedFile = new File([blob], fileName, { type: fileType });
-        const previewUrl = URL.createObjectURL(blob);
-        resolve({ file: croppedFile, previewUrl });
-      }, imageItem.originalFile?.type || 'image/jpeg', 0.92);
-    };
-
-    img.onerror = () => {
-      reject(new Error('Failed to process image.'));
-    };
-
-    if (!imageItem.originalUrl.startsWith('blob:')) {
-      img.crossOrigin = 'anonymous';
-    }
-
-    img.src = imageItem.originalUrl;
-  });
-
-  /**
-   * Persists the crop adjustments for a queued upload and refreshes the preview.
-   * @param {number} index - Index of the image within the local array.
-   * @param {{zoom:number, offsetX:number, offsetY:number}} adjustments - Updated crop data from the modal.
-   * @returns {Promise<void>}
-   */
-  const handleAdjustSave = async (index, adjustments) => {
-    if (index === null || index === undefined) return;
-    const targetImage = images[index];
-    if (!targetImage || targetImage.type !== 'local') {
-      setEditingImageIndex(null);
-      return;
-    }
-
-    try {
-      setIsProcessingImage(true);
-      const result = await cropImageWithAdjustments(targetImage, adjustments);
-
-      setImages((prev) => {
-        const next = [...prev];
-        const existing = next[index];
-        if (!existing) {
-          return prev;
-        }
-
-        next[index] = {
-          ...existing,
-          url: result.previewUrl,
-          file: result.file,
-          adjustments: {
-            ...existing.adjustments,
-            zoom: Math.max(1, adjustments.zoom || 1),
-            offsetX: Math.max(-1, Math.min(1, adjustments.offsetX || 0)),
-            offsetY: Math.max(-1, Math.min(1, adjustments.offsetY || 0))
-          }
-        };
-
-        return next;
-      });
-      setError("");
-    } catch (err) {
-      setError(err.message || 'Failed to adjust image. Please try again.');
-    } finally {
-      setIsProcessingImage(false);
-      setEditingImageIndex(null);
-    }
-  };
 
   // Step validation
   const validateStep = () => {
@@ -669,45 +492,15 @@ function AddRecipe() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="add-recipe-form__file-input-container">
-              <input
-                type="file"
-                className="add-recipe-form__file-input"
-                id="recipe-image"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-              />
-              <label htmlFor="recipe-image" className="add-recipe-form__file-label">
-                <UploadIcon aria-hidden="true" />
-                <span className="add-recipe-form__file-label-text">
-                  {hasImages ? "Add More Images" : "Upload Recipe Images"}
-                </span>
-                <span className="add-recipe-form__file-label-helper">
-                  Select up to {MAX_IMAGE_COUNT} images (PNG, JPG, GIF).
-                </span>
-              </label>
-              <div className="add-recipe-form__file-count" aria-live="polite">
-                {selectedImageCount} / {MAX_IMAGE_COUNT} images selected
-              </div>
-            </div>
+            <p style={{ marginBottom: 16 }}>
+              Image uploads are optional and will return later. You can still paste image URLs in the future version.
+            </p>
 
             {hasImages && (
               <div className="add-recipe-form__image-preview-grid">
                 {images.map((image, idx) => (
                   <div key={image.id ?? `${image.url}-${idx}`} className="add-recipe-form__image-preview-item">
                     <img src={image.url} alt={`Recipe preview ${idx + 1}`} />
-                    {image.type === 'local' && (
-                      <button
-                        type="button"
-                        className="add-recipe-form__image-edit"
-                        onClick={() => setEditingImageIndex(idx)}
-                        disabled={isProcessingImage}
-                        aria-label={`Adjust recipe image ${idx + 1}`}
-                      >
-                        <EditImageIcon aria-hidden="true" />
-                      </button>
-                    )}
                     <button
                       type="button"
                       className="add-recipe-form__image-remove"
@@ -850,6 +643,17 @@ function AddRecipe() {
     }
   };
 
+  if (!isAdmin) {
+    return (
+      <div className="admin-panel">
+        <div className="admin-panel-content">
+          <h1>Admin Access Required</h1>
+          <p>Please log in on the Admin page to manage recipes.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="add-recipe-form-preview-layout">
       <motion.form
@@ -971,13 +775,7 @@ function AddRecipe() {
         images={images}
       />
 
-      <ImageAdjustModal
-        isOpen={editingImageIndex !== null}
-        image={editingImageIndex !== null ? images[editingImageIndex] : null}
-        onClose={() => setEditingImageIndex(null)}
-        onSave={(adjustments) => handleAdjustSave(editingImageIndex, adjustments)}
-        isProcessing={isProcessingImage}
-      />
+
     </div>
   );
 }

@@ -13,7 +13,7 @@
  * - Public recipe browsing
  */
 
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TEXT } from "./localization/text";
@@ -130,6 +130,8 @@ function AnimatedRoutes({ isAdmin }) {
  * Handles admin authentication, theme, routing, and global state.
  * @returns {JSX.Element}
  */
+const emitAdminChange = () => window.dispatchEvent(new Event("admin-auth-changed"));
+
 function App() {
   const navigate = useNavigate();
   // State hooks
@@ -147,9 +149,14 @@ function App() {
   }, [dark]);
 
   // Handle admin logout
+  const syncAdminState = useCallback(() => {
+    setIsAdmin(localStorage.getItem("adminToken") !== null);
+  }, []);
+
   const handleAdminLogout = () => {
     localStorage.removeItem("adminToken");
-    setIsAdmin(false);
+    emitAdminChange();
+    syncAdminState();
     showSuccessToast("Logged out successfully!");
     navigate("/", { replace: true });
   };
@@ -158,15 +165,17 @@ function App() {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'adminToken') {
-        setIsAdmin(e.newValue !== null);
+        syncAdminState();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('admin-auth-changed', syncAdminState);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('admin-auth-changed', syncAdminState);
     };
-  }, []);
+  }, [syncAdminState]);
 
   return (
     <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
