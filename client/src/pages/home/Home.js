@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import FeaturedCarousel from "../../components/FeaturedCarousel";
 import CategoryTiles from "../../components/CategoryTiles";
 import RecipeGrid from "../../components/RecipeGrid";
 import HeroBanner from "../../components/HeroBanner";
@@ -41,21 +40,6 @@ function Home() {
       recipesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
-  // Featured/trending recipes (simple filter: top 8 by likes or rating)
-  const trendingRecipes = React.useMemo(() => {
-    if (!recipes || recipes.length === 0) return [];
-    // Sort by likes, fallback to ratings
-    return [...recipes]
-      .sort((a, b) => {
-        const aLikes = (a.likes ? a.likes.length : 0);
-        const bLikes = (b.likes ? b.likes.length : 0);
-        if (bLikes !== aLikes) return bLikes - aLikes;
-        const aRating = a.ratings && a.ratings.length > 0 ? a.ratings.reduce((s, r) => s + r.value, 0) / a.ratings.length : 0;
-        const bRating = b.ratings && b.ratings.length > 0 ? b.ratings.reduce((s, r) => s + r.value, 0) / b.ratings.length : 0;
-        return bRating - aRating;
-      })
-      .slice(0, 8);
-  }, [recipes]);
   // Hero search submit handler
   const handleHeroSearch = (e) => {
     e.preventDefault();
@@ -160,12 +144,12 @@ function Home() {
       })
       .then((res) => {
         if (reset) {
-          setRecipes(res.data);
+          setRecipes(res.data.recipes || res.data);
           setPage(0);
         } else {
-          setRecipes(res.data);
+          setRecipes(res.data.recipes || res.data);
         }
-        setHasMore(res.data.length === 9);
+        setHasMore((res.data.recipes || res.data).length === 9);
       })
       .catch((err) => {
         if (err && (err.name === 'CanceledError' || err.code === 'ERR_CANCELED' || err.name === 'AbortError')) return;
@@ -497,22 +481,6 @@ function Home() {
         {/* Category Browse */}
         <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
           <CategoryTiles onCategorySelect={handleCategorySelect} />
-        </div>
-
-        {/* Trending Now carousel only (Editor's Picks removed) */}
-        <div style={{ width: '100%', maxWidth: '1200px', margin: '32px auto' }}>
-          <FeaturedCarousel
-            recipes={trendingRecipes}
-            horizontalScroll={true}
-            title="🔥 Trending Now"
-            visibleCount={4}
-            cardWidth={300}
-            onViewRecipe={(recipe) => {
-              if (recipe && recipe._id) {
-                navigate(`/recipe/${recipe._id}`);
-              }
-            }}
-          />
         </div>
 
         <div ref={recipesRef} />

@@ -1,6 +1,7 @@
 /**
  * Recipe model schema
- * Represents a recipe posted by a user
+ * Represents a recipe in the personal recipe sharing site
+ * Simplified: only admin can create/update/delete, anyone can view
  */
 const mongoose = require("mongoose");
 
@@ -23,34 +24,15 @@ const RecipeSchema = new mongoose.Schema(
     imageUrls: [String], // Multiple image URLs
     imageUrl: String, // Main image URL (for backwards compatibility)
     diet: String, // Dietary preference (e.g., vegetarian, vegan, etc.)
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User
     tags: [String], // e.g., ["Vegan", "Gluten-Free"]
-    likes: [String], // Array of user IDs who liked
-    ratings: [
-      {
-        userId: String, // ID of user who rated
-        value: { type: Number, min: 1, max: 5 }, // Star value
-      },
-    ],
     nutrition: {
       calories: Number,
       protein: Number,
       carbs: Number,
       fat: Number,
-      // Add more as needed
     },
     funFacts: [String], // Array of fun facts/trivia
     stepImages: [String], // Step-by-step images
-    comments: [
-      {
-        userId: String, // ID of user who commented (for compatibility with existing code)
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // User reference (for compatibility with tests)
-        text: String, // Comment text
-        rating: Number, // Rating associated with this comment
-        createdAt: { type: Date, default: Date.now }, // Timestamp
-        updatedAt: Date, // Last updated timestamp
-      },
-    ],
   },
   { timestamps: true }
 );

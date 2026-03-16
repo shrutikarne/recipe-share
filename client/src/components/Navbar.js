@@ -5,28 +5,25 @@ import { TEXT } from "../localization/text";
 import { DefaultAvatarIcon } from "./SvgIcons";
 
 /**
- * Navbar component for the Recipe Share app.
- * Displays navigation, user avatar, and dropdown menu.
+ * Navbar component for the Personal Recipe Sharing Website.
+ * Displays navigation and admin status.
  *
  * @param {Object} props
- * @param {Object|null} props.user - The current user object or null if not logged in.
- * @param {function} props.onLogout - Function to call when logging out.
+ * @param {boolean} props.isAdmin - Whether the user is logged in as admin.
+ * @param {function} props.onAdminLogout - Function to call when logging out as admin.
  * @returns {JSX.Element}
  */
-export default function Navbar({ user, onLogout }) {
+export default function Navbar({ isAdmin, onAdminLogout }) {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     const avatarButtonRef = useRef(null);
-
-
 
     // Handle click outside to close dropdown
     useEffect(() => {
         if (!dropdownOpen) return;
 
         function handleClickOutside(e) {
-            // Only close if click is outside both dropdown and button
             if (
                 dropdownRef.current &&
                 !dropdownRef.current.contains(e.target) &&
@@ -41,9 +38,7 @@ export default function Navbar({ user, onLogout }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen]);
 
-    // Toggle dropdown function
     const toggleDropdown = () => {
-
         setDropdownOpen(prevState => !prevState);
     };
 
@@ -53,20 +48,20 @@ export default function Navbar({ user, onLogout }) {
                 <div className="navbar-glass__logo" onClick={() => navigate("/")}>🍳 {TEXT.navbar.logo}</div>
                 <div className="navbar-glass__profile">
                     <div className="navbar-glass__avatar-dropdown" ref={dropdownRef}>
-                        {/* Avatar button */}
                         <div
                             ref={avatarButtonRef}
                             className="navbar-glass__avatar-btn"
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-
                                 toggleDropdown();
                             }}
                             style={{ cursor: 'pointer' }}
                         >
-                            {user ? (
-                                <img src={user.avatar || "/default-avatar.png"} alt="avatar" className="navbar-glass__avatar" />
+                            {isAdmin ? (
+                                <div className="navbar-glass__avatar navbar-glass__avatar--admin">
+                                    <span style={{ fontSize: '20px' }}>👤</span>
+                                </div>
                             ) : (
                                 <div className="navbar-glass__avatar navbar-glass__avatar--default">
                                     <DefaultAvatarIcon />
@@ -75,21 +70,19 @@ export default function Navbar({ user, onLogout }) {
                             <span className="navbar-glass__caret" style={{ marginLeft: 6, fontSize: 16, color: '#84cc16' }}>▼</span>
                         </div>
 
-                        {/* Dropdown menu */}
                         {dropdownOpen && (
                             <div
                                 className="navbar-glass__dropdown"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                {user ? (
+                                {isAdmin ? (
                                     <>
-                                        <Link to="/profile" className="navbar-glass__dropdown-link">{TEXT.navbar.myProfile}</Link>
-                                        <button onClick={() => { setDropdownOpen(false); onLogout(); }}>{TEXT.navbar.logout}</button>
+                                        <Link to="/add-recipe" className="navbar-glass__dropdown-link">Add Recipe</Link>
+                                        <button onClick={() => { setDropdownOpen(false); onAdminLogout(); }}>Logout</button>
                                     </>
                                 ) : (
                                     <>
-                                        <Link to="/auth" className="navbar-glass__dropdown-link">{TEXT.navbar.login}</Link>
-                                        <Link to="/auth" className="navbar-glass__dropdown-link">{TEXT.navbar.register}</Link>
+                                        <Link to="/admin" className="navbar-glass__dropdown-link">Admin</Link>
                                     </>
                                 )}
                             </div>

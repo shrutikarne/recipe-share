@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
-import { uploadRecipeImage } from "../../api/uploads";
+
 import RecipePreviewCard from "./RecipePreviewCard";
 import ImageAdjustModal from "./ImageAdjustModal";
 import { sanitizeString } from "../../utils/sanitize";
@@ -10,16 +10,26 @@ import "./AddRecipe.scss";
 import { AddCircleIcon, DeleteIcon } from "../../components/SvgIcons";
 import { ReactComponent as UploadIcon } from "../../assets/icons/upload_recipe.svg";
 import { ReactComponent as EditImageIcon } from "../../assets/icons/edit_image.svg";
-import resolveImageUrl from "../../utils/resolveImageUrl";
 
 const MAX_IMAGE_COUNT = 10;
 
 /**
  * AddRecipe component
- * Renders a modern form for users to add a new recipe and submits it to the backend API.
+ * Renders a modern form for admin to add a new recipe and submits it to the backend API.
  * @component
  */
 function AddRecipe() {
+  const navigate = useNavigate();
+  
+  // Check if admin is logged in
+  const isAdmin = localStorage.getItem("adminToken") !== null;
+  
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate("/admin");
+    }
+  }, [isAdmin, navigate]);
+
   const [activeStep, setActiveStep] = useState(0);
   const [form, setForm] = useState({
     title: "",
@@ -42,7 +52,6 @@ function AddRecipe() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     imagesRef.current = images;
@@ -50,14 +59,10 @@ function AddRecipe() {
 
   useEffect(() => {
     return () => {
+      // Cleanup blob URLs if any exist
       imagesRef.current.forEach((image) => {
-        if (image?.type === 'local') {
-          if (image.url && image.url.startsWith('blob:')) {
-            URL.revokeObjectURL(image.url);
-          }
-          if (image.originalUrl && image.originalUrl.startsWith('blob:')) {
-            URL.revokeObjectURL(image.originalUrl);
-          }
+        if (image?.url && image.url.startsWith('blob:')) {
+          URL.revokeObjectURL(image.url);
         }
       });
     };
@@ -255,13 +260,8 @@ function AddRecipe() {
       if (index < 0 || index >= prev.length) return prev;
 
       const image = prev[index];
-      if (image?.type === 'local') {
-        if (image.url && image.url.startsWith('blob:') && image.url !== image.originalUrl) {
-          URL.revokeObjectURL(image.url);
-        }
-        if (image.originalUrl && image.originalUrl.startsWith('blob:')) {
-          URL.revokeObjectURL(image.originalUrl);
-        }
+      if (image?.url && image.url.startsWith('blob:')) {
+        URL.revokeObjectURL(image.url);
       }
 
       const updated = [...prev];
@@ -489,79 +489,10 @@ function AddRecipe() {
     setSuccess("");
 
     try {
-      const existingImageUrls = images
-        .filter((img) => img.type === 'remote' && (typeof img.url === 'string' || typeof img.remoteUrl === 'string'))
-        .map((img) => img.remoteUrl || img.url);
-
-      const localImages = images.filter((img) => img.type === 'local');
-
-      const uploadedImageResults = [];
-
-      for (const image of localImages) {
-        if (!image.file) continue;
-        const uploadResult = await uploadRecipeImage(image.file);
-        if (uploadResult && uploadResult.imageUrl) {
-          uploadedImageResults.push(uploadResult);
-        }
-      }
-
-      const imageUrls = [...existingImageUrls, ...uploadedImageResults.map((item) => item.imageUrl)];
-
-      if (uploadedImageResults.length) {
-        const urlsToRevoke = [];
-        setImages((prev) => {
-          const next = [];
-          let uploadedIndex = 0;
-          for (const item of prev) {
-            if (item.type === 'local') {
-              const uploadedMeta = uploadedImageResults[uploadedIndex];
-              uploadedIndex += 1;
-              if (uploadedMeta && uploadedMeta.imageUrl) {
-                if (item.originalUrl && item.originalUrl.startsWith('blob:')) {
-                  urlsToRevoke.push(item.originalUrl);
-                }
-                if (item.url && item.url.startsWith('blob:')) {
-                  urlsToRevoke.push(item.url);
-                }
-
-                next.push({
-                  ...item,
-                  type: 'remote',
-                  url: resolveImageUrl(uploadedMeta.imageUrl) || uploadedMeta.imageUrl,
-                  remoteUrl: uploadedMeta.imageUrl,
-                  imageKey: uploadedMeta.imageKey,
-                  originalUrl: uploadedMeta.imageUrl,
-                  originalFile: undefined,
-                  file: undefined
-                });
-              } else {
-                next.push(item);
-              }
-            } else {
-              next.push(item);
-            }
-          }
-          return next;
-        });
-
-        if (urlsToRevoke.length) {
-          const revoke = () => {
-            urlsToRevoke.forEach((url) => {
-              try {
-                URL.revokeObjectURL(url);
-              } catch (revokeError) {
-                console.warn('Failed to revoke object URL', revokeError);
-              }
-            });
-          };
-
-          if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
-            window.requestAnimationFrame(revoke);
-          } else {
-            setTimeout(revoke, 0);
-          }
-        }
-      }
+      // For personal recipe sharing, only accept image URLs (no local file uploads)
+      const imageUrls = images
+        .filter((img) => typeof img.url === 'string' && img.url.trim().length > 0)
+        .map((img) => img.url);
 
       const sanitizedForm = prepareForSubmission(form);
 

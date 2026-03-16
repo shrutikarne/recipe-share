@@ -3,8 +3,6 @@ import { render, screen } from "@testing-library/react";
 
 // Avoid importing axios via API in tests
 jest.mock('./api/api', () => ({ __esModule: true, default: { logout: jest.fn(), post: jest.fn() } }));
-// Avoid side effects from token refresh manager
-jest.mock('./components/TokenRefreshManager', () => () => null);
 
 // Mock ESM-only router to avoid Jest ESM interop issues
 jest.mock('react-router-dom', () => ({

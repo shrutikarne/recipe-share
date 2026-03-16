@@ -14,12 +14,6 @@ export const TEXT = {
     cta: "Start Exploring Recipes"
   },
   app: {
-    logoutModal: {
-      title: "Sign Out",
-      message: "We'll miss you! 👋 Are you sure you want to sign out?",
-      confirmText: "Yes, Sign Out",
-      cancelText: "No, Stay"
-    },
     addRecipeAria: "Add a new recipe",
     addRecipeTitle: "Add new recipe"
   },
@@ -35,11 +29,7 @@ export const TEXT = {
     stepsPlaceholder: "Steps will appear here."
   },
   navbar: {
-    logo: "RecipeShare",
-    myProfile: "My Profile",
-    logout: "Logout",
-    login: "Login",
-    register: "Register"
+    logo: "RecipeShare"
   },
   footer: {
     logoAlt: "Recipe Share Logo",
@@ -53,22 +43,5 @@ export const TEXT = {
     message: "We're sorry, but there was an error loading this component. Please try refreshing the page.",
     detailsSummary: "Error Details",
     refreshButton: "Refresh Page"
-  },
-  auth: {
-    loginTab: "Login",
-    registerTab: "Register",
-    loginTitle: "Login",
-    registerTitle: "Register",
-    firstNameLabel: "First Name",
-    lastNameLabel: "Last Name",
-    emailLabel: "Email",
-    passwordLabel: "Password",
-    showPassword: "Show password",
-    hidePassword: "Hide password",
-    or: "or",
-    continueWithGoogle: "Continue with Google",
-    continueWithFacebook: "Continue with Facebook",
-    googleComingSoon: "Google login coming soon!",
-    facebookComingSoon: "Facebook login coming soon!"
   }
 };

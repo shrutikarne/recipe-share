@@ -102,12 +102,10 @@ app.use(passport.session());
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Register authentication, recipe, user, and upload routes
-app.use("/api/auth", require("./routes/auth"));
+// Register admin authentication and recipe routes
+// Note: User and upload routes are removed as this is now a personal recipe sharing site
+app.use("/api/admin", require("./routes/admin-auth"));
 app.use("/api/recipes", require("./routes/recipes"));
-app.use("/api/user", require("./routes/user"));
-app.use("/api/uploads", require("./routes/uploads"));
-app.use("/api/images", require("./routes/images"));
 
 // Connect to MongoDB database
 connectDB();

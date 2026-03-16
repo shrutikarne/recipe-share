@@ -1,29 +1,24 @@
 /**
  * App component
- * Sets up the main routes and navigation for the Recipe Share frontend
- * - Home: lists all recipes
- * - AuthPage: combined login/register
- * - AddRecipe: add a new recipe
- * - RecipeDetail: view a single recipe
- * - Profile: user profile with their recipes and saved recipes
+ * Sets up the main routes and navigation for the Personal Recipe Sharing Website
+ * - Home: lists all recipes (public)
+ * - AdminPanel: admin login and recipe management (private)
+ * - RecipeDetail: view a single recipe (public)
+ * - AddRecipe: add a new recipe (admin only)
  * 
  * Features:
  * - Dark mode toggle
- * - Profile dropdown
- * - Logout confirmation
+ * - Admin authentication
  * - Toast notifications
- * - Token refresh mechanism for persistent login
+ * - Public recipe browsing
  */
 
 import React, { useState, useEffect, Suspense, lazy } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TEXT } from "./localization/text";
-import ConfirmModal from "./components/ConfirmModal";
-import TokenRefreshManager from "./components/TokenRefreshManager";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { showSuccessToast, toastContainerConfig } from "./utils/ToastConfig";
-import API from "./api/api";
 import {
   Routes,
   Route,
@@ -32,71 +27,22 @@ import {
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import "./App.scss";
-import PrivateRoute from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import "./components/Navbar.scss";
 const Home = lazy(() => import("./pages/home/Home"));
-const AuthPage = lazy(() => import("./pages/authentication/AuthPage"));
+const AdminPanel = lazy(() => import("./pages/admin/AdminPanel"));
 const AddRecipe = lazy(() => import("./pages/add-recipe/AddRecipe"));
 const RecipeDetail = lazy(() => import("./pages/recipe-details/RecipeDetail"));
-const Profile = lazy(() => import("./pages/profile/Profile"));
 const About = lazy(() => import("./pages/about/About"));
 
 /**
- * Layout component for the main app shell, including navbar, modals, and floating action button.
- *
- * @param {Object} props
- * @param {boolean} props.loggedIn - Whether the user is logged in.
- * @param {boolean} props.showLogoutModal - Whether the logout modal is open.
- * @param {function} props.setShowLogoutModal - Function to set logout modal state.
- * @param {function} props.confirmSignOut - Function to confirm sign out.
+ * Layout component for the main app shell, including navbar.
  * @returns {JSX.Element}
  */
-function Layout({ loggedIn, showLogoutModal, setShowLogoutModal, confirmSignOut }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleAddRecipe = () => {
-    navigate("/add-recipe");
-  };
-
-  const isProfilePage = location.pathname === "/profile";
-
+function Layout() {
   return (
     <>
-      <ConfirmModal
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={confirmSignOut}
-        title={TEXT.app.logoutModal.title}
-        message={TEXT.app.logoutModal.message}
-        confirmText={TEXT.app.logoutModal.confirmText}
-        cancelText={TEXT.app.logoutModal.cancelText}
-      />
-      {loggedIn && isProfilePage && (
-        <button
-          onClick={handleAddRecipe}
-          className="fab"
-          aria-label={TEXT.app.addRecipeAria}
-          title={TEXT.app.addRecipeTitle}
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 4V20M4 12H20"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      )}
+      {/* Navbar will handle admin status display */}
     </>
   );
 }
@@ -105,7 +51,7 @@ function Layout({ loggedIn, showLogoutModal, setShowLogoutModal, confirmSignOut 
  * AnimatedRoutes component for handling route transitions with animation.
  * @returns {JSX.Element}
  */
-function AnimatedRoutes() {
+function AnimatedRoutes({ isAdmin }) {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
@@ -124,7 +70,7 @@ function AnimatedRoutes() {
           }
         />
         <Route
-          path="/auth"
+          path="/admin"
           element={
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -132,14 +78,14 @@ function AnimatedRoutes() {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.35 }}
             >
-              <AuthPage />
+              <AdminPanel />
             </motion.div>
           }
         />
         <Route
           path="/add-recipe"
           element={
-            <PrivateRoute>
+            isAdmin ? (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -148,7 +94,16 @@ function AnimatedRoutes() {
               >
                 <AddRecipe />
               </motion.div>
-            </PrivateRoute>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.35 }}
+              >
+                <Home />
+              </motion.div>
+            )
           }
         />
         <Route
@@ -164,42 +119,23 @@ function AnimatedRoutes() {
             </motion.div>
           }
         />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{ duration: 0.35 }}
-              >
-                <Profile />
-              </motion.div>
-            </PrivateRoute>
-          }
-        />
         <Route path="/about" element={<About />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/register" element={<AuthPage />} />
       </Routes>
     </AnimatePresence>
   );
 }
 
 /**
- * Main App component for Recipe Share frontend.
- * Handles authentication, theme, routing, and global state.
+ * Main App component for Personal Recipe Sharing Website.
+ * Handles admin authentication, theme, routing, and global state.
  * @returns {JSX.Element}
  */
 function App() {
   const navigate = useNavigate();
   // State hooks
-  const [loggedIn, setLoggedIn] = useState(() => {
-    // Check if authenticated in session storage
-    return sessionStorage.getItem("isAuthenticated") === "true";
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem("adminToken") !== null;
   });
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [dark] = useState(() => {
     const saved = localStorage.getItem("darkMode");
     return saved ? saved === "true" : window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -210,62 +146,19 @@ function App() {
     localStorage.setItem("darkMode", dark);
   }, [dark]);
 
-
-  // Sign out functions
-  const handleSignOut = () => {
-    setShowLogoutModal(true);
+  // Handle admin logout
+  const handleAdminLogout = () => {
+    localStorage.removeItem("adminToken");
+    setIsAdmin(false);
+    showSuccessToast("Logged out successfully!");
+    navigate("/", { replace: true });
   };
 
-  const confirmSignOut = () => {
-    // Call the logout API function to clear the HTTP-only cookie
-    API.logout()
-      .then(() => {
-        // Use the token utility function to clear local session state
-        import("./utils/tokenManager").then(({ setLoggedOut }) => {
-          setLoggedOut();
-          setLoggedIn(false);
-          setShowLogoutModal(false);
-          showSuccessToast("👋 We'll miss you! Come back soon for more recipes.");
-          navigate("/", { replace: true });
-        });
-      })
-      .catch((error) => {
-        // Even if the server-side logout fails, clear local state
-        import("./utils/tokenManager").then(({ setLoggedOut }) => {
-          setLoggedOut();
-          setLoggedIn(false);
-          setShowLogoutModal(false);
-          navigate("/", { replace: true });
-        });
-      });
-  };
-
-  // User authentication state
-  const [user, setUser] = useState(null);
-
-  // Load user data when component mounts or auth status changes
+  // Listen for admin status changes
   useEffect(() => {
-    // Import and use the token utility functions
-    import("./utils/tokenManager").then(({ isAuthenticated, getUserId }) => {
-      if (isAuthenticated()) {
-        const userId = getUserId();
-        // In a real app, you might want to fetch additional user data from the API
-        setUser({ id: userId || "user-123", avatar: null });
-        setLoggedIn(true);
-      } else {
-        setUser(null);
-        setLoggedIn(false);
-      }
-    });
-
-    // Listen for storage events (in case authentication status changes in another tab)
     const handleStorageChange = (e) => {
-      if (e.key === 'isAuthenticated') {
-        const isAuthenticated = e.newValue === 'true';
-        setLoggedIn(isAuthenticated);
-        if (!isAuthenticated) {
-          setUser(null);
-        }
+      if (e.key === 'adminToken') {
+        setIsAdmin(e.newValue !== null);
       }
     };
 
@@ -275,29 +168,17 @@ function App() {
     };
   }, []);
 
-  const handleLogout = () => {
-    setShowLogoutModal(true);
-  };
-
   return (
     <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-      {/* TokenRefreshManager handles token refresh in the background */}
-      {loggedIn && <TokenRefreshManager />}
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar isAdmin={isAdmin} onAdminLogout={handleAdminLogout} />
       <div className={`app ${dark ? "dark" : ""}`}>
         <ToastContainer
           {...toastContainerConfig}
           theme={dark ? "dark" : "light"}
         />
-        <Layout
-          loggedIn={loggedIn}
-          handleSignOut={handleSignOut}
-          showLogoutModal={showLogoutModal}
-          setShowLogoutModal={setShowLogoutModal}
-          confirmSignOut={confirmSignOut}
-        />
+        <Layout />
         <Suspense fallback={<div />}> 
-          <AnimatedRoutes />
+          <AnimatedRoutes isAdmin={isAdmin} />
         </Suspense>
       </div>
     </ErrorBoundary>

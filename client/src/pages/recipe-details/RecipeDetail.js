@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import "./RecipeDetails.scss";
 import { fetchRecipe } from "../../api/recipes";
-import { ShareIcon, SaveIcon, PrintIcon } from "../../components/SvgIcons";
+import { ShareIcon, PrintIcon } from "../../components/SvgIcons";
 import resolveImageUrl from "../../utils/resolveImageUrl";
 
 /**
  * RecipeDetail page component
- * Fetches and displays a single recipe with all details, comments, and related recipes.
+ * Fetches and displays a single recipe with all details.
  * Handles loading and error states.
  *
  * @returns {JSX.Element}
@@ -18,9 +18,7 @@ function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [checkedIngredients, setCheckedIngredients] = useState({});
-  const [newComment, setNewComment] = useState("");
   const [baseServings, setBaseServings] = useState(1);
-  const [isSaved, setIsSaved] = useState(false);
   const [servings, setServings] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const stepsRef = useRef(null);
@@ -71,15 +69,7 @@ function RecipeDetail() {
     }
   }, [recipe]);
 
-  // Check if recipe is already saved
-  useEffect(() => {
-    if (recipe) {
-      // Get saved recipes from localStorage
-      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
-      // Check if current recipe is in saved recipes
-      setIsSaved(savedRecipes.some(savedRecipe => savedRecipe.id === recipe.id));
-    }
-  }, [recipe]);
+
 
   // Handle ingredient checkbox toggle
   /**
@@ -212,20 +202,6 @@ function RecipeDetail() {
                 <h1>{recipe?.title}</h1>
               </div>
               <div>
-                <SaveIcon
-                  className={`icon-button ${isSaved ? 'saved' : ''}`}
-                  role="button"
-                  tabIndex="0"
-                  aria-label={isSaved ? "Remove from saved recipes" : "Save recipe"}
-                  onClick={() => handleSaveRecipe(recipe, isSaved, setIsSaved)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleSaveRecipe(recipe, isSaved, setIsSaved);
-                    }
-                  }}
-                  fill={isSaved ? "currentColor" : "none"}
-                />
                 <ShareIcon
                   className="icon-button"
                   role="button"
@@ -382,46 +358,12 @@ function RecipeDetail() {
                 <p>No related recipes available</p>
               )}
             </div>
-
-            <section className="recipe-comments">
-              <h2>Comments</h2>
-              <div className="comment-box">
-                <textarea
-                  placeholder="Write a comment..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                />
-                <button>Post</button>
-              </div>
-              <div className="comment-list">
-                {recipe?.comments?.length > 0 ? (
-                  recipe.comments.map((comment, index) => (
-                    <div key={index} className={`comment ${comment.isAuthor ? 'author-comment' : ''}`}>
-                      <div className="comment-user">
-                        <img src={comment?.avatar || "/default-avatar.png"} alt={comment?.user} />
-                        <strong>{comment?.user}</strong>
-                        {comment?.isAuthor && <span className="author-badge">Author</span>}
-                      </div>
-                      <p>{comment?.text}</p>
-                      <div className="comment-meta">
-                        <span>{comment?.date || "Just now"}</span>
-                        <button className="reply-btn">Reply</button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="no-comments">No comments yet. Be the first to comment!</p>
-                )}
-              </div>
-            </section>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default RecipeDetail;
 
 // --- Helpers ---
 function handleShare(recipe) {
@@ -488,37 +430,4 @@ function formatQuantity(value) {
   return parts.join(' ');
 }
 
-function handleSaveRecipe(recipe, isSaved, setIsSaved) {
-  // Get current saved recipes from localStorage
-  const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
-  
-  if (isSaved) {
-    // Remove this recipe from saved recipes
-    const updatedRecipes = savedRecipes.filter(savedRecipe => savedRecipe.id !== recipe.id);
-    localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
-    setIsSaved(false);
-    
-    // Show feedback to user
-    alert('Recipe removed from your saved collection');
-  } else {
-    // Add this recipe to saved recipes (saving only essential details)
-    const recipeToSave = {
-      id: recipe.id,
-      title: recipe.title,
-      image: recipe.imageUrl || recipe.image,
-      prepTime: recipe.prepTime,
-      cookTime: recipe.cookTime,
-      difficulty: recipe.difficulty || 'Easy',
-      category: recipe.category,
-      cuisine: recipe.cuisine,
-      savedAt: new Date().toISOString()
-    };
-    
-    savedRecipes.push(recipeToSave);
-    localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
-    setIsSaved(true);
-    
-    // Show feedback to user
-    alert('Recipe saved to your collection');
-  }
-}
+export default RecipeDetail;

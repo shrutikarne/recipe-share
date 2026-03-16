@@ -1,6 +1,6 @@
 /**
  * Sets up a pre-configured Axios instance for API requests to the backend.
- * Works with HTTP-only cookies for authentication instead of Authorization header.
+ * Supports both user authentication (via tokenManager) and admin authentication (via localStorage).
  */
 import axios from "axios";
 import {
@@ -73,8 +73,14 @@ const refreshToken = async () => {
   }
 };
 
-// Intercept requests to handle token refresh
+// Intercept requests to add admin token if available
 API.interceptors.request.use(async (config) => {
+  // Add admin token to Authorization header if available
+  const adminToken = localStorage.getItem("adminToken");
+  if (adminToken) {
+    config.headers.Authorization = `Bearer ${adminToken}`;
+  }
+
   // If user is authenticated and token is expiring soon, refresh it
   if (isAuthenticated() && isTokenExpiringSoon()) {
     await refreshToken();
@@ -112,7 +118,7 @@ API.interceptors.response.use(
 
 // Add convenience method for logout
 API.logout = function () {
-  return API.post("/auth/logout");
+  return axios.post(`${base}/api/admin/logout`, {}, { withCredentials: true });
 };
 
 export default API;

@@ -55,5 +55,8 @@ module.exports = {
   // JWT Configuration
   JWT: {
     EXPIRATION: process.env.JWT_EXPIRATION || '30m' // Default: 30 minutes
-  }
+  },
+
+  // Admin Configuration (for personal recipe sharing)
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'admin123' // Change this in production!
 };
