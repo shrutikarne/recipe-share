@@ -6,12 +6,10 @@ import { DefaultAvatarIcon } from "./SvgIcons";
 
 /**
  * Navbar component for the Personal Recipe Sharing Website.
- * Displays navigation and admin status.
+ * Shows brand navigation plus an avatar dropdown reflecting admin status.
  *
- * @param {Object} props
- * @param {boolean} props.isAdmin - Whether the user is logged in as admin.
- * @param {function} props.onAdminLogout - Function to call when logging out as admin.
- * @returns {JSX.Element}
+ * @param {{isAdmin: boolean, onAdminLogout: () => void}} props - Component props.
+ * @returns {JSX.Element} Sticky nav with profile dropdown controls.
  */
 export default function Navbar({ isAdmin, onAdminLogout }) {
     const navigate = useNavigate();
@@ -38,6 +36,10 @@ export default function Navbar({ isAdmin, onAdminLogout }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen]);
 
+    /**
+     * Toggle the visibility of the profile dropdown menu.
+     * @returns {void}
+     */
     const toggleDropdown = () => {
         setDropdownOpen(prevState => !prevState);
     };

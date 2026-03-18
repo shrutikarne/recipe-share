@@ -36,5 +36,13 @@ module.exports = {
   },
 
   // Admin Configuration (for personal recipe sharing)
-  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'admin123' // Change this in production!
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'admin123', // Change this in production!
+
+  // Cloudinary (image uploads)
+  CLOUDINARY: {
+    CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
+    API_KEY: process.env.CLOUDINARY_API_KEY || '',
+    API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
+    UPLOAD_FOLDER: process.env.CLOUDINARY_UPLOAD_FOLDER || 'recipe-share'
+  }
 };

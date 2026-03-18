@@ -1,0 +1,73 @@
+[
+  {
+    "_id": "classic-margherita-pizza",
+    "title": "Classic Margherita Pizza",
+    "tagline": "Simple, bright, and impossibly good.",
+    "description": "A crisp artisan crust topped with tangy tomato sauce, creamy mozzarella, and fresh basil.",
+    "ingredients": [
+      "1 ball pizza dough",
+      "1/2 cup crushed tomatoes",
+      "4 oz fresh mozzarella",
+      "Fresh basil leaves",
+      "1 tbsp olive oil",
+      "Pinch of sea salt"
+    ],
+    "steps": [
+      "Preheat oven to 500°F (260°C) with a pizza stone inside.",
+      "Stretch the dough into a 12-inch circle and place on parchment.",
+      "Spread crushed tomatoes evenly, leaving a small border.",
+      "Tear mozzarella into pieces and scatter over sauce.",
+      "Bake 8-10 minutes until crust blisters.",
+      "Top with basil leaves and drizzle with olive oil."
+    ],
+    "tips": [
+      "Dust peel with semolina for easy transfer.",
+      "Let dough rest at room temp 30 minutes before stretching."
+    ],
+    "category": "Dinner",
+    "diet": "vegetarian",
+    "cuisine": "Italian",
+    "cookTime": 10,
+    "prepTime": 20,
+    "servings": 2,
+    "imageUrl": "https://images.unsplash.com/photo-1601924582971-8c3b35aee076",
+    "imageUrls": [
+      "https://images.unsplash.com/photo-1601924582971-8c3b35aee076"
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "coconut-chia-parfait",
+    "title": "Coconut Chia Parfait",
+    "tagline": "Creamy breakfast layered with tropical fruit.",
+    "description": "Prep once, enjoy all week. Chia pudding layered with mango and toasted coconut.",
+    "ingredients": [
+      "1 cup coconut milk",
+      "3 tbsp chia seeds",
+      "1 tbsp maple syrup",
+      "1 mango, diced",
+      "2 tbsp toasted coconut flakes"
+    ],
+    "steps": [
+      "Whisk coconut milk, chia seeds, and maple syrup.",
+      "Chill 4 hours or overnight until thickened.",
+      "Layer chia pudding with diced mango in jars.",
+      "Top with toasted coconut before serving."
+    ],
+    "tips": [
+      "Stir pudding once midway through chilling to prevent clumps.",
+      "Swap mango for berries when out of season."
+    ],
+    "category": "Breakfast",
+    "diet": "vegan",
+    "cuisine": "American",
+    "cookTime": 0,
+    "prepTime": 10,
+    "servings": 2,
+    "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    "imageUrls": [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+    ],
+    "createdAt": "2024-02-15T00:00:00.000Z"
+  }
+]

@@ -12,7 +12,7 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   padding: 3rem;
-  max-width: 500px;
+  max-width: 960px;
   width: 100%;
 }
 
@@ -121,4 +121,120 @@
 
 .dark .admin-panel-content p {
   color: #bbb;
+}
+
+.admin-recipes {
+  margin-top: 2.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.dark .admin-recipes {
+  background: #1f1f1f;
+}
+
+.admin-recipes__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-recipes__header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.admin-recipes__refresh {
+  border: none;
+  background: #e0e7ff;
+  color: #1e1b4b;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.admin-recipes__refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-recipes__error {
+  color: #dc2626;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.admin-recipes__empty {
+  text-align: center;
+  padding: 2rem;
+  color: #555;
+}
+
+.dark .admin-recipes__empty {
+  color: #aaa;
+}
+
+.admin-recipes__table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-recipes__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-recipes__table th,
+.admin-recipes__table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .admin-recipes__table th,
+.dark .admin-recipes__table td {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-recipes__table th {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.admin-recipes__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-recipes__action {
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-recipes__action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-recipes__action--edit {
+  background: #ecfccb;
+  color: #365314;
+}
+
+.admin-recipes__action--delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-recipes__action:hover:not(:disabled) {
+  transform: translateY(-1px);
 }

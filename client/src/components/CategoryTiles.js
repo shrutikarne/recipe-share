@@ -3,6 +3,20 @@ import React from "react";
 import "./CategoryTiles.scss";
 import { motion } from "framer-motion";
 
+/**
+ * @typedef {Object} CategoryTile
+ * @property {string} key - Unique identifier used for onSelect callbacks.
+ * @property {string} label - Short title displayed on the tile.
+ * @property {string} icon - Emoji used as the visual glyph.
+ * @property {string} description - Supporting copy describing the category.
+ * @property {string} color - Base color used for shadows.
+ * @property {string} gradient - CSS gradient string used for background.
+ */
+
+/**
+ * List of pre-defined mood/category tiles rendered on the home page.
+ * @type {CategoryTile[]}
+ */
 const categories = [
   {
     key: "quick",
@@ -73,9 +87,8 @@ const categories = [
 /**
  * CategoryTiles component for displaying recipe categories/moods as clickable cards.
  *
- * @param {Object} props
- * @param {function} props.onSelect - Callback when a category is selected.
- * @returns {JSX.Element}
+ * @param {{onSelect?: (category: CategoryTile) => void}} props - Component props.
+ * @returns {JSX.Element} Responsive tile grid.
  */
 export default function CategoryTiles({ onSelect }) {
   return (

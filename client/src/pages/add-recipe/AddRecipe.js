@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import API from "../../api/api";
 
 import RecipePreviewCard from "./RecipePreviewCard";
@@ -9,14 +9,38 @@ import "./AddRecipe.scss";
 import { AddCircleIcon, DeleteIcon } from "../../components/SvgIcons";
 
 const MAX_IMAGE_COUNT = 10;
+const minutesToTimeParts = (value) => {
+  if (!Number.isFinite(value) || value <= 0) {
+    return { hours: "", minutes: "" };
+  }
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+  return {
+    hours: hours > 0 ? String(hours) : "",
+    minutes: minutes > 0 ? String(minutes) : ""
+  };
+};
 
 /**
- * AddRecipe component
- * Renders a modern form for admin to add a new recipe and submits it to the backend API.
- * @component
+ * @typedef {Object} RecipeFormState
+ * @property {string} title
+ * @property {string} description
+ * @property {string[]} ingredients
+ * @property {string[]} steps
+ * @property {string} category
+ * @property {string} diet
+ */
+
+/**
+ * AddRecipe component provides a multi-step form for admins to create, edit, and submit recipes.
+ * It includes client-side validation, Cloudinary-backed image handling, and a live preview.
+ *
+ * @returns {JSX.Element} Add-recipe workflow layout.
  */
 function AddRecipe() {
   const navigate = useNavigate();
+  const { id: editRecipeId } = useParams();
+  const isEditMode = Boolean(editRecipeId);
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem("adminToken") !== null);
 
   useEffect(() => {
@@ -34,6 +58,10 @@ function AddRecipe() {
   }, [navigate]);
 
   const [activeStep, setActiveStep] = useState(0);
+  const [prefillLoading, setPrefillLoading] = useState(isEditMode);
+  /**
+   * @type {[RecipeFormState, React.Dispatch<React.SetStateAction<RecipeFormState>>]}
+   */
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -44,6 +72,7 @@ function AddRecipe() {
   });
   const [images, setImages] = useState([]);
   const imagesRef = useRef(images);
+  const fileInputRef = useRef(null);
   const [ingredientInput, setIngredientInput] = useState("");
   const [stepInput, setStepInput] = useState("");
   const [cookHours, setCookHours] = useState("");
@@ -53,6 +82,8 @@ function AddRecipe() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     imagesRef.current = images;
@@ -68,6 +99,58 @@ function AddRecipe() {
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (!isEditMode || !editRecipeId) {
+      setPrefillLoading(false);
+      return;
+    }
+
+    let isActive = true;
+    const loadRecipe = async () => {
+      setPrefillLoading(true);
+      try {
+        const { data } = await API.get(`/recipes/${editRecipeId}`);
+        if (!isActive || !data) return;
+
+        setForm({
+          title: data.title || "",
+          description: data.description || "",
+          ingredients: Array.isArray(data.ingredients) ? data.ingredients : [],
+          steps: Array.isArray(data.steps) ? data.steps : [],
+          category: data.category || "",
+          diet: data.diet || ""
+        });
+
+        const cookParts = minutesToTimeParts(Number(data.cookTime));
+        const prepParts = minutesToTimeParts(Number(data.prepTime));
+        setCookHours(cookParts.hours);
+        setCookMinutes(cookParts.minutes);
+        setPrepHours(prepParts.hours);
+        setPrepMinutes(prepParts.minutes);
+
+        const urls = Array.isArray(data.imageUrls) ? data.imageUrls : [];
+        const fallback = data.imageUrl ? [data.imageUrl] : [];
+        const normalized = (urls.length ? urls : fallback)
+          .filter((url) => typeof url === "string" && url.trim().length > 0)
+          .map((url) => ({ url }));
+        setImages(normalized);
+        setError("");
+      } catch (err) {
+        if (!isActive) return;
+        setError("Unable to load recipe for editing. Please try again.");
+      } finally {
+        if (isActive) {
+          setPrefillLoading(false);
+        }
+      }
+    };
+
+    loadRecipe();
+    return () => {
+      isActive = false;
+    };
+  }, [editRecipeId, isEditMode]);
 
   const cookTimeMinutes = useMemo(() => {
     const hours = Number(cookHours) || 0;
@@ -105,7 +188,10 @@ function AddRecipe() {
     }
   ];
 
-  // Enhanced handlers with proper sanitization
+  /**
+   * Handle text/select changes by updating the form state.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} e
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -115,7 +201,11 @@ function AddRecipe() {
     }));
   };
 
-  // Only sanitize on form submission, not during input
+  /**
+   * Prepare sanitized payload for submission without mutating the original form state.
+   * @param {RecipeFormState} formData
+   * @returns {RecipeFormState}
+   */
   const prepareForSubmission = (formData) => {
     const sanitizedData = {};
 
@@ -151,6 +241,10 @@ function AddRecipe() {
     return sanitizedData;
   };
 
+  /**
+   * Append a trimmed ingredient entry to the form state.
+   * @returns {void}
+   */
   const handleAddIngredient = () => {
     const trimmed = ingredientInput.trim();
     if (!trimmed) return;
@@ -162,6 +256,10 @@ function AddRecipe() {
     setIngredientInput("");
   };
 
+  /**
+   * Remove ingredient at a given index.
+   * @param {number} index
+   */
   const handleRemoveIngredient = (index) => {
     setForm((prev) => {
       const updatedIngredients = prev.ingredients.filter((_, idx) => idx !== index);
@@ -169,6 +267,10 @@ function AddRecipe() {
     });
   };
 
+  /**
+   * Append a trimmed preparation step to the form state.
+   * @returns {void}
+   */
   const handleAddStep = () => {
     const trimmed = stepInput.trim();
     if (!trimmed) return;
@@ -180,6 +282,10 @@ function AddRecipe() {
     setStepInput("");
   };
 
+  /**
+   * Remove a step by index.
+   * @param {number} index
+   */
   const handleRemoveStep = (index) => {
     setForm((prev) => {
       const updatedSteps = prev.steps.filter((_, idx) => idx !== index);
@@ -187,24 +293,10 @@ function AddRecipe() {
     });
   };
 
-
-  const [imageUrlInput, setImageUrlInput] = useState("");
-
-  // Add image URL helper
-  const handleAddImageUrl = () => {
-    const url = imageUrlInput.trim();
-    if (!url) return;
-    
-    if (images.length >= MAX_IMAGE_COUNT) {
-      setError(`You can upload up to ${MAX_IMAGE_COUNT} images.`);
-      return;
-    }
-
-    setImages((prev) => [...prev, { url }]);
-    setImageUrlInput("");
-    setError("");
-  };
-
+  /**
+   * Remove an uploaded/pasted image by index and clean up blob URLs.
+   * @param {number} index
+   */
   const handleRemoveImage = (index) => {
     const limitMessage = `You can upload up to ${MAX_IMAGE_COUNT} images.`;
     setImages((prev) => {
@@ -223,6 +315,53 @@ function AddRecipe() {
     if (error === limitMessage) {
       setError("");
     }
+    setUploadError("");
+  };
+
+  /**
+   * Upload an image file to the backend (Cloudinary) and append its URL to the form state.
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @returns {Promise<void>}
+   */
+  const handleImageFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (images.length >= MAX_IMAGE_COUNT) {
+      setError(`Only ${MAX_IMAGE_COUNT} images are allowed.`);
+      event.target.value = "";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please choose a valid image file.");
+      event.target.value = "";
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadError("");
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const { data } = await API.post("/uploads/image", formData);
+      setImages((prev) => [...prev, { url: data.url, publicId: data.publicId }]);
+    } catch (uploadErr) {
+      if (uploadErr.response?.status === 401) {
+        setUploadError("Session expired. Please log in again.");
+        localStorage.removeItem("adminToken");
+        window.dispatchEvent(new Event("admin-auth-changed"));
+        navigate("/admin");
+      } else {
+        const message = uploadErr.response?.data?.msg || "Failed to upload image";
+        setUploadError(message);
+      }
+    } finally {
+      setIsUploadingImage(false);
+      if (event.target) {
+        event.target.value = "";
+      }
+    }
   };
 
   /**
@@ -231,8 +370,6 @@ function AddRecipe() {
    * @param {{zoom:number, offsetX:number, offsetY:number}} adjustments - Applied transform values.
    * @returns {Promise<{file: File, previewUrl: string}>}
    */
-
-  // Step validation
   const validateStep = () => {
     const currentFields = steps[activeStep].fields;
     for (const field of currentFields) {
@@ -263,6 +400,10 @@ function AddRecipe() {
     return true;
   };
 
+  /**
+   * Proceed to the next step when validation passes.
+   * @returns {void}
+   */
   const handleNext = () => {
     if (validateStep()) {
       setActiveStep((prev) => prev + 1);
@@ -270,12 +411,21 @@ function AddRecipe() {
     }
   };
 
+  /**
+   * Return to the previous step and clear errors.
+   * @returns {void}
+   */
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
     setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  /**
+   * Submit the recipe to the backend once all validations succeed.
+   * @param {React.FormEvent<HTMLFormElement>} e
+   * @returns {Promise<void>}
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -319,17 +469,22 @@ function AddRecipe() {
 
       const sanitizedForm = prepareForSubmission(form);
 
-      // Submit the sanitized form data to the backend
-      await API.post("/recipes", {
+      const payload = {
         ...sanitizedForm,
         cookTime: cookTimeMinutes,
         prepTime: prepTimeMinutes,
         imageUrls,
         imageUrl: imageUrls[0] || ""
-      });
+      };
 
-      setSuccess("Recipe added!");
-      setTimeout(() => navigate("/"), 1200);
+      if (isEditMode && editRecipeId) {
+        await API.put(`/recipes/${editRecipeId}`, payload);
+      } else {
+        await API.post("/recipes", payload);
+      }
+
+      setSuccess(isEditMode ? "Recipe updated!" : "Recipe added!");
+      setTimeout(() => navigate(isEditMode ? "/admin" : "/"), 1200);
     } catch (err) {
       if (err.response?.data?.details) {
         // Show specific validation errors if available
@@ -346,7 +501,11 @@ function AddRecipe() {
     }
   };
 
-  // Step content rendering with improved UX
+  /**
+   * Render the inputs for the requested step index.
+   * @param {number} step
+   * @returns {JSX.Element|null}
+   */
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
@@ -493,8 +652,33 @@ function AddRecipe() {
             transition={{ duration: 0.3 }}
           >
             <p style={{ marginBottom: 16 }}>
-              Image uploads are optional and will return later. You can still paste image URLs in the future version.
+              Image uploads are optional. Each file is stored on Cloudinary’s free tier and immediately attached to this recipe.
             </p>
+            <div className="add-recipe-form__upload">
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleImageFileChange}
+              />
+              <button
+                type="button"
+                className="add-recipe-form__upload-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingImage || images.length >= MAX_IMAGE_COUNT}
+              >
+                {isUploadingImage ? "Uploading..." : "Upload Image"}
+              </button>
+              <span className="add-recipe-form__upload-hint">
+                {selectedImageCount}/{MAX_IMAGE_COUNT} images
+              </span>
+            </div>
+            {uploadError && (
+              <div className="add-recipe-form__upload-error" role="alert">
+                {uploadError}
+              </div>
+            )}
 
             {hasImages && (
               <div className="add-recipe-form__image-preview-grid">
@@ -654,6 +838,14 @@ function AddRecipe() {
     );
   }
 
+  if (isEditMode && prefillLoading) {
+    return (
+      <div className="add-recipe-form__loading">
+        <p>Loading recipe details...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="add-recipe-form-preview-layout">
       <motion.form
@@ -664,7 +856,7 @@ function AddRecipe() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="add-recipe-form__h2">Create Your Recipe</h2>
+        <h2 className="add-recipe-form__h2">{isEditMode ? "Update Recipe" : "Create Your Recipe"}</h2>
 
         <div className="stepper">
           {steps.map((step, idx) => (

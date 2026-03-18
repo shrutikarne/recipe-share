@@ -16,7 +16,6 @@
 import React, { useState, useEffect, Suspense, lazy, useCallback } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { TEXT } from "./localization/text";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { showSuccessToast, toastContainerConfig } from "./utils/ToastConfig";
 import {
@@ -84,6 +83,30 @@ function AnimatedRoutes({ isAdmin }) {
         />
         <Route
           path="/add-recipe"
+          element={
+            isAdmin ? (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.35 }}
+              >
+                <AddRecipe />
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.35 }}
+              >
+                <Home />
+              </motion.div>
+            )
+          }
+        />
+        <Route
+          path="/edit-recipe/:id"
           element={
             isAdmin ? (
               <motion.div

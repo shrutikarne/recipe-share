@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: recipe-share-api
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        fromService:
+          type: static
+          name: recipe-share-web
+          property: url
+      - key: CORS_ORIGIN
+        fromService:
+          type: static
+          name: recipe-share-web
+          property: url
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: MONGO_URI
+        sync: false
+
+  - type: static
+    name: recipe-share-web
+    plan: free
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: recipe-share-api
+          property: url

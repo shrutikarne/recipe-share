@@ -103,14 +103,6 @@ function RecipeDetail() {
   const cookTimeMinutes = Number.isFinite(rawCookTime) ? rawCookTime : 0;
   const totalTime = prepTimeMinutes + cookTimeMinutes;
 
-  // Get difficulty level based on time and steps
-  const getDifficulty = () => {
-    const stepsCount = recipe?.steps?.length || 0;
-    if (totalTime > 120 || stepsCount > 10) return "Hard";
-    if (totalTime > 60 || stepsCount > 5) return "Medium";
-    return "Easy";
-  };
-
   if (loading) {
     return (
       <div className="loading-container">
@@ -230,9 +222,6 @@ function RecipeDetail() {
                 />
               </div>
             </div>
-            <p className="recipe-tagline">
-              {recipe?.tagline || "Delicious, Homemade & Perfect for Any Occasion"}
-            </p>
             <div className="hero-meta">
               <span>⏱ {formatTime(totalTime)}</span>
               <span>👥 {recipe?.servings || 0} servings</span>

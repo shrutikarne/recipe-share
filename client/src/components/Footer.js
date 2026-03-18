@@ -6,8 +6,9 @@ import { TEXT } from "../localization/text";
 
 /**
  * Footer component for the Recipe Share app.
- * Displays navigation links and social media icons.
- * @returns {JSX.Element}
+ * Renders brand/logo, primary nav shortcuts, and social links.
+ *
+ * @returns {JSX.Element} Accessible footer layout.
  */
 export default function Footer() {
     return (

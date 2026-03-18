@@ -3,9 +3,12 @@ import './ErrorBoundary.scss';
 import { TEXT } from '../localization/text';
 
 /**
- * ErrorBoundary component for catching and handling React component errors
- * Prevents the entire app from crashing due to errors in a single component
+ * @typedef {Object} ErrorBoundaryState
+ * @property {boolean} hasError Indicates whether a descendant threw during rendering.
+ * @property {Error|null} error Captured error instance used for diagnostics.
+ * @property {React.ErrorInfo|null} errorInfo React component stack for the captured error.
  */
+
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -16,11 +19,22 @@ class ErrorBoundary extends Component {
     };
   }
 
+  /**
+   * Sync React error state to trigger fallback rendering.
+   * @param {Error} error - Error thrown by a child component.
+   * @returns {Partial<ErrorBoundaryState>}
+   */
   static getDerivedStateFromError(error) {
     // Update state so the next render shows the fallback UI
     return { hasError: true, error };
   }
 
+  /**
+   * Lifecycle hook for logging or side effects after an error is captured.
+   * @param {Error} error - The thrown error.
+   * @param {React.ErrorInfo} errorInfo - Component stack metadata from React.
+   * @returns {void}
+   */
   componentDidCatch(error, errorInfo) {
     // You can log the error to an error reporting service
     this.setState({ errorInfo });
@@ -29,6 +43,10 @@ class ErrorBoundary extends Component {
     // reportError(error, errorInfo);
   }
 
+  /**
+   * Render wrapped children or a fallback UI when an error is present.
+   * @returns {React.ReactNode}
+   */
   render() {
     if (this.state.hasError) {
       const { fallback } = this.props;

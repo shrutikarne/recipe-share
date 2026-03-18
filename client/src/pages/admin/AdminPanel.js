@@ -2,7 +2,7 @@
  * Admin Panel for personal recipe management
  * Allows admin to login, create, update, and delete recipes
  */
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "../../utils/ToastConfig";
 import API from "../../api/api";
@@ -14,7 +14,50 @@ function AdminPanel() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recipesLoading, setRecipesLoading] = useState(false);
+  const [recipesError, setRecipesError] = useState("");
+  const [recipes, setRecipes] = useState([]);
+  const [activeDeleteId, setActiveDeleteId] = useState(null);
   const isAdmin = localStorage.getItem("adminToken") !== null;
+
+  const fetchRecipes = useCallback(async () => {
+    if (!isAdmin) return;
+    setRecipesLoading(true);
+    setRecipesError("");
+    try {
+      const { data } = await API.get("/recipes", {
+        params: { limit: 100, sort: "-updatedAt" }
+      });
+      const incoming = Array.isArray(data?.recipes) ? data.recipes : Array.isArray(data) ? data : [];
+      setRecipes(incoming);
+    } catch (error) {
+      setRecipesError(error.response?.data?.msg || "Unable to load recipes");
+    } finally {
+      setRecipesLoading(false);
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
+
+  const handleDeleteRecipe = async (recipeId) => {
+    if (!recipeId) return;
+    const confirmed = window.confirm("Delete this recipe permanently?");
+    if (!confirmed) return;
+
+    setActiveDeleteId(recipeId);
+    try {
+      await API.delete(`/recipes/${recipeId}`);
+      showSuccessToast("Recipe deleted");
+      fetchRecipes();
+    } catch (error) {
+      const message = error.response?.data?.msg || "Failed to delete recipe";
+      showErrorToast(message);
+    } finally {
+      setActiveDeleteId(null);
+    }
+  };
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -62,6 +105,68 @@ function AdminPanel() {
               Logout
             </button>
           </div>
+          <section className="admin-recipes">
+            <div className="admin-recipes__header">
+              <h2>Your Recipes</h2>
+              <button
+                type="button"
+                className="admin-recipes__refresh"
+                onClick={fetchRecipes}
+                disabled={recipesLoading}
+              >
+                {recipesLoading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+            {recipesError && <div className="admin-recipes__error">{recipesError}</div>}
+            {recipesLoading ? (
+              <div className="admin-recipes__empty">Loading recipes...</div>
+            ) : recipes.length === 0 ? (
+              <div className="admin-recipes__empty">You have not added any recipes yet.</div>
+            ) : (
+              <div className="admin-recipes__table-wrapper">
+                <table className="admin-recipes__table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Updated</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recipes.map((recipe) => (
+                      <tr key={recipe._id}>
+                        <td>{recipe.title}</td>
+                        <td>{recipe.category || "—"}</td>
+                        <td>
+                          {recipe.updatedAt
+                            ? new Date(recipe.updatedAt).toLocaleDateString()
+                            : new Date(recipe.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="admin-recipes__actions">
+                          <button
+                            type="button"
+                            className="admin-recipes__action admin-recipes__action--edit"
+                            onClick={() => navigate(`/edit-recipe/${recipe._id}`)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-recipes__action admin-recipes__action--delete"
+                            onClick={() => handleDeleteRecipe(recipe._id)}
+                            disabled={activeDeleteId === recipe._id}
+                          >
+                            {activeDeleteId === recipe._id ? "Deleting..." : "Delete"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
         </div>
       </div>
     );

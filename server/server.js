@@ -77,6 +77,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Register admin authentication and recipe routes
 app.use("/api/admin", require("./routes/admin-auth"));
 app.use("/api/recipes", require("./routes/recipes"));
+app.use("/api/uploads", require("./routes/uploads"));
 
 // Connect to MongoDB database
 connectDB();
